@@ -2,6 +2,9 @@
   "name": "git-station",
   "version": "0.1.0",
   "private": true,
+  "bin": {
+    "git-station": "src/index.tsx"
+  },
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",

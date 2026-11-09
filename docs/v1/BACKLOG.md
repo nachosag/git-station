@@ -8,7 +8,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 
 | Story  | Title                                        | Status      |
 | ------ | -------------------------------------------- | ----------- |
-| US-001 | Launch gs and move between its two views     | Not started |
+| US-001 | Launch gs and move between its two views     | Done        |
 | US-002 | Discover every repository on the machine     | Not started |
 | US-003 | See the state of each repository at a glance | Not started |
 | US-004 | Filter the list by name                      | Not started |
@@ -33,7 +33,7 @@ Tracking rules:
 - Assumption: stories reference keys from the draft keyboard map in SPECS.md; key names may change during implementation without changing the stories' value.
 - Assumption: criteria that say "an external `git status` / `git log` confirms" are verified from a second terminal — git itself is the oracle, since gs wraps it.
 - Assumption: ahead/behind shown anywhere reflects local refs (last fetched state); only US-006 introduces network.
-- Open question: the binary stays `gs` for now, but a global bun install would shadow `/usr/bin/gs` (ghostscript) — decide the final name before installing globally (SPECS.md §Known risks). Blocks no story.
+- Resolved: the binary will be named `git-station`, not `gs` — the ghostscript collision on `/usr/bin/gs` is avoided entirely. The `bin` entry in package.json should use that name.
 - Open question: US-004 (filter) is Could — confirm whether it ships in v1 or moves to v2.
 
 ## Out of scope
@@ -78,12 +78,12 @@ As a developer with many local repositories, I want to launch `gs` from any dire
 
 **Acceptance criteria**
 
-- [ ] Given a terminal open in any directory, when I run the app, then a full-screen list placeholder renders with the key hints visible.
-- [ ] Given the list placeholder, when I press Enter, then the detail placeholder renders; when I then press Esc, then the list placeholder is back.
-- [ ] Given any view, when I press q or Ctrl+C, then the process exits and the shell prompt returns with the terminal fully usable (no escape-code garbage).
-- [ ] Given the app running, when I resize the terminal window, then the view re-renders to the new size without crashing.
-- [ ] Given the project's package.json, it declares a `gs` bin entry pointing at the entry file.
-- [ ] Given the repo, when I run typecheck, lint, and format check, then all three pass.
+- [x] Given a terminal open in any directory, when I run the app, then a full-screen list placeholder renders with the key hints visible.
+- [x] Given the list placeholder, when I press Enter, then the detail placeholder renders; when I then press Esc, then the list placeholder is back.
+- [x] Given any view, when I press q or Ctrl+C, then the process exits and the shell prompt returns with the terminal fully usable (no escape-code garbage).
+- [x] Given the app running, when I resize the terminal window, then the view re-renders to the new size without crashing.
+- [x] Given the project's package.json, it declares a `git-station` bin entry pointing at the entry file.
+- [x] Given the repo, when I run typecheck, lint, and format check, then all three pass.
 
 **Out of scope**
 
