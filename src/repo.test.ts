@@ -42,5 +42,14 @@ describe('findRepos', () => {
     await fs.rm(root, { recursive: true, force: true })
   })
 
-  test('reports a worktree (.git as a file) as a repo', () => {})
+  test('reports a worktree (.git as a file) as a repo', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'gs-'))
+    await fs.writeFile(
+      path.join(dir, '.git'),
+      'gitdir: /somewhere/repo/.git/worktrees/gs-1',
+    )
+    const repos = await findRepos(dir)
+    expect(repos).toStrictEqual([dir])
+    await fs.rm(dir, { recursive: true, force: true })
+  })
 })
