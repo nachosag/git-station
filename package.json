@@ -11,7 +11,8 @@
     "lint": "oxlint",
     "fmt": "oxfmt --write",
     "fmt:check": "oxfmt --check",
-    "test": "bun test --pass-with-no-tests"
+    "test": "bun test --pass-with-no-tests",
+    "dev": "bun run src/index.tsx"
   },
   "dependencies": {
     "@opentui/core": "0.5.17",

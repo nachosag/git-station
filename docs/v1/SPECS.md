@@ -57,11 +57,11 @@ Rationale for shelling out: zero new dependencies, and `push`/`pull` reuse the u
 Algorithm on every launch:
 
 1. Read `~/.config/git-station/config.json` if present. A missing file means defaults; it is never an error.
-2. Recursively walk `$HOME` plus every root from config, skipping any directory whose name is in the prune list or matches config `ignore`. Do not descend into a repository once found.
+2. Recursively walk `$HOME` plus every root from config, skipping any directory whose name is in the prune list or matches config `ignore`. Repositories are reported at any depth: the walk descends into a repository found inside another one, so nested loose clones are their own rows (e.g. a sandbox repo gitignored by its parent).
 3. A directory containing a `.git` entry — a directory or a file (worktrees) — is a repository.
 4. Show repositories as they are found; the list fills incrementally behind a progress indicator.
 
-Default prune list: `node_modules`, `.cache`, `.npm`, `.bun`, `.venv`, `venv`, `.cargo`, `.rustup`, `.m2`, `.gradle`, `.local`, `target`, `dist`, `build`, `Library`, `AppData`.
+Default prune list: `.git` (git's internal storage, never a repository), `node_modules`, `.cache`, `.npm`, `.bun`, `.venv`, `venv`, `.cargo`, `.rustup`, `.m2`, `.gradle`, `.local`, `target`, `dist`, `build`, `Library`, `AppData`.
 
 Config format:
 

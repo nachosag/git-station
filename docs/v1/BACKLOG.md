@@ -9,7 +9,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | Story  | Title                                        | Status      |
 | ------ | -------------------------------------------- | ----------- |
 | US-001 | Launch gs and move between its two views     | Done        |
-| US-002 | Discover every repository on the machine     | Not started |
+| US-002 | Discover every repository on the machine     | In progress |
 | US-003 | See the state of each repository at a glance | Not started |
 | US-004 | Filter the list by name                      | Not started |
 | US-005 | Inspect one repository in detail             | Not started |
@@ -102,8 +102,8 @@ As a developer with repositories scattered across my home directory, I want `gs`
 
 **Acceptance criteria**
 
-- [ ] Given `$HOME` contains repositories (including nested ones and at least one git worktree), when the app opens, then every one of them appears in the list, including the worktree.
-- [ ] Given heavy directories (node_modules, .cache, virtualenvs) exist under `$HOME`, when the scan runs, then they are skipped.
+- [x] Given `$HOME` contains repositories (including nested ones and at least one git worktree), when the app opens, then every one of them appears in the list, including the worktree.
+- [x] Given heavy directories (node_modules, .cache, virtualenvs) exist under `$HOME`, when the scan runs, then they are skipped.
 - [ ] Given a config file declaring an extra root and an ignore entry, when the app opens, then repositories under the extra root are listed and ignored paths are not.
 - [ ] Given no config file exists, when the app opens, then the scan still runs with defaults and no error is shown.
 - [ ] Given a scan in progress, then a progress indicator is visible and rows appear as repositories are found.
@@ -112,6 +112,7 @@ As a developer with repositories scattered across my home directory, I want `gs`
 **Notes / open questions**
 
 - SPECS.md §Discovery (D1): prune list, config format, and `.git` as a file counting as a repository. Walker mechanics are unit-tested with temporary fixtures.
+- Decision (2026-11-10): repositories are reported at any depth. The old "do not descend into a repository once found" rule hid real repos — loose clones gitignored by their parent (the vivarium case: vivarium-core, vivarium-ui would never appear).
 
 ### US-003: See the state of each repository at a glance
 
