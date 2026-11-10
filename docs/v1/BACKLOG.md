@@ -2,7 +2,7 @@
 
 ## Summary
 
-git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage every local git repository on the machine from one place, including everyday write operations (stage, commit, fetch, pull, push) without leaving the terminal. The backlog covers v1 only, as specified in [SPECS.md](./SPECS.md). Priorities use MoSCoW. There are 4 epics and 11 stories (10 Must, 1 Could), ordered to match the spec's milestones M1–M6. This file is also the progress tracker: every acceptance criterion is a checkbox, and the table below is the at-a-glance state.
+git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage every local git repository on the machine from one place, including everyday write operations (stage, commit, fetch, pull, push) without leaving the terminal. The backlog covers v1 only, as specified in [SPECS.md](./SPECS.md). Priorities use MoSCoW. There are 5 epics and 12 stories (11 Must, 1 Could), ordered to match the spec's milestones M1–M7. This file is also the progress tracker: every acceptance criterion is a checkbox, and the table below is the at-a-glance state.
 
 ## Status
 
@@ -19,6 +19,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | US-009 | Fetch the open repository on demand          | Not started |
 | US-010 | Pull from upstream                           | Not started |
 | US-011 | Push to upstream                             | Not started |
+| US-012 | Delete a repository from the list            | Not started |
 
 Tracking rules:
 
@@ -47,15 +48,17 @@ Follows the spec's milestones; after each milestone the app is demonstrable.
 1. **M1 Base TUI**: US-001
 2. **M2 Discovery**: US-002
 3. **M3 Status**: US-003, then US-004 (optional polish)
-4. **M4 Detail read-only**: US-005, US-006
-5. **M5 Stage + commit**: US-007, US-008
-6. **M6 Network ops**: US-009, US-010, US-011
+4. **M7 Delete**: US-012 (needs only the interactive list; place after M3)
+5. **M4 Detail read-only**: US-005, US-006
+6. **M5 Stage + commit**: US-007, US-008
+7. **M6 Network ops**: US-009, US-010, US-011
 
 ```mermaid
 graph LR
   US001[US-001 Launch and navigate] --> US002[US-002 Discover repositories]
   US002 --> US003[US-003 Status at a glance]
   US003 --> US004[US-004 Filter the list]
+  US003 --> US012[US-012 Delete a repository]
   US003 --> US005[US-005 Inspect a repository]
   US005 --> US006[US-006 Trustworthy ahead/behind]
   US005 --> US007[US-007 Stage and unstage]
@@ -275,18 +278,52 @@ As a developer with local commits ready, I want to push from the detail view, so
 - [ ] Given a repository with no upstream, when I press the push key, then git's error shows inline.
 - [ ] Given an operation already running, when I press the push key, then it is ignored until it finishes.
 
+## Epic E5: Prune repositories from the machine
+
+Delete what no longer serves from the same list that finds it — never by accident.
+
+### US-012: Delete a repository from the list
+
+**Epic:** E5 · **Priority:** Must · **Size:** M · **Depends on:** US-003
+
+**Story**
+As a developer with many local repositories, I want to delete a repository directly from the list with a strong confirmation, so that I can prune abandoned clones and worktrees without dropping to a shell — and never by accident.
+
+**Acceptance criteria**
+
+- [ ] Given the populated list, when I press `d` on the selected repository, then a confirmation screen appears showing the repository's full path, an input to type its name, and a hint that `Esc` cancels.
+- [ ] Given the confirmation screen, when I press `Esc`, then the operation is cancelled and the list returns untouched.
+- [ ] Given the confirmation screen, when I type the repository's exact name and press Enter, then the repository's directory is deleted and the list refreshes without that row.
+- [ ] Given the confirmation input with any name other than an exact match, when I press Enter, then nothing is deleted and the input stays open with a hint.
+- [ ] Given a selected worktree (`.git` is a file), when the deletion is confirmed, then it is removed via `git worktree remove --force` and the origin repository keeps no stale worktree entry.
+- [ ] Given a selected umbrella repository containing nested repositories, when I press `d`, then the confirmation screen lists every repository that will be deleted (the umbrella and each nested one), marking those with uncommitted changes, and confirming deletes all of them.
+- [ ] Given a deletion that fails (for example, no write permission on the parent directory), when it errors, then a message says the repository could not be deleted due to permissions and must be removed manually, and the list keeps it.
+- [ ] Given the detail view, when I press `d`, then nothing happens (deletion exists only in the list).
+
+**Out of scope**
+
+- Any recovery of a deleted repository.
+- Deleting non-repository directories.
+- Deleting from the detail view.
+
+**Notes / open questions**
+
+- There is no git command that deletes a regular repository — it is a recursive filesystem delete. Worktrees go through `git worktree remove --force`: it cleans the origin's worktree registry (no prune needed), and `--force` is deliberate — git's own dirty guard is bypassed because the confirmation screen already showed the dirty state of every repo in the deletion set.
+- Decision (2026-11-10): dirty repositories warn but do not block. The dirty check runs over every repository in the deletion set, not just the selected one — otherwise the warning lies for the umbrella case (clean parent, dirty child).
+
 ## INVEST check
 
-| Story  | I   | N   | V   | E   | S   | T   | Adjustments made                                                      |
-| ------ | --- | --- | --- | --- | --- | --- | --------------------------------------------------------------------- |
-| US-001 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Absorbed bootstrap and `bin` entry as the walking skeleton            |
-| US-002 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | none                                                                  |
-| US-003 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Split row status (list) from file detail (US-005)                     |
-| US-004 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Kept as Could pending v1/v2 confirmation                              |
-| US-005 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Read-only inspection split from staging                               |
-| US-006 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Implicit fetch-on-open split from on-demand fetch                     |
-| US-007 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Stage/unstage kept as one toggle capability                           |
-| US-008 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Commit separated from staging; dependency made explicit               |
-| US-009 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Interface-variation split of fetch (on demand)                        |
-| US-010 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Operation split; conflict handling bounded to "visible, not resolved" |
-| US-011 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Operation split                                                       |
+| Story  | I   | N   | V   | E   | S   | T   | Adjustments made                                                         |
+| ------ | --- | --- | --- | --- | --- | --- | ------------------------------------------------------------------------ |
+| US-001 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Absorbed bootstrap and `bin` entry as the walking skeleton               |
+| US-002 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | none                                                                     |
+| US-003 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Split row status (list) from file detail (US-005)                        |
+| US-004 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Kept as Could pending v1/v2 confirmation                                 |
+| US-005 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Read-only inspection split from staging                                  |
+| US-006 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Implicit fetch-on-open split from on-demand fetch                        |
+| US-007 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Stage/unstage kept as one toggle capability                              |
+| US-008 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Commit separated from staging; dependency made explicit                  |
+| US-009 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Interface-variation split of fetch (on demand)                           |
+| US-010 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Operation split; conflict handling bounded to "visible, not resolved"    |
+| US-011 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Operation split                                                          |
+| US-012 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Typed-name confirmation and set-wide dirty check absorbed into the story |

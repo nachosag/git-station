@@ -17,6 +17,7 @@ git-station (`gs`) is a keyboard-driven terminal UI to discover, monitor, and ma
 - Show every detected repository with: name, current branch, dirty indicator, ahead/behind counts vs upstream.
 - Open a detail view for any repository.
 - Run fetch, pull, stage, commit, and push from the TUI without `cd`-ing or leaving `gs`.
+- Delete a repository from the list — regular repos, umbrella repos (with every nested repo), and worktrees — behind a typed-name confirmation.
 - Clean, keyboard-driven design: one list, one detail view.
 
 ## Non-goals (v1)
@@ -39,16 +40,18 @@ Internal module layout, file names, and types are not prescribed; they emerge fr
 
 ## Git command map
 
-| Operation            | Command                                                 |
-| -------------------- | ------------------------------------------------------- |
-| Status (single call) | `git -C <path> status --porcelain=v2 --branch`          |
-| Stage files / all    | `git -C <path> add -- <paths>` / `git -C <path> add -A` |
-| Unstage tracked      | `git -C <path> restore --staged -- <paths>`             |
-| Unstage untracked    | `git -C <path> rm --cached -- <paths>`                  |
-| Commit               | `git -C <path> commit -m <message>`                     |
-| Fetch                | `git -C <path> fetch`                                   |
-| Pull                 | `git -C <path> pull`                                    |
-| Push                 | `git -C <path> push`                                    |
+| Operation                   | Command                                                                            |
+| --------------------------- | ---------------------------------------------------------------------------------- |
+| Status (single call)        | `git -C <path> status --porcelain=v2 --branch`                                     |
+| Stage files / all           | `git -C <path> add -- <paths>` / `git -C <path> add -A`                            |
+| Unstage tracked             | `git -C <path> restore --staged -- <paths>`                                        |
+| Unstage untracked           | `git -C <path> rm --cached -- <paths>`                                             |
+| Commit                      | `git -C <path> commit -m <message>`                                                |
+| Fetch                       | `git -C <path> fetch`                                                              |
+| Pull                        | `git -C <path> pull`                                                               |
+| Push                        | `git -C <path> push`                                                               |
+| Delete repository (regular) | Recursive filesystem delete of the repo directory — no git command exists for this |
+| Delete worktree             | `git worktree remove --force <path>`                                               |
 
 Rationale for shelling out: zero new dependencies, and `push`/`pull` reuse the user's existing SSH agent and credential helpers — git-station never handles auth.
 
@@ -113,6 +116,7 @@ Opening the detail view renders the local status immediately; a background `fetc
 | List   | `Enter`             | Open detail                                   |
 | List   | `/`                 | Filter by name                                |
 | List   | `r`                 | Refresh statuses                              |
+| List   | `d`                 | Delete repository (typed-name confirmation)   |
 | List   | `q`                 | Quit                                          |
 | Detail | `Esc`               | Back to list (cancels the commit input first) |
 | Detail | `j` / `k`           | Move over files                               |
@@ -133,6 +137,9 @@ Opening the detail view renders the local status immediately; a background `fetc
 | Git command fails                      | Show stderr in the feedback line; never crash the TUI                                                  |
 | Rename entries (porcelain `2` records) | Parse the origin path; display `old -> new`                                                            |
 | `.git` is a file (worktree)            | Valid repository; listed independently                                                                 |
+| Worktree deleted                       | Removed with `git worktree remove --force`; the origin registry is cleaned (no prune needed)           |
+| Umbrella repo deleted                  | The confirmation lists every repo in the deletion set with its dirty state; confirming deletes all     |
+| Deletion fails (e.g. permissions)      | Message: could not be deleted, remove it manually; the list keeps the repository                       |
 | Clean working tree                     | Detail shows a clean state message; `c` with nothing staged surfaces git's error inline                |
 | Operation in flight                    | Per-repo running state; keys that would conflict are ignored until it finishes                         |
 | TUI crash without destroy              | Terminal may break; `reset` / `stty sane` restores it — bootstrap must call destroy on every exit path |
@@ -147,6 +154,7 @@ Each milestone is independently verifiable against its done criteria. Progress i
 - **M4 Detail read-only** — header + grouped file list; background fetch on open with indicator and re-status.
 - **M5 Stage + commit** — `Space` / `a` stage and unstage (untracked via `rm --cached`); `c` + `Enter` commits; errors inline; status refreshes after commit.
 - **M6 Network ops** — `f` / `p` / `P` run async with running state, output/stderr inline, status refresh on completion; the UI never blocks.
+- **M7 Delete** — `d` on the list opens a typed-name confirmation; umbrella sets are enumerated with dirty marks; worktrees go via `git worktree remove --force`; the list refreshes after; failures show a message and never crash the TUI.
 
 ## Testing
 
