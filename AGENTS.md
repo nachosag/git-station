@@ -8,15 +8,12 @@ git-station: a keyboard-driven TUI (bun + TypeScript + @opentui/react) to discov
 - The user is at a junior level with TypeScript and with the libraries in this stack (bun, opentui, React), and is new to git internals beyond everyday usage. Never assume prior knowledge: explain concepts as they appear, define jargon (hooks, porcelain formats, worktrees, ahead/behind), keep steps small, and point to the exact doc section when one exists. Hand-holding is expected and welcome — the constraint in this contract is about who types, not how much explanation.
 - Before code exists for a feature, do not prescribe internal names — no file, function, class, or type names. Describe outcomes and constraints; internal design emerges from his code.
 - Once his code exists, proactively recommending better names, refactors, and simplifications is welcome — as proposals with reasons, never as edits.
+- When he is writing tests, proactively propose the wording for `describe()` / `test()` — he should never be left guessing what to put there. Convention: `describe()` names the unit under test, each `test()` names the behavior it expects (e.g. `describe('findRepos')` + `test('reports a repo at the root')`).
 - "revisá mi código" is the formal review trigger.
 - The project is only half the goal — he wants to understand what he builds in the process. After a milestone task in `docs/v1/BACKLOG.md` is ticked, the user explains in his own words what the code he just wrote does (how it works, why one approach over another, what happens on an edge cases). Listen, correct gently if he gets it wrong, and confirm what he got right. Happens right after the tick, one explanation per task, never batched and never skipped, and the task is not considered closed until he has done it.
 - Sessions run on the backlog loop: "qué hay que hacer hoy" → the current story in `docs/v1/BACKLOG.md` → "¿por dónde arranco?" → an outcome-level first step, never a file/module order.
 - Keeping `docs/v1/BACKLOG.md` updated and in sync with reality is the agent's responsibility, not the user's: tick verified acceptance criteria, move story statuses, and reflect scope changes as work happens — never leave the tracker stale at the end of a task.
 - When a task's criteria in `docs/v1/BACKLOG.md` are ticked `- [x]`, the agent commits everything related to that task (code, docs, backlog) in the same pass. The agent owns the commits, not the user.
-
-## Reply length
-
-- Keep replies between 1 and 1200 characters (~1–200 words). Detailed hand-holding fits; long essays and dumps do not — split into steps or point to a doc section instead.
 
 ## Source of truth
 
@@ -29,7 +26,7 @@ git-station: a keyboard-driven TUI (bun + TypeScript + @opentui/react) to discov
 - `bun install` — dependencies
 - `bun run src/index.ts` — run the app
 - `bun run typecheck` · `bun run lint` · `bun run fmt:check` — the verification trio; all three must pass before a story is Done
-- `bun test` — tests (`bun:test`, colocated `*.test.ts`)
+- `bun test` — tests (`bun:test`, colocated `*.test.ts`). Single file: `bun test src/repo.test.ts`; by name: `bun test -t "pattern"`. Per-test timeout defaults to 5s — a test that walks `$HOME` times out; walk a temp fixture instead (tests must be hermetic).
 - No CI and no pre-commit hooks; the trio above is the gate.
 
 ## Toolchain quirks
