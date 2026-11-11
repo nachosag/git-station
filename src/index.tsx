@@ -7,46 +7,43 @@ import path from 'path'
 import { type ReactNode, useEffect, useState } from 'react'
 
 import { loadConfig } from './config.ts'
+import { Detail } from './pages/Detail.tsx'
+import { Listing } from './pages/Listing.tsx'
+import { Loading } from './pages/Loading.tsx'
 import { findRepos } from './repo.ts'
 
+type ViewStates = 'list' | 'detail' | 'loading'
+
 function App(props: { renderer: CliRenderer }): ReactNode {
-  const [view, setView] = useState<'list' | 'detail'>('list')
+  const [view, setView] = useState<ViewStates>('loading')
   const [repos, setRepos] = useState<string[]>([])
+
+  const screens = {
+    loading: <Loading length={repos.length} />,
+    list: <Listing repos={repos} />,
+    detail: <Detail />,
+  }
 
   useEffect(() => {
     loadConfig(path.join(os.homedir(), '.config', 'git-station', 'config.json'))
-      .then((options) => findRepos(options))
+      .then((options) =>
+        findRepos(options, (repo) => {
+          setRepos((prev) => prev.concat(repo))
+        }),
+      )
       .then((r) => setRepos(r))
+      .then(() => setView('list'))
   }, [])
 
   useKeyboard((key) => {
     const { renderer } = props
 
     if (key.name === 'q') renderer.destroy()
-    if (key.name === 'return') setView('detail')
-    if (key.name === 'escape') setView('list')
+    if (key.name === 'return' && view === 'list') setView('detail')
+    if (key.name === 'escape' && view === 'detail') setView('list')
   })
 
-  return (
-    <box>
-      {view === 'list' ? (
-        <box>
-          <box>
-            {repos.map((repo) => (
-              <text key={repo}>{repo}</text>
-            ))}
-          </box>
-          <text>Enter: open</text>
-          <text>q: quit</text>
-        </box>
-      ) : (
-        <box>
-          <text>Esc: back</text>
-          <text>q: quit</text>
-        </box>
-      )}
-    </box>
-  )
+  return <box>{screens[view]}</box>
 }
 
 const renderer = await createCliRenderer()

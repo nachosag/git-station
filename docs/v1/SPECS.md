@@ -62,7 +62,7 @@ Algorithm on every launch:
 1. Read `~/.config/git-station/config.json` if present. A missing file means defaults; it is never an error.
 2. Recursively walk `$HOME` plus every root from config, skipping any directory whose name is in the prune list or matches config `ignores`. Repositories are reported at any depth: the walk descends into a repository found inside another one, so nested loose clones are their own rows (e.g. a sandbox repo gitignored by its parent).
 3. A directory containing a `.git` entry — a directory or a file (worktrees) — is a repository.
-4. Show repositories as they are found; the list fills incrementally behind a progress indicator.
+4. While the walk runs, show an animated progress bar (no percentage — the total is unknowable) plus a running "found: N" counter. When the walk finishes, the bar fills and the full list renders. Decision (2026-11-11): the list no longer fills incrementally; it renders once at the end.
 
 Default prune list: `.git` (git's internal storage, never a repository), `node_modules`, `.cache`, `.npm`, `.bun`, `.venv`, `venv`, `.cargo`, `.rustup`, `.m2`, `.gradle`, `.local`, `target`, `dist`, `build`, `Library`, `AppData`.
 
@@ -78,7 +78,7 @@ Config format:
 - `roots`: extra absolute roots to scan in addition to `$HOME`.
 - `ignores`: directory names (matched anywhere in the walk) or absolute paths to skip.
 
-Known ceiling: scanning on every open costs seconds on a large `$HOME`. Upgrade path: persist the last scan in a state file, render it instantly on open, rescan in the background.
+Known ceiling: scanning on every open costs seconds on a large `$HOME`. Persisting the last scan to a state file (render it instantly on open, rescan in the background) is deliberately NOT a v1 upgrade path — stale data would need validation, and that complexity is deferred to v2. Decision (2026-11-11).
 
 ## Views
 
@@ -149,7 +149,7 @@ Opening the detail view renders the local status immediately; a background `fetc
 Each milestone is independently verifiable against its done criteria. Progress is tracked in [BACKLOG.md](./BACKLOG.md); this file stays spec-only.
 
 - **M1 Base TUI** — bootstrap/destroy on all exit paths; two placeholder views; `q` and Ctrl+C exit clean; resize-safe; `typecheck`, `lint`, `fmt:check` green; `bin` field in `package.json`.
-- **M2 Discovery** — pruned `$HOME` walk + config; list shows repository names as they are found; scanning and empty states.
+- **M2 Discovery** — pruned `$HOME` walk + config; progress bar with found-count while scanning, list renders on completion; scanning and empty states.
 - **M3 Status** — rows show name, branch/detached, dirty, `↑N ↓M` or `—`; statuses load without blocking the UI; porcelain parser unit-tested.
 - **M4 Detail read-only** — header + grouped file list; background fetch on open with indicator and re-status.
 - **M5 Stage + commit** — `Space` / `a` stage and unstage (untracked via `rm --cached`); `c` + `Enter` commits; errors inline; status refreshes after commit.

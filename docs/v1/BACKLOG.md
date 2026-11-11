@@ -23,8 +23,12 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 
 Tracking rules:
 
-- Tick a criterion only when it has been verified — by running the app, running the tests, or checking from another terminal — not when the code is merely written.
+- Tick a step only when it has been verified — by running the app, running the tests, or checking from another terminal — not when the code is merely written. A step marked `eye` counts as verified when the user says he looked at it and it is right.
 - Move a story to **In progress** when you start it, and to **Done** when every criterion is ticked.
+- The unit of work is the next unticked step. If a criterion is too big for one sitting (more than one thing to check at the end), the agent splits it into indented sub-steps right under it, writing them into the backlog file at that moment. Once written they are the plan: a later conversation uses them as they are and never splits the same criterion again, unless the user asks or the scope changes. Each sub-step is ticked on its own, and the parent criterion is ticked when all its sub-steps are.
+- Each step being worked on carries a `Verified by:` line: a test file with test names and `planned` or `written`, or `eye` for what the screen shows. The line is added when the step is planned, not for the whole backlog in advance. A step that already has the line never gets new tests proposed; `planned` means the tests are still to be written.
+- When the last step of a story is done, the agent writes `Closing questions: pending` under the story's heading. It becomes `done` once the user has answered the explanation and chosen from the proposals (or said none).
+- At the end of a story the agent offers a numbered list of proposals (names, refactors, automations). The ones the user picks are added to the backlog as improvements: `IMP-001`, `IMP-002`… They appear in the Status table and in an `## Improvements` section at the end of the file, with the same checkboxes, sub-steps and `Verified by` lines as stories, and they go before the next story's first step unless the user says otherwise.
 - This is the single progress tracker; SPECS.md stays spec-only.
 
 ## Assumptions and open questions
@@ -109,7 +113,12 @@ As a developer with repositories scattered across my home directory, I want `gs`
 - [x] Given heavy directories (node_modules, .cache, virtualenvs) exist under `$HOME`, when the scan runs, then they are skipped.
 - [x] Given a config file declaring an extra root and an ignore entry, when the app opens, then repositories under the extra root are listed and ignored paths are not.
 - [x] Given no config file exists, when the app opens, then the scan still runs with defaults and no error is shown.
-- [ ] Given a scan in progress, then a progress indicator is visible and rows appear as repositories are found.
+- [x] Given a scan in progress, then an animated progress bar (no percentage) with a "found: N" counter is visible, and the counter climbs while the walk runs.
+- [x] Given a scan that finishes, then the bar fills completely and the full list renders.
+
+  Verified by: eye
+
+  Decision (2026-11-11): the list no longer fills incrementally — the user chose a progress bar + list at the end; SPECS.md §Discovery reflects it.
 - [ ] Given a fixture with no repositories at all, when the scan finishes, then an empty state with a hint renders instead of a blank screen.
 
 **Notes / open questions**
