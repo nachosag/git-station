@@ -1,25 +1,7 @@
 import fs from 'fs/promises'
 import path from 'path'
 
-const pruneList = new Set([
-  'node_modules',
-  '.git',
-  '.cache',
-  '.npm',
-  '.bun',
-  '.venv',
-  'venv',
-  '.cargo',
-  '.rustup',
-  '.m2',
-  '.gradle',
-  '.local',
-  'target',
-  'dist',
-  'build',
-  'Library',
-  'AppData',
-])
+import { type ScanOptions } from './config'
 
 async function hasRepo(dir: string): Promise<boolean> {
   try {
@@ -31,21 +13,33 @@ async function hasRepo(dir: string): Promise<boolean> {
   }
 }
 
-export async function findRepos(dir: string): Promise<string[]> {
+export async function walk(
+  dir: string,
+  ignores: Set<string>,
+): Promise<string[]> {
   const repos: Promise<string[]>[] = []
 
   if (await hasRepo(dir)) repos.push(Promise.resolve([dir]))
   try {
     const entries = await fs.readdir(dir, { withFileTypes: true })
     for (const entry of entries) {
-      if (pruneList.has(entry.name) || !entry.isDirectory()) continue
+      if (ignores.has(entry.name) || !entry.isDirectory()) continue
 
       const subDir = path.join(dir, entry.name)
-      repos.push(findRepos(subDir))
+      repos.push(walk(subDir, ignores))
     }
   } catch {
     return []
   }
+
+  return (await Promise.all(repos)).flat()
+}
+
+export async function findRepos(options: ScanOptions): Promise<string[]> {
+  const { roots, ignores } = options
+  const repos: Promise<string[]>[] = []
+
+  for (const dir of roots) repos.push(walk(dir, ignores))
 
   return (await Promise.all(repos)).flat()
 }

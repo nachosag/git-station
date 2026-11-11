@@ -9,37 +9,37 @@ describe('findRepos', () => {
   test('reports the scanned directory itself when it contains .git', async () => {
     const dir = await fs.mkdtemp(path.join(tmpdir(), 'gs-'))
     await fs.mkdir(path.join(dir, '.git'))
-    const repos = await findRepos(dir)
+    const repos = await findRepos({ roots: [dir], ignores: new Set() })
     expect(repos).toStrictEqual([dir])
     await fs.rm(dir, { recursive: true, force: true })
   })
 
   test('reports a repo nested two levels deep', async () => {
-    const root = await fs.mkdtemp(path.join(tmpdir(), 'gs-'))
-    await fs.mkdir(path.join(root, 'a/b/repo/.git'), { recursive: true })
-    const repos = await findRepos(root)
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'gs-'))
+    await fs.mkdir(path.join(dir, 'a/b/repo/.git'), { recursive: true })
+    const repos = await findRepos({ roots: [dir], ignores: new Set() })
 
-    expect(repos).toStrictEqual([path.join(root, 'a', 'b', 'repo')])
+    expect(repos).toStrictEqual([path.join(dir, 'a', 'b', 'repo')])
 
-    await fs.rm(root, { recursive: true, force: true })
+    await fs.rm(dir, { recursive: true, force: true })
   })
 
   test('reports an umbrella repo and the repos nested inside it', async () => {
-    const root = await fs.mkdtemp(path.join(tmpdir(), 'gs-'))
-    await fs.mkdir(path.join(root, '.git'), { recursive: true })
-    await fs.mkdir(path.join(root, 'inner/.git'), { recursive: true })
-    await fs.mkdir(path.join(root, 'deep/innermost/.git'), { recursive: true })
-    const repos = await findRepos(root)
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'gs-'))
+    await fs.mkdir(path.join(dir, '.git'), { recursive: true })
+    await fs.mkdir(path.join(dir, 'inner/.git'), { recursive: true })
+    await fs.mkdir(path.join(dir, 'deep/innermost/.git'), { recursive: true })
+    const repos = await findRepos({ roots: [dir], ignores: new Set() })
 
     expect(repos.toSorted()).toStrictEqual(
       [
-        root,
-        path.join(root, 'inner'),
-        path.join(root, 'deep', 'innermost'),
+        dir,
+        path.join(dir, 'inner'),
+        path.join(dir, 'deep', 'innermost'),
       ].toSorted(),
     )
 
-    await fs.rm(root, { recursive: true, force: true })
+    await fs.rm(dir, { recursive: true, force: true })
   })
 
   test('reports a worktree (.git as a file) as a repo', async () => {
@@ -48,8 +48,39 @@ describe('findRepos', () => {
       path.join(dir, '.git'),
       'gitdir: /somewhere/repo/.git/worktrees/gs-1',
     )
-    const repos = await findRepos(dir)
+    const repos = await findRepos({ roots: [dir], ignores: new Set() })
     expect(repos).toStrictEqual([dir])
+    await fs.rm(dir, { recursive: true, force: true })
+  })
+
+  test('walks every root in the options', async () => {
+    const dirA = await fs.mkdtemp(path.join(tmpdir(), 'gs-'))
+    const dirB = await fs.mkdtemp(path.join(tmpdir(), 'gs-'))
+    await fs.mkdir(path.join(dirA, 'repo/.git'), { recursive: true })
+    await fs.mkdir(path.join(dirB, 'repo/.git'), { recursive: true })
+    const repos = await findRepos({
+      roots: [dirA, dirB],
+      ignores: new Set(),
+    })
+
+    expect(repos.toSorted()).toStrictEqual(
+      [path.join(dirA, 'repo'), path.join(dirB, 'repo')].toSorted(),
+    )
+
+    await fs.rm(dirA, { recursive: true, force: true })
+    await fs.rm(dirB, { recursive: true, force: true })
+  })
+
+  test('skips ignored names', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'gs-'))
+    await fs.mkdir(path.join(dir, 'skipme/repo/.git'), { recursive: true })
+    const repos = await findRepos({
+      roots: [dir],
+      ignores: new Set(['skipme']),
+    })
+
+    expect(repos).toStrictEqual([])
+
     await fs.rm(dir, { recursive: true, force: true })
   })
 })

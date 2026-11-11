@@ -60,7 +60,7 @@ Rationale for shelling out: zero new dependencies, and `push`/`pull` reuse the u
 Algorithm on every launch:
 
 1. Read `~/.config/git-station/config.json` if present. A missing file means defaults; it is never an error.
-2. Recursively walk `$HOME` plus every root from config, skipping any directory whose name is in the prune list or matches config `ignore`. Repositories are reported at any depth: the walk descends into a repository found inside another one, so nested loose clones are their own rows (e.g. a sandbox repo gitignored by its parent).
+2. Recursively walk `$HOME` plus every root from config, skipping any directory whose name is in the prune list or matches config `ignores`. Repositories are reported at any depth: the walk descends into a repository found inside another one, so nested loose clones are their own rows (e.g. a sandbox repo gitignored by its parent).
 3. A directory containing a `.git` entry — a directory or a file (worktrees) — is a repository.
 4. Show repositories as they are found; the list fills incrementally behind a progress indicator.
 
@@ -71,12 +71,12 @@ Config format:
 ```json
 {
   "roots": ["/opt/src"],
-  "ignore": ["playground", "/home/user/archive"]
+  "ignores": ["playground", "/home/user/archive"]
 }
 ```
 
 - `roots`: extra absolute roots to scan in addition to `$HOME`.
-- `ignore`: directory names (matched anywhere in the walk) or absolute paths to skip.
+- `ignores`: directory names (matched anywhere in the walk) or absolute paths to skip.
 
 Known ceiling: scanning on every open costs seconds on a large `$HOME`. Upgrade path: persist the last scan in a state file, render it instantly on open, rescan in the background.
 

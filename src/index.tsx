@@ -3,8 +3,10 @@ import type { CliRenderer } from '@opentui/core'
 import { createCliRenderer } from '@opentui/core'
 import { createRoot, useKeyboard } from '@opentui/react'
 import os from 'os'
+import path from 'path'
 import { type ReactNode, useEffect, useState } from 'react'
 
+import { loadConfig } from './config.ts'
 import { findRepos } from './repo.ts'
 
 function App(props: { renderer: CliRenderer }): ReactNode {
@@ -12,7 +14,9 @@ function App(props: { renderer: CliRenderer }): ReactNode {
   const [repos, setRepos] = useState<string[]>([])
 
   useEffect(() => {
-    findRepos(os.homedir()).then((repo) => setRepos(repo))
+    loadConfig(path.join(os.homedir(), '.config', 'git-station', 'config.json'))
+      .then((options) => findRepos(options))
+      .then((r) => setRepos(r))
   }, [])
 
   useKeyboard((key) => {

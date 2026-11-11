@@ -107,8 +107,8 @@ As a developer with repositories scattered across my home directory, I want `gs`
 
 - [x] Given `$HOME` contains repositories (including nested ones and at least one git worktree), when the app opens, then every one of them appears in the list, including the worktree.
 - [x] Given heavy directories (node_modules, .cache, virtualenvs) exist under `$HOME`, when the scan runs, then they are skipped.
-- [ ] Given a config file declaring an extra root and an ignore entry, when the app opens, then repositories under the extra root are listed and ignored paths are not.
-- [ ] Given no config file exists, when the app opens, then the scan still runs with defaults and no error is shown.
+- [x] Given a config file declaring an extra root and an ignore entry, when the app opens, then repositories under the extra root are listed and ignored paths are not.
+- [x] Given no config file exists, when the app opens, then the scan still runs with defaults and no error is shown.
 - [ ] Given a scan in progress, then a progress indicator is visible and rows appear as repositories are found.
 - [ ] Given a fixture with no repositories at all, when the scan finishes, then an empty state with a hint renders instead of a blank screen.
 
