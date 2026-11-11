@@ -10,6 +10,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | ------ | -------------------------------------------- | ----------- |
 | US-001 | Launch gs and move between its two views     | Done        |
 | US-002 | Discover every repository on the machine     | Done        |
+| IMP-001 | Simplify the directory walk in src/repo.ts  | Not started |
 | US-003 | See the state of each repository at a glance | Not started |
 | US-004 | Filter the list by name                      | Not started |
 | US-005 | Inspect one repository in detail             | Not started |
@@ -340,3 +341,20 @@ As a developer with many local repositories, I want to delete a repository direc
 | US-010 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Operation split; conflict handling bounded to "visible, not resolved"    |
 | US-011 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Operation split                                                          |
 | US-012 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Typed-name confirmation and set-wide dirty check absorbed into the story |
+
+## Improvements
+
+### IMP-001: Simplify the directory walk in src/repo.ts
+
+**Priority:** polish · **Size:** S · **Depends on:** US-002
+
+**Description**
+
+Accumulate the found repositories in a plain string array during the recursive walk, instead of pushing one promise per directory and flattening everything with `Promise.all(...).flat()` at the end. Behavior must not change: same repos found, same order of skipping, and a failure reading one subdirectory must not lose the repositories found in sibling directories.
+
+**Acceptance criteria**
+
+- [ ] Given the existing test suite, when the refactor is done and `bun test src/repo.test.ts` runs, then every test passes without changes to the tests.
+- [ ] Given a directory tree where one subdirectory cannot be read, when the walk runs, then it still returns every repository found in the readable directories.
+
+  Verified by: src/repo.test.ts — existing tests pass unchanged + one new test for the unreadable directory (planned)
