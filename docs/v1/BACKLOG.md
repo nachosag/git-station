@@ -9,7 +9,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | Story  | Title                                        | Status      |
 | ------ | -------------------------------------------- | ----------- |
 | US-001 | Launch gs and move between its two views     | Done        |
-| US-002 | Discover every repository on the machine     | In progress |
+| US-002 | Discover every repository on the machine     | Done        |
 | US-003 | See the state of each repository at a glance | Not started |
 | US-004 | Filter the list by name                      | Not started |
 | US-005 | Inspect one repository in detail             | Not started |
@@ -104,6 +104,8 @@ As a developer with many local repositories, I want to launch `gs` from any dire
 
 **Epic:** E1 · **Priority:** Must · **Size:** M · **Depends on:** US-001
 
+Closing questions: pending
+
 **Story**
 As a developer with repositories scattered across my home directory, I want `gs` to find them all by itself when it opens, so that I never have to register repositories by hand.
 
@@ -119,7 +121,9 @@ As a developer with repositories scattered across my home directory, I want `gs`
   Verified by: eye
 
   Decision (2026-11-11): the list no longer fills incrementally — the user chose a progress bar + list at the end; SPECS.md §Discovery reflects it.
-- [ ] Given a fixture with no repositories at all, when the scan finishes, then an empty state with a hint renders instead of a blank screen.
+- [x] Given a fixture with no repositories at all, when the scan finishes, then an empty state with a hint renders instead of a blank screen.
+
+  Verified by: eye (chosen 2026-11-11: dedicated `EmptyState` component)
 
 **Notes / open questions**
 
