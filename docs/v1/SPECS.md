@@ -11,6 +11,7 @@ git-station (`gs`) is a keyboard-driven terminal UI to discover, monitor, and ma
 | D3  | Detail scope | Header + file list (staged/unstaged/untracked) + one-line commit + fetch/pull/push. No log, diff, or branch checkout in v1.                                                              |
 | D4  | Network      | The list always shows local state (`git status`). Opening a detail view triggers a background `fetch` (with indicator) followed by a re-status. No fetch-all, no other implicit network. |
 | D5  | Git adapter  | Always shell out to the `git` binary via `Bun.spawn` with `git -C <path>`. No git library. `git status --porcelain=v2 --branch` is the single source of repo state.                      |
+| D6  | UI language  | All on-screen text is English in v1 (decision 2026-11-11). A localized UI (Spanish first) is a v2 candidate.                                                                              |
 
 ## Goals (v1)
 
@@ -22,7 +23,7 @@ git-station (`gs`) is a keyboard-driven terminal UI to discover, monitor, and ma
 
 ## Non-goals (v1)
 
-Interactive rebase, stash management, submodules, pull requests / platform integrations (GitHub, GitLab), remote or network-hosted repos, merge conflict resolution UI, applying one action to many repos at once (including fetch-all).
+Interactive rebase, stash management, submodules, pull requests / platform integrations (GitHub, GitLab), remote or network-hosted repos, merge conflict resolution UI, applying one action to many repos at once (including fetch-all), localized UI (English-only in v1; Spanish is a v2 candidate).
 
 ## Stack
 
