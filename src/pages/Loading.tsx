@@ -17,7 +17,7 @@ export function Loading(props: { length: number }): ReactNode {
 
   return (
     <box>
-      {props.length > 0 && <text>founded: {props.length}</text>}
+      {props.length > 0 && <text>found: {props.length}</text>}
 
       <text>{bar}</text>
     </box>
