@@ -105,7 +105,7 @@ As a developer with many local repositories, I want to launch `gs` from any dire
 
 **Epic:** E1 · **Priority:** Must · **Size:** M · **Depends on:** US-001
 
-Closing questions: pending
+Closing questions: done
 
 **Story**
 As a developer with repositories scattered across my home directory, I want `gs` to find them all by itself when it opens, so that I never have to register repositories by hand.
