@@ -90,20 +90,18 @@ describe('findRepos', () => {
     const dirC = await fs.mkdtemp(path.join(tmpdir(), 'gs-'))
     const dirD = await fs.mkdtemp(path.join(dirC, 'gs-'))
 
-    await fs.mkdir(path.join(dirA, 'repo/.git'), { recursive: true })
-    await fs.mkdir(path.join(dirB, 'repo/.git'), { recursive: true })
+    await fs.mkdir(path.join(dirA, '.git'), { recursive: true })
+    await fs.mkdir(path.join(dirB, '.git'), { recursive: true })
     await fs.mkdir(path.join(dirD, 'repo/.git'), { recursive: true })
 
     await fs.chmod(dirC, 0o000)
 
     const repos = await findRepos({
       roots: [dirA, dirB, dirC],
-      ignores: new Set('skipme'),
+      ignores: new Set(),
     })
 
-    expect(repos.toSorted()).toStrictEqual(
-      [dirA + '/repo', dirB + '/repo'].toSorted(),
-    )
+    expect(repos.toSorted()).toStrictEqual([dirA, dirB].toSorted())
 
     await fs.chmod(dirC, 0o755)
 
