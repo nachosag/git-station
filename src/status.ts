@@ -1,0 +1,59 @@
+type Count = number | null
+
+type RepoStatus = {
+  branch: string
+  ahead: Count
+  behind: Count
+}
+
+export async function readStatus(repoPath: string): Promise<RepoStatus> {
+  const proc = Bun.spawn([
+    'git',
+    '-C',
+    repoPath,
+    'status',
+    '--porcelain=v2',
+    '--branch',
+  ])
+  const status = await new Response(proc.stdout).text()
+
+  return parseStatus(status)
+}
+
+export function parseStatus(status: string): RepoStatus {
+  const input = status.split('\n')
+  const [ahead, behind] = parseAheadAndBehind(input)
+
+  return {
+    branch: parseBranch(input),
+    ahead,
+    behind,
+  }
+}
+
+function parseBranch(lines: string[]): string {
+  const prefix = '# branch.head '
+  const branch = lines
+    .find((sentence) => sentence.startsWith(prefix))
+    ?.slice(prefix.length)
+
+  if (!branch) return 'unknown'
+
+  return branch === '(detached)' ? 'detached' : branch
+}
+
+function parseAheadAndBehind(lines: string[]): [Count, Count] {
+  const prefix = '# branch.ab '
+  const numbers = lines
+    .find((sentence) => sentence.startsWith(prefix))
+    ?.slice(prefix.length)
+    .split(' ')
+
+  if (!numbers) return [null, null]
+
+  return [convert(numbers[0]), convert(numbers[1])]
+}
+
+function convert(value: string | undefined): Count {
+  return value ? Number(value.slice(1)) : null
+}

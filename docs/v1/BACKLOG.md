@@ -11,7 +11,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | US-001 | Launch gs and move between its two views     | Done        |
 | US-002 | Discover every repository on the machine     | Done        |
 | IMP-001 | Simplify the directory walk in src/repo.ts  | Done        |
-| US-003 | See the state of each repository at a glance | Not started |
+| US-003 | See the state of each repository at a glance | In progress |
 | US-004 | Filter the list by name                      | Not started |
 | US-005 | Inspect one repository in detail             | Not started |
 | US-006 | Trust the ahead/behind I see                 | Not started |
@@ -141,6 +141,11 @@ As a developer scanning many repositories, I want each row to show the branch, a
 **Acceptance criteria**
 
 - [ ] Given a repository with a dirty working tree, 2 commits ahead and 1 behind its upstream (per local refs), when the list renders, then its row shows the name, the branch, a dirty mark, and ahead 2 / behind 1.
+  - [x] Given one repository, when its status is read, then the branch line yields the branch name and ahead/behind, and yields `detached` and `—` when there is a detached HEAD or no upstream.
+
+    Verified by: src/status.test.ts — `parseStatus` → 'reports the branch and ahead/behind from the status header', 'reports detached and no upstream with no ahead/behind' (written)
+  - [ ] Given one repository, when its status is read while it has an unstaged change, then the repository comes back marked dirty; a clean one is not.
+  - [ ] Given the list of repositories, when it renders, then every row shows the name, the branch, the dirty mark and ahead/behind.
 - [ ] Given a repository in detached HEAD, when the list renders, then the branch column shows `detached` and ahead/behind show `—`.
 - [ ] Given a repository with no upstream configured, when the list renders, then ahead/behind show `—` and no error is displayed.
 - [ ] Given many repositories, when statuses are still loading, then the list stays interactive and each row's status appears as soon as it is read.
