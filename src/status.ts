@@ -4,6 +4,7 @@ type RepoStatus = {
   branch: string
   ahead: Count
   behind: Count
+  dirty: boolean
 }
 
 export async function readStatus(repoPath: string): Promise<RepoStatus> {
@@ -28,7 +29,16 @@ export function parseStatus(status: string): RepoStatus {
     branch: parseBranch(input),
     ahead,
     behind,
+    dirty: parseDirtyStatus(input),
   }
+}
+
+function parseDirtyStatus(input: string[]): boolean {
+  const entries = input.filter(
+    (line) => line.trim() !== '' && !line.startsWith('#'),
+  )
+
+  return entries.length > 0
 }
 
 function parseBranch(lines: string[]): string {

@@ -6,21 +6,22 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 
 ## Status
 
-| Story  | Title                                        | Status      |
-| ------ | -------------------------------------------- | ----------- |
-| US-001 | Launch gs and move between its two views     | Done        |
-| US-002 | Discover every repository on the machine     | Done        |
-| IMP-001 | Simplify the directory walk in src/repo.ts  | Done        |
-| US-003 | See the state of each repository at a glance | In progress |
-| US-004 | Filter the list by name                      | Not started |
-| US-005 | Inspect one repository in detail             | Not started |
-| US-006 | Trust the ahead/behind I see                 | Not started |
-| US-007 | Stage and unstage files                      | Not started |
-| US-008 | Commit the staged changes                    | Not started |
-| US-009 | Fetch the open repository on demand          | Not started |
-| US-010 | Pull from upstream                           | Not started |
-| US-011 | Push to upstream                             | Not started |
-| US-012 | Delete a repository from the list            | Not started |
+| Story   | Title                                        | Status      |
+| ------- | -------------------------------------------- | ----------- |
+| US-001  | Launch gs and move between its two views     | Done        |
+| US-002  | Discover every repository on the machine     | Done        |
+| IMP-001 | Simplify the directory walk in src/repo.ts   | Done        |
+| IMP-002 | Ship a Linux binary with a one-line install  | Not started |
+| US-003  | See the state of each repository at a glance | In progress |
+| US-004  | Filter the list by name                      | Not started |
+| US-005  | Inspect one repository in detail             | Not started |
+| US-006  | Trust the ahead/behind I see                 | Not started |
+| US-007  | Stage and unstage files                      | Not started |
+| US-008  | Commit the staged changes                    | Not started |
+| US-009  | Fetch the open repository on demand          | Not started |
+| US-010  | Pull from upstream                           | Not started |
+| US-011  | Push to upstream                             | Not started |
+| US-012  | Delete a repository from the list            | Not started |
 
 Tracking rules:
 
@@ -122,6 +123,7 @@ As a developer with repositories scattered across my home directory, I want `gs`
   Verified by: eye
 
   Decision (2026-11-11): the list no longer fills incrementally — the user chose a progress bar + list at the end; SPECS.md §Discovery reflects it.
+
 - [x] Given a fixture with no repositories at all, when the scan finishes, then an empty state with a hint renders instead of a blank screen.
 
   Verified by: eye (chosen 2026-11-11: dedicated `EmptyState` component)
@@ -144,7 +146,11 @@ As a developer scanning many repositories, I want each row to show the branch, a
   - [x] Given one repository, when its status is read, then the branch line yields the branch name and ahead/behind, and yields `detached` and `—` when there is a detached HEAD or no upstream.
 
     Verified by: src/status.test.ts — `parseStatus` → 'reports the branch and ahead/behind from the status header', 'reports detached and no upstream with no ahead/behind' (written)
-  - [ ] Given one repository, when its status is read while it has an unstaged change, then the repository comes back marked dirty; a clean one is not.
+
+  - [x] Given one repository, when its status is read while it has an unstaged change, then the repository comes back marked dirty; a clean one is not.
+
+    Verified by: src/status.test.ts — `parseStatus` → dirty flags from file entries, clean without (written)
+
   - [ ] Given the list of repositories, when it renders, then every row shows the name, the branch, the dirty mark and ahead/behind.
 - [ ] Given a repository in detached HEAD, when the list renders, then the branch column shows `detached` and ahead/behind show `—`.
 - [ ] Given a repository with no upstream configured, when the list renders, then ahead/behind show `—` and no error is displayed.
@@ -363,3 +369,29 @@ Accumulate the found repositories in a plain string array during the recursive w
 - [x] Given a directory tree where one subdirectory cannot be read, when the walk runs, then it still returns every repository found in the readable directories.
 
   Verified by: src/repo.test.ts — existing tests pass unchanged + one new test for the unreadable directory (written)
+
+### IMP-002: Ship a Linux binary with a one-line install
+
+**Priority:** must (v1 scope, decided 2026-11-12) · **Size:** M · **Depends on:** US-001
+
+**Description**
+
+Make `git-station` installable by someone who does not have bun: every release publishes a standalone `git-station-linux-x64` executable built on Linux, and the README's install line downloads it from the latest release without sudo. macOS, Windows and musl builds stay out of v1.
+
+**Acceptance criteria**
+
+- [ ] Given a pushed version tag, when CI finishes, then the release carries a `git-station-linux-x64` executable built from that tag.
+- [ ] Given a machine with no bun installed, when the built file runs, then the list view opens and quits cleanly.
+- [ ] Given a fresh Ubuntu, when the README's install line runs, then `git-station` is executable and on the PATH.
+- [ ] Given the README, then it shows the install line, where the file lands, how to remove it, and that only Linux x64 is supported.
+
+**Out of scope**
+
+- macOS, Windows and musl builds (v2).
+- npm, `brew`, `.deb` and auto-updating.
+
+**Notes / open questions**
+
+- Verified 2026-11-12: `bun build --compile src/index.tsx` produces a 96 MB self-contained binary that runs from another directory, opentui's native library included.
+- Cross-compiling from Linux to another OS fails until that platform's opentui package is installed; CI builds on Linux instead.
+- `latest/download/<asset>` gives a stable URL, so the install line never changes between versions.

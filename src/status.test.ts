@@ -11,11 +11,13 @@ describe('parseStatus', () => {
       '# branch.ab +1 -0',
       '1 .M N... 100644 100644 100644 d655836 d655836 docs/v1/BACKLOG.md',
     ].join('\n')
-    const { branch, ahead, behind } = parseStatus(input)
 
-    expect(branch).toStrictEqual('main')
-    expect(ahead).toStrictEqual(1)
-    expect(behind).toStrictEqual(0)
+    expect(parseStatus(input)).toStrictEqual({
+      branch: 'main',
+      ahead: 1,
+      behind: 0,
+      dirty: true,
+    })
   })
 
   test('reports detached and no upstream with no ahead/behind', () => {
@@ -30,11 +32,13 @@ describe('parseStatus', () => {
       branch: 'detached',
       ahead: null,
       behind: null,
+      dirty: false,
     })
     expect(parseStatus(noUpstream)).toStrictEqual({
       branch: 'main',
       ahead: null,
       behind: null,
+      dirty: false,
     })
   })
 })
