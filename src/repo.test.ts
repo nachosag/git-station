@@ -83,4 +83,32 @@ describe('findRepos', () => {
 
     await fs.rm(dir, { recursive: true, force: true })
   })
+
+  test('still returns repos from readable directories when one subdirectory cannot be read', async () => {
+    const dirA = await fs.mkdtemp(path.join(tmpdir(), 'gs-'))
+    const dirB = await fs.mkdtemp(path.join(tmpdir(), 'gs-'))
+    const dirC = await fs.mkdtemp(path.join(tmpdir(), 'gs-'))
+    const dirD = await fs.mkdtemp(path.join(dirC, 'gs-'))
+
+    await fs.mkdir(path.join(dirA, 'repo/.git'), { recursive: true })
+    await fs.mkdir(path.join(dirB, 'repo/.git'), { recursive: true })
+    await fs.mkdir(path.join(dirD, 'repo/.git'), { recursive: true })
+
+    await fs.chmod(dirC, 0o000)
+
+    const repos = await findRepos({
+      roots: [dirA, dirB, dirC],
+      ignores: new Set('skipme'),
+    })
+
+    expect(repos.toSorted()).toStrictEqual(
+      [dirA + '/repo', dirB + '/repo'].toSorted(),
+    )
+
+    await fs.chmod(dirC, 0o755)
+
+    await fs.rm(dirA, { recursive: true, force: true })
+    await fs.rm(dirB, { recursive: true, force: true })
+    await fs.rm(dirC, { recursive: true, force: true })
+  })
 })

@@ -10,7 +10,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | ------ | -------------------------------------------- | ----------- |
 | US-001 | Launch gs and move between its two views     | Done        |
 | US-002 | Discover every repository on the machine     | Done        |
-| IMP-001 | Simplify the directory walk in src/repo.ts  | Not started |
+| IMP-001 | Simplify the directory walk in src/repo.ts  | Done        |
 | US-003 | See the state of each repository at a glance | Not started |
 | US-004 | Filter the list by name                      | Not started |
 | US-005 | Inspect one repository in detail             | Not started |
@@ -354,7 +354,7 @@ Accumulate the found repositories in a plain string array during the recursive w
 
 **Acceptance criteria**
 
-- [ ] Given the existing test suite, when the refactor is done and `bun test src/repo.test.ts` runs, then every test passes without changes to the tests.
-- [ ] Given a directory tree where one subdirectory cannot be read, when the walk runs, then it still returns every repository found in the readable directories.
+- [x] Given the existing test suite, when the refactor is done and `bun test src/repo.test.ts` runs, then every test passes without changes to the tests.
+- [x] Given a directory tree where one subdirectory cannot be read, when the walk runs, then it still returns every repository found in the readable directories.
 
-  Verified by: src/repo.test.ts — existing tests pass unchanged + one new test for the unreadable directory (planned)
+  Verified by: src/repo.test.ts — existing tests pass unchanged + one new test for the unreadable directory (written)

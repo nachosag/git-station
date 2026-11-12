@@ -15,38 +15,41 @@ async function hasRepo(dir: string): Promise<boolean> {
 
 export async function walk(
   dir: string,
+  found: string[],
   ignores: Set<string>,
   onFound?: (directory: string) => void,
-): Promise<string[]> {
-  const repos: Promise<string[]>[] = []
+): Promise<void> {
+  const repos: Promise<void>[] = []
 
   if (await hasRepo(dir)) {
-    repos.push(Promise.resolve([dir]))
+    found.push(dir)
     onFound?.(dir)
   }
+
   try {
     const entries = await fs.readdir(dir, { withFileTypes: true })
+
     for (const entry of entries) {
       if (ignores.has(entry.name) || !entry.isDirectory()) continue
 
       const subDir = path.join(dir, entry.name)
-      repos.push(walk(subDir, ignores, onFound))
+      repos.push(walk(subDir, found, ignores, onFound))
     }
-  } catch {
-    return []
-  }
+  } catch {}
 
-  return (await Promise.all(repos)).flat()
+  await Promise.all(repos)
 }
 
 export async function findRepos(
   options: ScanOptions,
   onFound?: (directory: string) => void,
 ): Promise<string[]> {
+  const found: string[] = []
   const { roots, ignores } = options
-  const repos: Promise<string[]>[] = []
+  const repos: Promise<void>[] = []
 
-  for (const dir of roots) repos.push(walk(dir, ignores, onFound))
+  for (const dir of roots) repos.push(walk(dir, found, ignores, onFound))
 
-  return (await Promise.all(repos)).flat()
+  await Promise.all(repos)
+  return found
 }
