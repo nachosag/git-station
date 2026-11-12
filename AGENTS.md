@@ -79,8 +79,8 @@ Trigger: "terminé", or any other way of saying he is done with the step.
 1. Run `bun run check`. It must pass. If it fails, quote the errors, keep helping, and stop here.
 2. Verify the step against its criteria and its `Verified by` lines: run the app, run the tests, or check from another terminal. When he says "terminé", any `eye` check counts as done by him.
 3. Update `docs/v1/BACKLOG.md`: tick what was verified, mark the `Verified by` lines `written`, move the story to In progress / Done, and reflect scope changes. If the step finishes its story, write `Closing questions: pending` under the story's heading.
-4. Commit everything related to the step (code, tests, backlog) in one commit. Message: short, imperative, in English, starting with the story id (e.g. `US-003: read the status of one repo`).
-5. Push to the current branch's upstream. If the push is rejected, stop and tell him. Never force-push and never rewrite history.
+4. Commit everything related to the step (code, tests, backlog) in one commit. Message: short, imperative, in English, starting with the story id or improvement id (e.g. `US-003: read the status of one repo`, `IMP-001: simplify the directory walk`).
+5. **Push only when a user story or epic completes** — every step of it done, verified, and closed in the backlog. A middle step ends at the commit; the push waits for the story boundary. When the push finally happens and is rejected, stop and tell him. Never force-push and never rewrite history.
 6. **Only now, questions.** If this was the last step of its story (every criterion is ticked and the story moves to Done), ask him to explain in his own words what the code he wrote does (how it works, why one approach over another, what happens on an edge case). The project is only half the goal — he wants to understand what he builds in the process. Listen, correct gently if he gets it wrong, and confirm what he got right. One explanation per story, never batched, never skipped. On the first or a middle step of a story there is no explanation yet. If he leaves without explaining, the marker stays `pending` and it is asked first thing in the next session.
 7. **Then proposals — only when this was the last step of its story.** Once code exists, proactively recommend better names (variables, functions, classes, files), refactors, simplifications, abstractions, or automations. Present them as a short numbered list (zero is a fine number; more than four is too many), each with the reason and the trade-off, as proposals and never as edits, so he can answer with numbers ("la 1 y la 4"). Proposals are not obligations. For each one he picks: add it to the backlog right away as an improvement (see "Source of truth"), splitting a big one into small steps with the same size rule as any other step. Drop the rest. Then commit and push that backlog change and change the story's marker to `Closing questions: done`.
 8. If this story also closed a milestone or epic, base the list in point 7 on the whole codebase and not only on this story's code: naming, abstractions, automations, simpler or faster approaches.
@@ -89,7 +89,7 @@ Trigger: "terminé", or any other way of saying he is done with the step.
 ### Who owns the backlog and the repo
 
 - Keeping `docs/v1/BACKLOG.md` updated and in sync with reality is the agent's responsibility, not the user's: tick verified criteria, move story statuses, and reflect scope changes as work happens — never leave the tracker stale at the end of a step.
-- Commits and pushes are the agent's too, as described under "Closing a step". One commit per step.
+- Commits are the agent's too, one per step, as described under "Closing a step". Pushes are the agent's as well, but only at a story or epic boundary — never per step.
 
 ## Source of truth
 
