@@ -11,7 +11,7 @@ git-station (`gs`) is a keyboard-driven terminal UI to discover, monitor, and ma
 | D3  | Detail scope | Header + file list (staged/unstaged/untracked) + one-line commit + fetch/pull/push. No log, diff, or branch checkout in v1.                                                              |
 | D4  | Network      | The list always shows local state (`git status`). Opening a detail view triggers a background `fetch` (with indicator) followed by a re-status. No fetch-all, no other implicit network. |
 | D5  | Git adapter  | Always shell out to the `git` binary via `Bun.spawn` with `git -C <path>`. No git library. `git status --porcelain=v2 --branch` is the single source of repo state.                      |
-| D6  | UI language  | All on-screen text is English in v1 (decision 2026-11-11). A localized UI (Spanish first) is a v2 candidate.                                                                              |
+| D6  | UI language  | All on-screen text is English in v1 (decision 2026-11-11). A localized UI (Spanish first) is a v2 candidate.                                                                             |
 
 ## Goals (v1)
 
@@ -156,6 +156,14 @@ Each milestone is independently verifiable against its done criteria. Progress i
 - **M5 Stage + commit** — `Space` / `a` stage and unstage (untracked via `rm --cached`); `c` + `Enter` commits; errors inline; status refreshes after commit.
 - **M6 Network ops** — `f` / `p` / `P` run async with running state, output/stderr inline, status refresh on completion; the UI never blocks.
 - **M7 Delete** — `d` on the list opens a typed-name confirmation; umbrella sets are enumerated with dirty marks; worktrees go via `git worktree remove --force`; the list refreshes after; failures show a message and never crash the TUI.
+
+## Distribution
+
+- v1 targets Linux x64 only, verified on Ubuntu. macOS, Windows and musl builds are v2.
+- Every release carries a standalone `git-station-linux-x64` built with `bun build --compile`; the user needs no bun on their machine.
+- Installing is one line from the README, downloading `releases/latest/download/git-station-linux-x64`, with no sudo.
+- The binary is built by CI when a version tag is pushed, never from a developer machine.
+- npm publishing and `brew` are not v1 goals.
 
 ## Testing
 
