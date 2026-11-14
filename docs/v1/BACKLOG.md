@@ -211,11 +211,27 @@ As a developer about to act on a repository, I want to open it and see its path,
   - [x] Given the detail view of a repository, then the header shows its branch, upstream name, and ahead/behind.
 
     Verified by: src/status.test.ts — `parseStatus` fixtures now include the upstream name and `null` when there is none, inside 'reports the branch and ahead/behind from the status header' and 'reports detached and no upstream with no ahead/behind' (written). Header rendering: eye (written 2026-11-14).
-  - [ ] Given the detail view of a repository, then it shows the counts of staged, unstaged, and untracked files.
+  - [x] Given the detail view of a repository, then it shows the counts of staged, unstaged, and untracked files.
+
+    Verified by: src/status.test.ts — `parseStatus` → 'counts one file per group: staged, unstaged and untracked', 'counts a file staged and modified in both groups' (written). Counts rendering: eye (written 2026-11-14 — group titles `staged (1)`, `unstaged (2)`, `untracked (3)` match `git status --porcelain=v2` on `/home/nachosag/vaults/college`).
+
+    Decision (2026-11-14): the status reading returns the list of files with their group, and the counts are derived from that list — not three separate counters — so the header and the groups below cannot disagree.
 - [ ] Given a repository with staged, unstaged, and untracked changes, when the detail renders, then the files appear grouped as staged / unstaged / untracked, and a renamed file displays as `old -> new`.
+  - [ ] Given the detail file list, when I press `j`/`k` or the arrows, then the list scrolls and the rest of the view stays put.
+
+    Verified by: eye (written 2026-11-14 — `<scrollbox focused>` moves with `j`/`k`, arrows, PageUp/PageDown and Home/End; mouse wheel still works).
+
+    Decision (2026-11-14): keyboard scroll comes from the scrollbox's own focus handling instead of a `useKeyboard` handler calling `scrollBy`. It costs no code and brings paging keys for free; US-007 replaces it anyway when `j`/`k` has to move the file selection.
 - [ ] Given a clean repository, when the detail renders, then a clean-state message shows instead of empty groups.
 - [ ] Given a repository in detached HEAD, when the detail renders, then the header shows `detached` without crashing.
 - [ ] Given the detail view, when I press Esc, then the list returns with the previous selection preserved.
+
+**Notes / open questions**
+
+- UI pass in progress (uncommitted, 2026-11-14): the detail file list is a `scrollbox` (mouse wheel and keyboard both scroll), inside a centered 80% column, with the header line above and the key hints below. Pending in this pass: a per-group marker with color instead of the hardcoded `M`, and fixed column widths like the list table.
+- Known bug (2026-11-14): on a short terminal (large font/zoom) the key hints line overlaps the last file rows. `minHeight={0}` on the scrollbox did not fix it; next suspects are the row box around `Info` + `Groups` and the percentage-width chain.
+- Decision (2026-11-14): the status reading returns the list of files with their group, and the counts are derived from that list.
+- Proposed but not accepted yet: `IMP-003`, make the repository list scroll the same way (selection kept visible with `scrollChildIntoView`).
 
 ### US-006: Trust the ahead/behind I see
 

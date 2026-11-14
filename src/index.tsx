@@ -59,13 +59,13 @@ function App(props: { renderer: CliRenderer }): ReactNode {
     if (repos.length === 0) return
     if (key.name === 'return' && view === 'list') setView('detail')
     if (key.name === 'escape' && view === 'detail') setView('list')
-    if (key.name === 'j' || key.name === 'down')
+    if (view === 'list' && (key.name === 'j' || key.name === 'down'))
       setSelectedRepo((i) => Math.min(i + 1, repos.length - 1))
-    if (key.name === 'k' || key.name === 'up')
+    if (view === 'list' && (key.name === 'k' || key.name === 'up'))
       setSelectedRepo((i) => Math.max(i - 1, 0))
   })
 
-  return <box>{screens[view]}</box>
+  return <box height='100%'>{screens[view]}</box>
 }
 
 const renderer = await createCliRenderer()
