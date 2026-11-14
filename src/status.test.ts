@@ -14,6 +14,7 @@ describe('parseStatus', () => {
 
     expect(parseStatus(input)).toStrictEqual({
       branch: 'main',
+      upstream: 'origin/main',
       ahead: 1,
       behind: 0,
       dirty: true,
@@ -30,12 +31,14 @@ describe('parseStatus', () => {
 
     expect(parseStatus(detached)).toStrictEqual({
       branch: 'detached',
+      upstream: null,
       ahead: null,
       behind: null,
       dirty: false,
     })
     expect(parseStatus(noUpstream)).toStrictEqual({
       branch: 'main',
+      upstream: null,
       ahead: null,
       behind: null,
       dirty: false,

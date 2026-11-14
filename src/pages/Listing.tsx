@@ -15,7 +15,7 @@ const WIDTHS = {
 export function Listing(props: {
   repos: string[]
   statuses: RepoStatus[]
-  selectedRow: number
+  selectedRepo: number
 }): ReactNode {
   return (
     <box>
@@ -25,7 +25,7 @@ export function Listing(props: {
         <Table
           repos={props.repos}
           statuses={props.statuses}
-          selectedRow={props.selectedRow}
+          selectedRepo={props.selectedRepo}
         />
       )}
 
@@ -38,7 +38,7 @@ export function Listing(props: {
 function Table(props: {
   repos: string[]
   statuses: RepoStatus[]
-  selectedRow: number
+  selectedRepo: number
 }): ReactNode {
   return (
     <box
@@ -51,7 +51,7 @@ function Table(props: {
             key={repo}
             repo={repo}
             status={props.statuses[i]!}
-            isSelected={i === props.selectedRow}
+            isSelected={i === props.selectedRepo}
           />
         ))}
       </box>

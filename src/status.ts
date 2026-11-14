@@ -2,6 +2,7 @@ type Count = number | null
 
 export type RepoStatus = {
   branch: string
+  upstream: string | null
   ahead: Count
   behind: Count
   dirty: boolean
@@ -27,10 +28,20 @@ export function parseStatus(status: string): RepoStatus {
 
   return {
     branch: parseBranch(input),
+    upstream: parseUpstream(input),
     ahead,
     behind,
     dirty: parseDirtyStatus(input),
   }
+}
+
+function parseUpstream(input: string[]): string | null {
+  const prefix = '# branch.upstream '
+  const upstream = input.find((value) => value.startsWith(prefix))
+
+  if (!upstream) return null
+
+  return upstream.slice(prefix.length)
 }
 
 function parseDirtyStatus(input: string[]): boolean {
@@ -66,4 +77,8 @@ function parseAheadAndBehind(lines: string[]): [Count, Count] {
 
 function convert(value: string | undefined): Count {
   return value ? Number(value.slice(1)) : null
+}
+
+export function readStatuses(paths: string[]): Promise<RepoStatus[]> {
+  return Promise.all(paths.map((p) => readStatus(p)))
 }

@@ -208,7 +208,9 @@ As a developer about to act on a repository, I want to open it and see its path,
     Verified by: eye (written 2026-11-14)
 
     Decision (2026-11-14): the selection state lives in the component that owns both views (list/detail), so it survives going back with Esc. Keys per SPECS.md keyboard map: j/k or arrows move, Enter opens.
-  - [ ] Given the detail view of a repository, then the header shows its branch, upstream name, and ahead/behind.
+  - [x] Given the detail view of a repository, then the header shows its branch, upstream name, and ahead/behind.
+
+    Verified by: src/status.test.ts — `parseStatus` fixtures now include the upstream name and `null` when there is none, inside 'reports the branch and ahead/behind from the status header' and 'reports detached and no upstream with no ahead/behind' (written). Header rendering: eye (written 2026-11-14).
   - [ ] Given the detail view of a repository, then it shows the counts of staged, unstaged, and untracked files.
 - [ ] Given a repository with staged, unstaged, and untracked changes, when the detail renders, then the files appear grouped as staged / unstaged / untracked, and a renamed file displays as `old -> new`.
 - [ ] Given a clean repository, when the detail renders, then a clean-state message shows instead of empty groups.
