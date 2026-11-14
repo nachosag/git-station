@@ -18,6 +18,7 @@ describe('parseStatus', () => {
       ahead: 1,
       behind: 0,
       dirty: true,
+      files: [{ path: 'docs/v1/BACKLOG.md', status: 'unstaged' }],
     })
   })
 
@@ -35,6 +36,7 @@ describe('parseStatus', () => {
       ahead: null,
       behind: null,
       dirty: false,
+      files: [],
     })
     expect(parseStatus(noUpstream)).toStrictEqual({
       branch: 'main',
@@ -42,6 +44,36 @@ describe('parseStatus', () => {
       ahead: null,
       behind: null,
       dirty: false,
+      files: [],
     })
+  })
+
+  test('counts one file per group: staged, unstaged and untracked', () => {
+    const input = [
+      '# branch.oid 32dc0d0',
+      '# branch.head main',
+      '1 M. N... 100644 100644 100644 d655836 d655836 src/staged.ts',
+      '1 .M N... 100644 100644 100644 d655836 d655836 src/unstaged.ts',
+      '? src/new.ts',
+    ].join('\n')
+
+    expect(parseStatus(input).files).toStrictEqual([
+      { path: 'src/staged.ts', status: 'staged' },
+      { path: 'src/unstaged.ts', status: 'unstaged' },
+      { path: 'src/new.ts', status: 'untracked' },
+    ])
+  })
+
+  test('counts a file staged and modified in both groups', () => {
+    const input = [
+      '# branch.oid 32dc0d0',
+      '# branch.head main',
+      '1 MM N... 100644 100644 100644 d655836 d655836 src/both.ts',
+    ].join('\n')
+
+    expect(parseStatus(input).files).toStrictEqual([
+      { path: 'src/both.ts', status: 'staged' },
+      { path: 'src/both.ts', status: 'unstaged' },
+    ])
   })
 })

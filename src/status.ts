@@ -1,11 +1,17 @@
 type Count = number | null
 
+export type File = {
+  path: string
+  status: 'staged' | 'unstaged' | 'untracked'
+}
+
 export type RepoStatus = {
   branch: string
   upstream: string | null
   ahead: Count
   behind: Count
   dirty: boolean
+  files: File[]
 }
 
 export async function readStatus(repoPath: string): Promise<RepoStatus> {
@@ -32,7 +38,37 @@ export function parseStatus(status: string): RepoStatus {
     ahead,
     behind,
     dirty: parseDirtyStatus(input),
+    files: parseFiles(input),
   }
+}
+
+function parseFiles(input: string[]): File[] {
+  const entries = input.filter(
+    (line) => line.trim() !== '' && !line.startsWith('#'),
+  )
+  const files: File[] = []
+  const SKIP: Record<string, number> = {
+    '1': 8,
+    '2': 9,
+    u: 10,
+  }
+
+  for (const entry of entries) {
+    if (entry.startsWith('? ')) {
+      files.push({ path: entry.slice(2), status: 'untracked' })
+      continue
+    }
+
+    const fields = entry.split(' ')
+    const [x, y] = fields[1] ?? ''
+    const skip = SKIP[fields[0] ?? ''] ?? 8
+    const path = fields.slice(skip).join(' ').split('\t')[0] ?? ''
+
+    if (x !== '.') files.push({ path, status: 'staged' })
+    if (y !== '.') files.push({ path, status: 'unstaged' })
+  }
+
+  return files
 }
 
 function parseUpstream(input: string[]): string | null {
