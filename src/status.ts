@@ -1,6 +1,6 @@
 type Count = number | null
 
-type RepoStatus = {
+export type RepoStatus = {
   branch: string
   ahead: Count
   behind: Count

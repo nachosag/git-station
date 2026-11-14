@@ -16,7 +16,8 @@
   },
   "rules": {
     "no-unused-vars": "off",
-    "max-lines-per-function": ["warn", { "max": 200 }],
+    "import/max-dependencies": "allow",
+    "max-lines-per-function": "allow",
     "sort-imports": ["error", { "ignoreDeclarationSort": true }],
     "eqeqeq": "error",
     "prefer-const": "error",

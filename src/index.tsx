@@ -11,16 +11,23 @@ import { Detail } from './pages/Detail.tsx'
 import { Listing } from './pages/Listing.tsx'
 import { Loading } from './pages/Loading.tsx'
 import { findRepos } from './repo.ts'
+import { type RepoStatus, readStatus } from './status.ts'
 
 type ViewStates = 'list' | 'detail' | 'loading'
 
 function App(props: { renderer: CliRenderer }): ReactNode {
   const [view, setView] = useState<ViewStates>('loading')
   const [repos, setRepos] = useState<string[]>([])
+  const [statuses, setStatuses] = useState<RepoStatus[]>([])
 
   const screens = {
     loading: <Loading length={repos.length} />,
-    list: <Listing repos={repos} />,
+    list: (
+      <Listing
+        repos={repos}
+        statuses={statuses}
+      />
+    ),
     detail: <Detail />,
   }
 
@@ -31,8 +38,11 @@ function App(props: { renderer: CliRenderer }): ReactNode {
           setRepos((prev) => prev.concat(repo))
         }),
       )
-      .then((r) => setRepos(r))
-      .then(() => setView('list'))
+      .then((paths) => readStatuses(paths))
+      .then((s) => {
+        setStatuses(s)
+        setView('list')
+      })
   }, [])
 
   useKeyboard((key) => {
@@ -48,3 +58,7 @@ function App(props: { renderer: CliRenderer }): ReactNode {
 
 const renderer = await createCliRenderer()
 createRoot(renderer).render(<App renderer={renderer} />)
+
+function readStatuses(paths: string[]): Promise<RepoStatus[]> {
+  return Promise.all(paths.map((p) => readStatus(p)))
+}

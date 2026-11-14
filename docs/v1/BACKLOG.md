@@ -142,7 +142,7 @@ As a developer scanning many repositories, I want each row to show the branch, a
 
 **Acceptance criteria**
 
-- [ ] Given a repository with a dirty working tree, 2 commits ahead and 1 behind its upstream (per local refs), when the list renders, then its row shows the name, the branch, a dirty mark, and ahead 2 / behind 1.
+- [x] Given a repository with a dirty working tree, 2 commits ahead and 1 behind its upstream (per local refs), when the list renders, then its row shows the name, the branch, a dirty mark, and ahead 2 / behind 1.
   - [x] Given one repository, when its status is read, then the branch line yields the branch name and ahead/behind, and yields `detached` and `—` when there is a detached HEAD or no upstream.
 
     Verified by: src/status.test.ts — `parseStatus` → 'reports the branch and ahead/behind from the status header', 'reports detached and no upstream with no ahead/behind' (written)
@@ -151,7 +151,10 @@ As a developer scanning many repositories, I want each row to show the branch, a
 
     Verified by: src/status.test.ts — `parseStatus` → dirty flags from file entries, clean without (written)
 
-  - [ ] Given the list of repositories, when it renders, then every row shows the name, the branch, the dirty mark and ahead/behind.
+  - [x] Given the list of repositories, when it renders, then every row shows the name, the branch, the dirty mark and ahead/behind.
+
+    Verified by: eye (2026-11-13: centered table, widths as percentages of the table box)
+
 - [ ] Given a repository in detached HEAD, when the list renders, then the branch column shows `detached` and ahead/behind show `—`.
 - [ ] Given a repository with no upstream configured, when the list renders, then ahead/behind show `—` and no error is displayed.
 - [ ] Given many repositories, when statuses are still loading, then the list stays interactive and each row's status appears as soon as it is read.
