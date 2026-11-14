@@ -15,6 +15,7 @@ const WIDTHS = {
 export function Listing(props: {
   repos: string[]
   statuses: RepoStatus[]
+  selectedRow: number
 }): ReactNode {
   return (
     <box>
@@ -24,6 +25,7 @@ export function Listing(props: {
         <Table
           repos={props.repos}
           statuses={props.statuses}
+          selectedRow={props.selectedRow}
         />
       )}
 
@@ -33,7 +35,11 @@ export function Listing(props: {
   )
 }
 
-function Table(props: { repos: string[]; statuses: RepoStatus[] }): ReactNode {
+function Table(props: {
+  repos: string[]
+  statuses: RepoStatus[]
+  selectedRow: number
+}): ReactNode {
   return (
     <box
       width='100%'
@@ -45,6 +51,7 @@ function Table(props: { repos: string[]; statuses: RepoStatus[] }): ReactNode {
             key={repo}
             repo={repo}
             status={props.statuses[i]!}
+            isSelected={i === props.selectedRow}
           />
         ))}
       </box>
@@ -84,7 +91,11 @@ function Header(): ReactNode {
   )
 }
 
-function Row(props: { repo: string; status: RepoStatus }): ReactNode {
+function Row(props: {
+  repo: string
+  status: RepoStatus
+  isSelected: boolean
+}): ReactNode {
   const dir = props.repo.split('/').at(-1)
   const branch = props.status.branch
   const dirty = props.status.dirty ? ' (*)' : ''
@@ -95,7 +106,9 @@ function Row(props: { repo: string; status: RepoStatus }): ReactNode {
     ? `↓ ${props.status.behind}`
     : ' '.repeat(Math.floor('behind'.length / 2)).concat('—')
   return (
-    <box flexDirection='row'>
+    <box
+      flexDirection='row'
+      {...(props.isSelected ? { backgroundColor: 'gray' } : {})}>
       <text width={WIDTHS.repo}>{dir}</text>
       <text width={WIDTHS.dirty}>{dirty}</text>
       <text width={WIDTHS.branch}>{branch}</text>

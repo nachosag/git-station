@@ -19,6 +19,7 @@ function App(props: { renderer: CliRenderer }): ReactNode {
   const [view, setView] = useState<ViewStates>('loading')
   const [repos, setRepos] = useState<string[]>([])
   const [statuses, setStatuses] = useState<RepoStatus[]>([])
+  const [selectedRow, setSelectedRow] = useState(0)
 
   const screens = {
     loading: <Loading length={repos.length} />,
@@ -26,9 +27,10 @@ function App(props: { renderer: CliRenderer }): ReactNode {
       <Listing
         repos={repos}
         statuses={statuses}
+        selectedRow={selectedRow}
       />
     ),
-    detail: <Detail />,
+    detail: <Detail repoPath={repos[selectedRow]!} />,
   }
 
   useEffect(() => {
@@ -49,8 +51,13 @@ function App(props: { renderer: CliRenderer }): ReactNode {
     const { renderer } = props
 
     if (key.name === 'q') renderer.destroy()
+    if (repos.length === 0) return
     if (key.name === 'return' && view === 'list') setView('detail')
     if (key.name === 'escape' && view === 'detail') setView('list')
+    if (key.name === 'j' || key.name === 'down')
+      setSelectedRow((i) => Math.min(i + 1, repos.length - 1))
+    if (key.name === 'k' || key.name === 'up')
+      setSelectedRow((i) => Math.max(i - 1, 0))
   })
 
   return <box>{screens[view]}</box>

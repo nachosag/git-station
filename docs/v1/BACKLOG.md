@@ -14,7 +14,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | IMP-002 | Ship a Linux binary with a one-line install  | Not started |
 | US-003  | See the state of each repository at a glance | In progress |
 | US-004  | Filter the list by name                      | Not started |
-| US-005  | Inspect one repository in detail             | Not started |
+| US-005  | Inspect one repository in detail             | In progress |
 | US-006  | Trust the ahead/behind I see                 | Not started |
 | US-007  | Stage and unstage files                      | Not started |
 | US-008  | Commit the staged changes                    | Not started |
@@ -155,11 +155,17 @@ As a developer scanning many repositories, I want each row to show the branch, a
 
     Verified by: eye (2026-11-13: centered table, widths as percentages of the table box)
 
-- [ ] Given a repository in detached HEAD, when the list renders, then the branch column shows `detached` and ahead/behind show `—`.
-- [ ] Given a repository with no upstream configured, when the list renders, then ahead/behind show `—` and no error is displayed.
+- [x] Given a repository in detached HEAD, when the list renders, then the branch column shows `detached` and ahead/behind show `—`.
+
+  Verified by: eye (written 2026-11-14)
+- [x] Given a repository with no upstream configured, when the list renders, then ahead/behind show `—` and no error is displayed.
+
+  Verified by: eye (written 2026-11-14)
 - [ ] Given many repositories, when statuses are still loading, then the list stays interactive and each row's status appears as soon as it is read.
 - [ ] Given a repository where git itself fails, when its status cannot be read, then the row renders with an error marker and the app keeps running.
-- [ ] Given the parser test suite, when run, then fixtures for porcelain v2 (branch lines, file entries, renames, detached, no upstream) all pass.
+- [x] Given the parser test suite, when run, then fixtures for porcelain v2 (branch lines, file entries, renames, detached, no upstream) all pass.
+
+  Verified by: src/status.test.ts — `parseStatus` fixtures (written)
 
 **Notes / open questions**
 
@@ -197,6 +203,13 @@ As a developer about to act on a repository, I want to open it and see its path,
 **Acceptance criteria**
 
 - [ ] Given a repository selected in the list, when I press Enter, then the detail shows its absolute path, branch, upstream name, ahead/behind, and counts of staged, unstaged, and untracked files.
+  - [x] Given the populated list, moving the selection with the keyboard highlights a row, and Enter opens the detail showing that repository's absolute path.
+
+    Verified by: eye (written 2026-11-14)
+
+    Decision (2026-11-14): the selection state lives in the component that owns both views (list/detail), so it survives going back with Esc. Keys per SPECS.md keyboard map: j/k or arrows move, Enter opens.
+  - [ ] Given the detail view of a repository, then the header shows its branch, upstream name, and ahead/behind.
+  - [ ] Given the detail view of a repository, then it shows the counts of staged, unstaged, and untracked files.
 - [ ] Given a repository with staged, unstaged, and untracked changes, when the detail renders, then the files appear grouped as staged / unstaged / untracked, and a renamed file displays as `old -> new`.
 - [ ] Given a clean repository, when the detail renders, then a clean-state message shows instead of empty groups.
 - [ ] Given a repository in detached HEAD, when the detail renders, then the header shows `detached` without crashing.
