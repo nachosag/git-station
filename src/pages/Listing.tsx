@@ -5,10 +5,11 @@ import type { RepoStatus } from '../status.ts'
 import { EmptyState } from '../components/EmptyState.tsx'
 
 const WIDTHS = {
-  repo: '40%',
-  branch: '34%',
-  ahead: '13%',
-  behind: '13%',
+  repo: '35%',
+  dirty: '10%',
+  branch: '35%',
+  ahead: '10%',
+  behind: '10%',
 } as const
 
 export function Listing(props: {
@@ -60,6 +61,11 @@ function Header(): ReactNode {
         repo
       </text>
       <text
+        width={WIDTHS.dirty}
+        fg='gray'>
+        dirty
+      </text>
+      <text
         width={WIDTHS.branch}
         fg='gray'>
         branch
@@ -81,14 +87,18 @@ function Header(): ReactNode {
 function Row(props: { repo: string; status: RepoStatus }): ReactNode {
   const dir = props.repo.split('/').at(-1)
   const branch = props.status.branch
-  const dirty = props.status.dirty ? '(*) ' : ' '.repeat('(*) '.length)
-  const ahead = props.status.ahead ? `↑ ${props.status.ahead}` : '—'
-  const behind = props.status.behind ? `↓ ${props.status.behind}` : '—'
-
+  const dirty = props.status.dirty ? ' (*)' : ''
+  const ahead = props.status.ahead
+    ? `↑ ${props.status.ahead}`
+    : ' '.repeat(Math.floor('ahead'.length / 2)).concat('—')
+  const behind = props.status.behind
+    ? `↓ ${props.status.behind}`
+    : ' '.repeat(Math.floor('behind'.length / 2)).concat('—')
   return (
     <box flexDirection='row'>
       <text width={WIDTHS.repo}>{dir}</text>
-      <text width={WIDTHS.branch}>{dirty + branch}</text>
+      <text width={WIDTHS.dirty}>{dirty}</text>
+      <text width={WIDTHS.branch}>{branch}</text>
       <text width={WIDTHS.ahead}>{ahead}</text>
       <text width={WIDTHS.behind}>{behind}</text>
     </box>
