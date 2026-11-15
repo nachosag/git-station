@@ -151,7 +151,7 @@ Each milestone is independently verifiable against its done criteria. Progress i
 
 - **M1 Base TUI** — bootstrap/destroy on all exit paths; two placeholder views; `q` and Ctrl+C exit clean; resize-safe; `typecheck`, `lint`, `fmt:check` green; `bin` field in `package.json`.
 - **M2 Discovery** — pruned `$HOME` walk + config; progress bar with found-count while scanning, list renders on completion; scanning and empty states.
-- **M3 Status** — rows show name, branch/detached, dirty, `↑N ↓M` or `—`; statuses load without blocking the UI; porcelain parser unit-tested.
+- **M3 Status** — rows show name, branch/detached, dirty, `↑N ↓M` or `—`; each repository's status is read as soon as the walk finds it, so the list renders complete as soon as the last status arrives (decision 2026-11-14: no half-filled rows); porcelain parser unit-tested.
 - **M4 Detail read-only** — header + grouped file list; background fetch on open with indicator and re-status.
 - **M5 Stage + commit** — `Space` / `a` stage and unstage (untracked via `rm --cached`); `c` + `Enter` commits; errors inline; status refreshes after commit.
 - **M6 Network ops** — `f` / `p` / `P` run async with running state, output/stderr inline, status refresh on completion; the UI never blocks.

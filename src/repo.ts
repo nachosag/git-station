@@ -1,7 +1,7 @@
 import fs from 'fs/promises'
 import path from 'path'
 
-import { type ScanOptions } from './config'
+import { type ScanOptions } from './config.ts'
 
 async function hasRepo(dir: string): Promise<boolean> {
   try {

@@ -1,3 +1,7 @@
+import type { ScanOptions } from './config.ts'
+
+import { findRepos } from './repo.ts'
+
 type Count = number | null
 
 export type File = {
@@ -12,6 +16,25 @@ export type RepoStatus = {
   behind: Count
   dirty: boolean
   files: File[]
+}
+
+export async function scan(
+  options: ScanOptions,
+  onFound?: (directory: string) => void,
+): Promise<{ repos: string[]; statuses: RepoStatus[] }> {
+  const pending: Promise<RepoStatus>[] = []
+
+  const repos = await findRepos(options, (directory) => {
+    pending.push(readStatus(directory))
+    onFound?.(directory)
+  })
+
+  const statuses = await Promise.all(pending)
+
+  return {
+    repos,
+    statuses,
+  }
 }
 
 export async function readStatus(repoPath: string): Promise<RepoStatus> {

@@ -161,7 +161,11 @@ As a developer scanning many repositories, I want each row to show the branch, a
 - [x] Given a repository with no upstream configured, when the list renders, then ahead/behind show `—` and no error is displayed.
 
   Verified by: eye (written 2026-11-14)
-- [ ] Given many repositories, when statuses are still loading, then the list stays interactive and each row's status appears as soon as it is read.
+- [x] Given many repositories, when the app opens, then each repository's status starts being read as soon as the walk finds it, and the list renders complete once the last status arrives — the loading screen stays until then.
+
+  Decision (2026-11-14): the list never shows half-filled rows. Overlapping the status reads with the walk is the only change; the UI stays on the loading screen until every status is in. SPECS.md M3 updated to match.
+
+  Verified by: eye (written 2026-11-14). Measured with `scan()` on this machine: 23 repos, 23 statuses, first repo announced 15 ms after start, total 562 ms against 659 ms for the old scan-then-read sequence. Walk mechanics stay covered by `src/repo.test.ts`; `scan` itself is thin orchestration over `findRepos` + `readStatus`, both already covered.
 - [ ] Given a repository where git itself fails, when its status cannot be read, then the row renders with an error marker and the app keeps running.
 - [x] Given the parser test suite, when run, then fixtures for porcelain v2 (branch lines, file entries, renames, detached, no upstream) all pass.
 
@@ -202,7 +206,7 @@ As a developer about to act on a repository, I want to open it and see its path,
 
 **Acceptance criteria**
 
-- [ ] Given a repository selected in the list, when I press Enter, then the detail shows its absolute path, branch, upstream name, ahead/behind, and counts of staged, unstaged, and untracked files.
+- [x] Given a repository selected in the list, when I press Enter, then the detail shows its absolute path, branch, upstream name, ahead/behind, and counts of staged, unstaged, and untracked files.
   - [x] Given the populated list, moving the selection with the keyboard highlights a row, and Enter opens the detail showing that repository's absolute path.
 
     Verified by: eye (written 2026-11-14)

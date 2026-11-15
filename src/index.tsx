@@ -10,8 +10,7 @@ import { loadConfig } from './config.ts'
 import { Detail } from './pages/Detail.tsx'
 import { Listing } from './pages/Listing.tsx'
 import { Loading } from './pages/Loading.tsx'
-import { findRepos } from './repo.ts'
-import { type RepoStatus, readStatuses } from './status.ts'
+import { type RepoStatus, scan } from './status.ts'
 
 type ViewStates = 'list' | 'detail' | 'loading'
 
@@ -41,13 +40,10 @@ function App(props: { renderer: CliRenderer }): ReactNode {
   useEffect(() => {
     loadConfig(path.join(os.homedir(), '.config', 'git-station', 'config.json'))
       .then((options) =>
-        findRepos(options, (repo) => {
-          setRepos((prev) => prev.concat(repo))
-        }),
+        scan(options, (repo) => setRepos((prev) => prev.concat(repo))),
       )
-      .then((paths) => readStatuses(paths))
-      .then((s) => {
-        setStatuses(s)
+      .then((result) => {
+        setStatuses(result.statuses)
         setView('list')
       })
   }, [])
