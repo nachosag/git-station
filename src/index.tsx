@@ -22,13 +22,13 @@ type ViewStates = 'list' | 'detail' | 'loading'
 
 function App(props: { renderer: CliRenderer }): ReactNode {
   const [view, setView] = useState<ViewStates>('loading')
-  const [repos, setRepos] = useState<string[]>([])
+  const [found, setFound] = useState(0)
   const [rows, setRows] = useState<RowView[]>([])
   const [details, setDetails] = useState<DetailView[]>([])
   const [selectedRow, setSelectedRow] = useState(0)
 
   const screens = {
-    loading: <Loading length={repos.length} />,
+    loading: <Loading length={found} />,
     list: (
       <Listing
         rows={rows}
@@ -41,13 +41,13 @@ function App(props: { renderer: CliRenderer }): ReactNode {
   useEffect(() => {
     loadConfig(path.join(os.homedir(), '.config', 'git-station', 'config.json'))
       .then((options) =>
-        scan(options, (repo) => setRepos((prev) => prev.concat(repo))),
+        scan(options, () => setFound((n) => n + 1)),
       )
       .then((result) => {
-        setRows(toRowViews(result.repos, result.statuses, result.errors))
+        setRows(toRowViews(result.repos, result.readable, result.unreadable))
         setDetails(
           result.repos.map((repo) =>
-            toDetailView(repo, result.statuses, result.errors),
+            toDetailView(repo, result.readable, result.unreadable),
           ),
         )
         setView('list')

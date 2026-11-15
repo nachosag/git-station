@@ -20,8 +20,8 @@ export type RepoStatus = {
 
 export type ScanResult = {
   repos: string[]
-  statuses: Map<string, RepoStatus>
-  errors: Map<string, string>
+  readable: Map<string, RepoStatus>
+  unreadable: Map<string, string>
 }
 
 export async function scan(
@@ -37,24 +37,24 @@ export async function scan(
 
   const settled = await Promise.all(pending)
 
-  const statuses = new Map<string, RepoStatus>()
-  const errors = new Map<string, string>()
+  const readable = new Map<string, RepoStatus>()
+  const unreadable = new Map<string, string>()
 
   for (const [index, result] of settled.entries()) {
     const repo = repos[index]!
 
     if (result.status === 'fulfilled') {
-      statuses.set(repo, result.value)
+      readable.set(repo, result.value)
     } else {
       const reason = result.reason
-      errors.set(
+      unreadable.set(
         repo,
         reason instanceof Error ? reason.message : String(reason),
       )
     }
   }
 
-  return { repos, statuses, errors }
+  return { repos, readable, unreadable }
 }
 
 // Attach the rejection handler while the walk runs: a git status that fails

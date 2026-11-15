@@ -1,3 +1,5 @@
+import path from 'path'
+
 import type { File, RepoStatus } from './status.ts'
 
 export type RowView = {
@@ -23,19 +25,19 @@ const BEHIND_PAD = ' '.repeat(Math.floor('behind'.length / 2))
 
 export function toRowViews(
   repos: string[],
-  statuses: Map<string, RepoStatus>,
-  errors: Map<string, string>,
+  readable: Map<string, RepoStatus>,
+  unreadable: Map<string, string>,
 ): RowView[] {
   return repos.map((repo) => {
-    const status = statuses.get(repo)
-    const name = repo.split('/').at(-1) ?? repo
+    const status = readable.get(repo)
+    const name = path.basename(repo)
 
     if (!status) {
       return {
         path: repo,
         name,
         dirty: '',
-        branch: `⚠ ${errors.get(repo) ?? 'unreadable'}`,
+        branch: `⚠ ${unreadable.get(repo) ?? 'unreadable'}`,
         ahead: `${AHEAD_PAD}${DASH}`,
         behind: `${BEHIND_PAD}${DASH}`,
       }
@@ -54,15 +56,15 @@ export function toRowViews(
 
 export function toDetailView(
   repo: string,
-  statuses: Map<string, RepoStatus>,
-  errors: Map<string, string>,
+  readable: Map<string, RepoStatus>,
+  unreadable: Map<string, string>,
 ): DetailView {
-  const status = statuses.get(repo)
+  const status = readable.get(repo)
 
   if (!status) {
     return {
       path: repo,
-      info: [`⚠ ${errors.get(repo) ?? 'unreadable'}`],
+      info: [`⚠ ${unreadable.get(repo) ?? 'unreadable'}`],
       staged: [],
       unstaged: [],
       untracked: [],

@@ -12,6 +12,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | US-002  | Discover every repository on the machine     | Done        |
 | IMP-001 | Simplify the directory walk in src/repo.ts   | Done        |
 | IMP-002 | Ship a Linux binary with a one-line install  | Not started |
+| IMP-004 | Tighten the status naming and path reading   | Done        |
 | US-003  | See the state of each repository at a glance | Done        |
 | US-004  | Filter the list by name                      | Not started |
 | US-005  | Inspect one repository in detail             | In progress |
@@ -137,7 +138,7 @@ As a developer with repositories scattered across my home directory, I want `gs`
 
 **Epic:** E1 · **Priority:** Must · **Size:** M · **Depends on:** US-002
 
-Closing questions: pending
+Closing questions: done
 
 **Story**
 As a developer scanning many repositories, I want each row to show the branch, a dirty indicator, and ahead/behind versus upstream, so that I can tell which repositories need attention without opening them.
@@ -446,3 +447,24 @@ Make `git-station` installable by someone who does not have bun: every release p
 - Verified 2026-11-12: `bun build --compile src/index.tsx` produces a 96 MB self-contained binary that runs from another directory, opentui's native library included.
 - Cross-compiling from Linux to another OS fails until that platform's opentui package is installed; CI builds on Linux instead.
 - `latest/download/<asset>` gives a stable URL, so the install line never changes between versions.
+
+### IMP-004: Tighten the status naming and path reading
+
+**Priority:** polish · **Size:** S · **Depends on:** US-003
+
+**Description**
+
+Three cleanups accepted when US-003 closed: the two maps returned by `scan` are named by outcome instead of by shape, the row name comes from `basename` instead of splitting the path by hand, and the loading counter in `App` is a number instead of an array of paths that nothing else reads.
+
+**Acceptance criteria**
+
+- [x] Given `scan`, when it returns, then the maps are `readable` (path → status) and `unreadable` (path → message), and `App`, the presenters and the tests use those names.
+- [x] Given a repository path, when the row name is built, then `basename` returns the last segment and the `?? repo` fallback is gone.
+- [x] Given the loading screen, then `App` counts the repositories found instead of collecting their paths.
+
+  Verified by: `bun run check` — the 19 tests pass unchanged after the rename (written 2026-11-15). Behavior is identical: the row and detail output are the same strings.
+
+**Notes**
+
+- `IMP-003` stays reserved for the list-scrolling proposal noted under US-005.
+

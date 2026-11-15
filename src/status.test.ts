@@ -108,8 +108,8 @@ describe('scan', () => {
       const result = await scan({ roots: [root], ignores: new Set() })
 
       expect(result.repos.toSorted()).toStrictEqual([good, broken].toSorted())
-      expect(result.statuses.get(good)).toBeDefined()
-      expect(result.errors.get(broken) ?? '').toMatch(
+      expect(result.readable.get(good)).toBeDefined()
+      expect(result.unreadable.get(broken) ?? '').toMatch(
         /repositorio|repository/iu,
       )
     } finally {

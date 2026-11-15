@@ -10,10 +10,10 @@ const ERROR =
 describe('presenters', () => {
   test('marks a broken repository with the git error', () => {
     const repos = ['/tmp']
-    const statuses = new Map<string, RepoStatus>()
-    const errors = new Map<string, string>().set('/tmp', ERROR)
+    const readable = new Map<string, RepoStatus>()
+    const unreadable = new Map<string, string>().set('/tmp', ERROR)
 
-    expect(toRowViews(repos, statuses, errors)).toStrictEqual([
+    expect(toRowViews(repos, readable, unreadable)).toStrictEqual([
       {
         path: '/tmp',
         name: 'tmp',
@@ -24,7 +24,7 @@ describe('presenters', () => {
       },
     ])
 
-    expect(toDetailView('/tmp', statuses, errors)).toStrictEqual({
+    expect(toDetailView('/tmp', readable, unreadable)).toStrictEqual({
       path: '/tmp',
       info: [`⚠ ${ERROR}`],
       staged: [],
@@ -47,13 +47,13 @@ describe('presenters', () => {
       ],
     }
     const repos = ['/home/me/git-station']
-    const statuses = new Map<string, RepoStatus>().set(
+    const readable = new Map<string, RepoStatus>().set(
       '/home/me/git-station',
       status,
     )
 
     expect(
-      toRowViews(repos, statuses, new Map<string, string>()),
+      toRowViews(repos, readable, new Map<string, string>()),
     ).toStrictEqual([
       {
         path: '/home/me/git-station',
@@ -66,7 +66,7 @@ describe('presenters', () => {
     ])
 
     expect(
-      toDetailView('/home/me/git-station', statuses, new Map<string, string>()),
+      toDetailView('/home/me/git-station', readable, new Map<string, string>()),
     ).toStrictEqual({
       path: '/home/me/git-station',
       info: [
