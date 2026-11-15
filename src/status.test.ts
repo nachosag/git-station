@@ -1,6 +1,9 @@
 import { describe, expect, test } from 'bun:test'
+import fs from 'fs/promises'
+import { tmpdir } from 'os'
+import path from 'path'
 
-import { parseStatus } from './status.ts'
+import { parseStatus, readStatus, scan } from './status.ts'
 
 describe('parseStatus', () => {
   test('reports the branch and ahead/behind from the status header', () => {
@@ -75,5 +78,42 @@ describe('parseStatus', () => {
       { path: 'src/both.ts', status: 'staged' },
       { path: 'src/both.ts', status: 'unstaged' },
     ])
+  })
+})
+
+describe('readStatus', () => {
+  test('throws the git error message when git fails', async () => {
+    const dir = await fs.mkdtemp(path.join(tmpdir(), 'gs-'))
+    try {
+      await expect(readStatus(dir)).rejects.toThrow(/repositorio|repository/iu)
+    } finally {
+      await fs.rm(dir, { recursive: true, force: true })
+    }
+  })
+})
+
+describe('scan', () => {
+  test('an unreadable directory does not break the listing', async () => {
+    const root = await fs.mkdtemp(path.join(tmpdir(), 'gs-'))
+    try {
+      const good = path.join(root, 'good')
+      const broken = path.join(root, 'broken')
+      await fs.mkdir(good, { recursive: true })
+      await fs.mkdir(path.join(broken, '.git'), { recursive: true })
+      await Bun.spawn(['git', 'init', good], {
+        stdout: 'ignore',
+        stderr: 'ignore',
+      }).exited
+
+      const result = await scan({ roots: [root], ignores: new Set() })
+
+      expect(result.repos.toSorted()).toStrictEqual([good, broken].toSorted())
+      expect(result.statuses.get(good)).toBeDefined()
+      expect(result.errors.get(broken) ?? '').toMatch(
+        /repositorio|repository/iu,
+      )
+    } finally {
+      await fs.rm(root, { recursive: true, force: true })
+    }
   })
 })

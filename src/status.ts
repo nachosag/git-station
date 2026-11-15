@@ -18,10 +18,16 @@ export type RepoStatus = {
   files: File[]
 }
 
+export type ScanResult = {
+  repos: string[]
+  statuses: Map<string, RepoStatus>
+  errors: Map<string, string>
+}
+
 export async function scan(
   options: ScanOptions,
   onFound?: (directory: string) => void,
-): Promise<{ repos: string[]; statuses: RepoStatus[] }> {
+): Promise<ScanResult> {
   const pending: Promise<RepoStatus>[] = []
 
   const repos = await findRepos(options, (directory) => {
@@ -29,24 +35,44 @@ export async function scan(
     onFound?.(directory)
   })
 
-  const statuses = await Promise.all(pending)
+  const settled = await Promise.allSettled(pending)
 
-  return {
-    repos,
-    statuses,
+  const statuses = new Map<string, RepoStatus>()
+  const errors = new Map<string, string>()
+
+  for (const [index, result] of settled.entries()) {
+    const repo = repos[index]!
+
+    if (result.status === 'fulfilled') {
+      statuses.set(repo, result.value)
+    } else {
+      const reason = result.reason
+      errors.set(
+        repo,
+        reason instanceof Error ? reason.message : String(reason),
+      )
+    }
   }
+
+  return { repos, statuses, errors }
 }
 
 export async function readStatus(repoPath: string): Promise<RepoStatus> {
-  const proc = Bun.spawn([
-    'git',
-    '-C',
-    repoPath,
-    'status',
-    '--porcelain=v2',
-    '--branch',
+  const process = Bun.spawn(
+    ['git', '-C', repoPath, 'status', '--porcelain=v2', '--branch'],
+    { stdout: 'pipe', stderr: 'pipe' },
+  )
+  const [status, stderr] = await Promise.all([
+    new Response(process.stdout).text(),
+    new Response(process.stderr).text(),
   ])
-  const status = await new Response(proc.stdout).text()
+  await process.exited
+
+  if (process.exitCode !== 0) {
+    throw new Error(
+      stderr.trim() || `git status exited with code ${process.exitCode}`,
+    )
+  }
 
   return parseStatus(status)
 }
@@ -138,3 +164,13 @@ function convert(value: string | undefined): Count {
   return value ? Number(value.slice(1)) : null
 }
 
+export function brokenStatus(message: string): RepoStatus {
+  return {
+    branch: `⚠ ${message}`,
+    upstream: null,
+    ahead: null,
+    behind: null,
+    dirty: false,
+    files: [],
+  }
+}

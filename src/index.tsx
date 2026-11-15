@@ -10,15 +10,21 @@ import { loadConfig } from './config.ts'
 import { Detail } from './pages/Detail.tsx'
 import { Listing } from './pages/Listing.tsx'
 import { Loading } from './pages/Loading.tsx'
-import { type RepoStatus, scan } from './status.ts'
+import { type RepoStatus, brokenStatus, scan } from './status.ts'
 
 type ViewStates = 'list' | 'detail' | 'loading'
 
 function App(props: { renderer: CliRenderer }): ReactNode {
   const [view, setView] = useState<ViewStates>('loading')
   const [repos, setRepos] = useState<string[]>([])
-  const [statuses, setStatuses] = useState<RepoStatus[]>([])
   const [selectedRepo, setSelectedRepo] = useState(0)
+  const [statusMap, setStatusMap] = useState<Map<string, RepoStatus>>(new Map())
+  const [errorMap, setErrorMap] = useState<Map<string, string>>(new Map())
+
+  const statuses = repos.map(
+    (repo) =>
+      statusMap.get(repo) ?? brokenStatus(errorMap.get(repo) ?? 'unreadable'),
+  )
 
   const screens = {
     loading: <Loading length={repos.length} />,
@@ -43,7 +49,8 @@ function App(props: { renderer: CliRenderer }): ReactNode {
         scan(options, (repo) => setRepos((prev) => prev.concat(repo))),
       )
       .then((result) => {
-        setStatuses(result.statuses)
+        setStatusMap(result.statuses)
+        setErrorMap(result.errors)
         setView('list')
       })
   }, [])
