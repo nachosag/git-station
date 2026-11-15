@@ -79,6 +79,17 @@ describe('parseStatus', () => {
       { path: 'src/both.ts', status: 'unstaged' },
     ])
   })
+
+  test('keep the original path of a renamed file', () => {
+    const input = [
+      '# branch.head main',
+      '2 R. N... 100644 100644 100644 5c1b149 5c1b149 R100 nuevo.txt\tviejo.txt',
+    ].join('\n')
+
+    expect(parseStatus(input).files).toStrictEqual([
+      { path: 'nuevo.txt', status: 'staged', oldPath: 'viejo.txt' },
+    ])
+  })
 })
 
 describe('readStatus', () => {

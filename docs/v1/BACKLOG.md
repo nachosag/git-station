@@ -234,7 +234,10 @@ As a developer about to act on a repository, I want to open it and see its path,
     Verified by: src/status.test.ts — `parseStatus` → 'counts one file per group: staged, unstaged and untracked', 'counts a file staged and modified in both groups' (written). Counts rendering: eye (written 2026-11-14 — group titles `staged (1)`, `unstaged (2)`, `untracked (3)` match `git status --porcelain=v2` on `/home/nachosag/vaults/college`).
 
     Decision (2026-11-14): the status reading returns the list of files with their group, and the counts are derived from that list — not three separate counters — so the header and the groups below cannot disagree.
-- [ ] Given a repository with staged, unstaged, and untracked changes, when the detail renders, then the files appear grouped as staged / unstaged / untracked, and a renamed file displays as `old -> new`.
+- [x] Given a repository with staged, unstaged, and untracked changes, when the detail renders, then the files appear grouped as staged / unstaged / untracked, and a renamed file displays as `old -> new`.
+
+  Verified by: src/status.test.ts — `parseStatus` → 'keeps the original path of a renamed file' (written); src/presenters.test.ts — `presenters` → 'shows a rename as old -> new' (written). Eye (written 2026-11-15 — `~/tmp/rename-demo` shows `staged (1)` with `viejo.txt -> nuevo.txt`, `unstaged (1)`, `untracked (1)`).
+
   - [x] Given the detail file list, when I press `j`/`k` or the arrows, then the list scrolls and the rest of the view stays put.
 
     Verified by: eye (written 2026-11-14 — `<scrollbox focused>` moves with `j`/`k`, arrows, PageUp/PageDown and Home/End; mouse wheel still works; confirmed on a repository with more files than lines and on a short terminal, 2026-11-15).

@@ -7,6 +7,7 @@ type Count = number | null
 export type File = {
   path: string
   status: 'staged' | 'unstaged' | 'untracked'
+  oldPath?: string
 }
 
 export type RepoStatus = {
@@ -122,10 +123,12 @@ function parseFiles(input: string[]): File[] {
     const fields = entry.split(' ')
     const [x, y] = fields[1] ?? ''
     const skip = SKIP[fields[0] ?? ''] ?? 8
-    const path = fields.slice(skip).join(' ').split('\t')[0] ?? ''
+    const paths = fields.slice(skip).join(' ').split('\t')
+    const path = paths[0] ?? ''
+    const oldPath = paths[1] ? { oldPath: paths[1] } : {}
 
-    if (x !== '.') files.push({ path, status: 'staged' })
-    if (y !== '.') files.push({ path, status: 'unstaged' })
+    if (x !== '.') files.push({ path, status: 'staged', ...oldPath })
+    if (y !== '.') files.push({ path, status: 'unstaged', ...oldPath })
   }
 
   return files

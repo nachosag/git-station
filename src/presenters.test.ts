@@ -80,4 +80,20 @@ describe('presenters', () => {
       untracked: ['\t ? notes.md'],
     })
   })
+
+  test('shows a rename as old -> new', () => {
+    const status: RepoStatus = {
+      branch: 'main',
+      upstream: null,
+      ahead: null,
+      behind: null,
+      dirty: true,
+      files: [{ path: 'nuevo.txt', status: 'staged', oldPath: 'viejo.txt' }],
+    }
+    const readable = new Map<string, RepoStatus>().set('/home/me/demo', status)
+
+    expect(
+      toDetailView('/home/me/demo', readable, new Map<string, string>()).staged,
+    ).toStrictEqual(['\t M viejo.txt -> nuevo.txt'])
+  })
 })

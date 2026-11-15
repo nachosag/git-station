@@ -90,5 +90,8 @@ function fileLines(status: RepoStatus, group: File['status']): string[] {
 
   return status.files
     .filter((file) => file.status === group)
-    .map((file) => `\t ${marker} ${file.path}`)
+    .map((file) => {
+      const name = file.oldPath ? `${file.oldPath} -> ${file.path}` : file.path
+      return `\t ${marker} ${name}`
+    })
 }
