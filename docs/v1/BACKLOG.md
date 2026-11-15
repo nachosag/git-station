@@ -171,8 +171,8 @@ As a developer scanning many repositories, I want each row to show the branch, a
     Verified by: `src/status.test.ts` — `readStatus` → 'throws the git error message when git fails' (written)
   - [x] `scan` switches to `Promise.allSettled` and returns the repositories in order plus two maps: path → status for readable ones, path → error message for broken ones; an unreadable directory does not lose its siblings.
     Verified by: `src/status.test.ts` — `scan` → an unreadable directory does not break the listing (written); walk mechanics stay covered by `src/repo.test.ts` (IMP-001)
-  - [ ] New pure presenters module (no UI): `RowView` and `DetailView` flatten display data; `RowView` shows `⚠ message` for broken repositories and ahead/behind as display strings.
-    Verified by: presenter unit tests (planned)
+  - [x] New pure presenters module (no UI): `RowView` and `DetailView` flatten display data; `RowView` shows `⚠ message` for broken repositories and ahead/behind as display strings.
+    Verified by: src/presenters.test.ts — 'marks a broken repository with the git error' (row `⚠` + detail message with empty groups); 'flattens a readable repository into info and three groups' (written)
   - [ ] `Row`, `Table` and `Detail` render flat view data with one `return` each; `App` stores what the presenters produce instead of `RepoStatus[]`.
     Verified by: eye — row shows the error marker and `Detail` renders without crashing on a broken repository
 
@@ -184,6 +184,7 @@ As a developer scanning many repositories, I want each row to show the branch, a
 **Notes / open questions**
 
 - SPECS.md D5: one `git status --porcelain=v2 --branch` call per repository is the single status source. Local refs only — no network in this story.
+- Fixed (2026-11-15): `scan` created every `readStatus` promise during the walk but attached the rejection handler only when `Promise.allSettled` ran at the end. A git that failed fast was an unhandled rejection, which failed `bun test` about one run in three ('an unreadable directory does not break the listing'). Each promise is now settled the moment it is created; the failure becomes data immediately, and the returned maps are unchanged.
 
 ### US-004: Filter the list by name
 
