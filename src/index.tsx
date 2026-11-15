@@ -10,37 +10,32 @@ import { loadConfig } from './config.ts'
 import { Detail } from './pages/Detail.tsx'
 import { Listing } from './pages/Listing.tsx'
 import { Loading } from './pages/Loading.tsx'
-import { type RepoStatus, brokenStatus, scan } from './status.ts'
+import {
+  type DetailView,
+  type RowView,
+  toDetailView,
+  toRowViews,
+} from './presenters.ts'
+import { scan } from './status.ts'
 
 type ViewStates = 'list' | 'detail' | 'loading'
 
 function App(props: { renderer: CliRenderer }): ReactNode {
   const [view, setView] = useState<ViewStates>('loading')
   const [repos, setRepos] = useState<string[]>([])
-  const [selectedRepo, setSelectedRepo] = useState(0)
-  const [statusMap, setStatusMap] = useState<Map<string, RepoStatus>>(new Map())
-  const [errorMap, setErrorMap] = useState<Map<string, string>>(new Map())
-
-  const statuses = repos.map(
-    (repo) =>
-      statusMap.get(repo) ?? brokenStatus(errorMap.get(repo) ?? 'unreadable'),
-  )
+  const [rows, setRows] = useState<RowView[]>([])
+  const [details, setDetails] = useState<DetailView[]>([])
+  const [selectedRow, setSelectedRow] = useState(0)
 
   const screens = {
     loading: <Loading length={repos.length} />,
     list: (
       <Listing
-        repos={repos}
-        statuses={statuses}
-        selectedRepo={selectedRepo}
+        rows={rows}
+        selectedRow={selectedRow}
       />
     ),
-    detail: (
-      <Detail
-        repo={repos[selectedRepo]!}
-        status={statuses[selectedRepo]!}
-      />
-    ),
+    detail: <Detail view={details[selectedRow]!} />,
   }
 
   useEffect(() => {
@@ -49,8 +44,12 @@ function App(props: { renderer: CliRenderer }): ReactNode {
         scan(options, (repo) => setRepos((prev) => prev.concat(repo))),
       )
       .then((result) => {
-        setStatusMap(result.statuses)
-        setErrorMap(result.errors)
+        setRows(toRowViews(result.repos, result.statuses, result.errors))
+        setDetails(
+          result.repos.map((repo) =>
+            toDetailView(repo, result.statuses, result.errors),
+          ),
+        )
         setView('list')
       })
   }, [])
@@ -59,13 +58,13 @@ function App(props: { renderer: CliRenderer }): ReactNode {
     const { renderer } = props
 
     if (key.name === 'q') renderer.destroy()
-    if (repos.length === 0) return
+    if (rows.length === 0) return
     if (key.name === 'return' && view === 'list') setView('detail')
     if (key.name === 'escape' && view === 'detail') setView('list')
     if (view === 'list' && (key.name === 'j' || key.name === 'down'))
-      setSelectedRepo((i) => Math.min(i + 1, repos.length - 1))
+      setSelectedRow((i) => Math.min(i + 1, rows.length - 1))
     if (view === 'list' && (key.name === 'k' || key.name === 'up'))
-      setSelectedRepo((i) => Math.max(i - 1, 0))
+      setSelectedRow((i) => Math.max(i - 1, 0))
   })
 
   return <box height='100%'>{screens[view]}</box>

@@ -12,7 +12,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | US-002  | Discover every repository on the machine     | Done        |
 | IMP-001 | Simplify the directory walk in src/repo.ts   | Done        |
 | IMP-002 | Ship a Linux binary with a one-line install  | Not started |
-| US-003  | See the state of each repository at a glance | In progress |
+| US-003  | See the state of each repository at a glance | Done        |
 | US-004  | Filter the list by name                      | Not started |
 | US-005  | Inspect one repository in detail             | In progress |
 | US-006  | Trust the ahead/behind I see                 | Not started |
@@ -137,6 +137,8 @@ As a developer with repositories scattered across my home directory, I want `gs`
 
 **Epic:** E1 · **Priority:** Must · **Size:** M · **Depends on:** US-002
 
+Closing questions: pending
+
 **Story**
 As a developer scanning many repositories, I want each row to show the branch, a dirty indicator, and ahead/behind versus upstream, so that I can tell which repositories need attention without opening them.
 
@@ -166,15 +168,15 @@ As a developer scanning many repositories, I want each row to show the branch, a
   Decision (2026-11-14): the list never shows half-filled rows. Overlapping the status reads with the walk is the only change; the UI stays on the loading screen until every status is in. SPECS.md M3 updated to match.
 
   Verified by: eye (written 2026-11-14). Measured with `scan()` on this machine: 23 repos, 23 statuses, first repo announced 15 ms after start, total 562 ms against 659 ms for the old scan-then-read sequence. Walk mechanics stay covered by `src/repo.test.ts`; `scan` itself is thin orchestration over `findRepos` + `readStatus`, both already covered.
-- [ ] Given a repository where git itself fails, when its status cannot be read, then the row renders with an error marker and the app keeps running.
+- [x] Given a repository where git itself fails, when its status cannot be read, then the row renders with an error marker and the app keeps running.
   - [x] `readStatus` rejects with git's stderr when its exit code is nonzero (e.g. a directory that is not a git repository).
     Verified by: `src/status.test.ts` — `readStatus` → 'throws the git error message when git fails' (written)
   - [x] `scan` switches to `Promise.allSettled` and returns the repositories in order plus two maps: path → status for readable ones, path → error message for broken ones; an unreadable directory does not lose its siblings.
     Verified by: `src/status.test.ts` — `scan` → an unreadable directory does not break the listing (written); walk mechanics stay covered by `src/repo.test.ts` (IMP-001)
   - [x] New pure presenters module (no UI): `RowView` and `DetailView` flatten display data; `RowView` shows `⚠ message` for broken repositories and ahead/behind as display strings.
     Verified by: src/presenters.test.ts — 'marks a broken repository with the git error' (row `⚠` + detail message with empty groups); 'flattens a readable repository into info and three groups' (written)
-  - [ ] `Row`, `Table` and `Detail` render flat view data with one `return` each; `App` stores what the presenters produce instead of `RepoStatus[]`.
-    Verified by: eye — row shows the error marker and `Detail` renders without crashing on a broken repository
+  - [x] `Row`, `Table` and `Detail` render flat view data with one `return` each; `App` stores what the presenters produce instead of `RepoStatus[]`.
+    Verified by: eye (written 2026-11-15 — headless render of both views plus `bun run dev`). The agreement also added `path` to `RowView` (row key and detail header) because oxlint forbids array indexes as keys.
 
   Design agreed (2026-11-14): `readStatus` keeps its `Promise<RepoStatus>` signature and throws with git's stderr when the exit code is nonzero (same channel as `JSON.parse` / `fs.readFile` — failure is not data). `scan` switches to `Promise.allSettled` and returns the repos in order plus two single-shape maps: path → status for readable repos, path → message for broken ones. A new presenters module (pure, no UI) is the only place in the codebase that asks "did the read succeed?": it walks the repos in order and produces flattened display data — `RowView` (dir, dirty, branch cell with `⚠ message` for broken repos, ahead/behind as display strings; the space-padding hack in `Row` moves here) and `DetailView` (flattened Info strings plus the three file groups; broken repo shows the `⚠` message and empty groups). All views become dumb: `Row`, `Table`, `Detail` render flat data with one return each, and `App` stops storing statuses — it stores what the presenters produce. `RepoStatus` no longer leaks into the UI layer. Rejected twice before and off the table: the tagged-union/`kind` retagging with router components and slots, and the `RepoStatus | { error: string }` return with `'error' in` narrowing in the views.
 - [x] Given the parser test suite, when run, then fixtures for porcelain v2 (branch lines, file entries, renames, detached, no upstream) all pass.

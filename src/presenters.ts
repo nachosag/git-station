@@ -1,6 +1,7 @@
 import type { File, RepoStatus } from './status.ts'
 
 export type RowView = {
+  path: string
   name: string
   dirty: string
   branch: string
@@ -9,6 +10,7 @@ export type RowView = {
 }
 
 export type DetailView = {
+  path: string
   info: string[]
   staged: string[]
   unstaged: string[]
@@ -30,6 +32,7 @@ export function toRowViews(
 
     if (!status) {
       return {
+        path: repo,
         name,
         dirty: '',
         branch: `⚠ ${errors.get(repo) ?? 'unreadable'}`,
@@ -39,6 +42,7 @@ export function toRowViews(
     }
 
     return {
+      path: repo,
       name,
       dirty: status.dirty ? ' (*)' : '',
       branch: status.branch,
@@ -57,6 +61,7 @@ export function toDetailView(
 
   if (!status) {
     return {
+      path: repo,
       info: [`⚠ ${errors.get(repo) ?? 'unreadable'}`],
       staged: [],
       unstaged: [],
@@ -65,6 +70,7 @@ export function toDetailView(
   }
 
   return {
+    path: repo,
     info: [
       `branch: ${status.branch}`,
       `upstream: ${status.upstream ?? DASH}`,

@@ -15,6 +15,7 @@ describe('presenters', () => {
 
     expect(toRowViews(repos, statuses, errors)).toStrictEqual([
       {
+        path: '/tmp',
         name: 'tmp',
         dirty: '',
         branch: `⚠ ${ERROR}`,
@@ -24,6 +25,7 @@ describe('presenters', () => {
     ])
 
     expect(toDetailView('/tmp', statuses, errors)).toStrictEqual({
+      path: '/tmp',
       info: [`⚠ ${ERROR}`],
       staged: [],
       unstaged: [],
@@ -54,6 +56,7 @@ describe('presenters', () => {
       toRowViews(repos, statuses, new Map<string, string>()),
     ).toStrictEqual([
       {
+        path: '/home/me/git-station',
         name: 'git-station',
         dirty: ' (*)',
         branch: 'main',
@@ -65,6 +68,7 @@ describe('presenters', () => {
     expect(
       toDetailView('/home/me/git-station', statuses, new Map<string, string>()),
     ).toStrictEqual({
+      path: '/home/me/git-station',
       info: [
         'branch: main',
         'upstream: origin/main',

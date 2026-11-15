@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import type { RepoStatus } from '../status.ts'
+import type { RowView } from '../presenters.ts'
 
 import { EmptyState } from '../components/EmptyState.tsx'
 
@@ -13,19 +13,17 @@ const WIDTHS = {
 } as const
 
 export function Listing(props: {
-  repos: string[]
-  statuses: RepoStatus[]
-  selectedRepo: number
+  rows: RowView[]
+  selectedRow: number
 }): ReactNode {
   return (
     <box>
-      {props.repos.length === 0 ? (
+      {props.rows.length === 0 ? (
         <EmptyState />
       ) : (
         <Table
-          repos={props.repos}
-          statuses={props.statuses}
-          selectedRepo={props.selectedRepo}
+          rows={props.rows}
+          selectedRow={props.selectedRow}
         />
       )}
 
@@ -35,23 +33,18 @@ export function Listing(props: {
   )
 }
 
-function Table(props: {
-  repos: string[]
-  statuses: RepoStatus[]
-  selectedRepo: number
-}): ReactNode {
+function Table(props: { rows: RowView[]; selectedRow: number }): ReactNode {
   return (
     <box
       width='100%'
       alignItems='center'>
       <box width='60%'>
         <Header />
-        {props.repos.map((repo, i) => (
+        {props.rows.map((row, i) => (
           <Row
-            key={repo}
-            repo={repo}
-            status={props.statuses[i]!}
-            isSelected={i === props.selectedRepo}
+            key={row.path}
+            view={row}
+            isSelected={i === props.selectedRow}
           />
         ))}
       </box>
@@ -91,29 +84,16 @@ function Header(): ReactNode {
   )
 }
 
-function Row(props: {
-  repo: string
-  status: RepoStatus
-  isSelected: boolean
-}): ReactNode {
-  const dir = props.repo.split('/').at(-1)
-  const branch = props.status.branch
-  const dirty = props.status.dirty ? ' (*)' : ''
-  const ahead = props.status.ahead
-    ? `↑ ${props.status.ahead}`
-    : ' '.repeat(Math.floor('ahead'.length / 2)).concat('—')
-  const behind = props.status.behind
-    ? `↓ ${props.status.behind}`
-    : ' '.repeat(Math.floor('behind'.length / 2)).concat('—')
+function Row(props: { view: RowView; isSelected: boolean }): ReactNode {
   return (
     <box
       flexDirection='row'
       {...(props.isSelected ? { backgroundColor: 'gray' } : {})}>
-      <text width={WIDTHS.repo}>{dir}</text>
-      <text width={WIDTHS.dirty}>{dirty}</text>
-      <text width={WIDTHS.branch}>{branch}</text>
-      <text width={WIDTHS.ahead}>{ahead}</text>
-      <text width={WIDTHS.behind}>{behind}</text>
+      <text width={WIDTHS.repo}>{props.view.name}</text>
+      <text width={WIDTHS.dirty}>{props.view.dirty}</text>
+      <text width={WIDTHS.branch}>{props.view.branch}</text>
+      <text width={WIDTHS.ahead}>{props.view.ahead}</text>
+      <text width={WIDTHS.behind}>{props.view.behind}</text>
     </box>
   )
 }

@@ -174,14 +174,3 @@ function parseAheadAndBehind(lines: string[]): [Count, Count] {
 function convert(value: string | undefined): Count {
   return value ? Number(value.slice(1)) : null
 }
-
-export function brokenStatus(message: string): RepoStatus {
-  return {
-    branch: `⚠ ${message}`,
-    upstream: null,
-    ahead: null,
-    behind: null,
-    dirty: false,
-    files: [],
-  }
-}
