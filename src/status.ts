@@ -28,14 +28,14 @@ export async function scan(
   options: ScanOptions,
   onFound?: (directory: string) => void,
 ): Promise<ScanResult> {
-  const pending: Promise<RepoStatus>[] = []
+  const pending: Promise<PromiseSettledResult<RepoStatus>>[] = []
 
   const repos = await findRepos(options, (directory) => {
-    pending.push(readStatus(directory))
+    pending.push(settle(readStatus(directory)))
     onFound?.(directory)
   })
 
-  const settled = await Promise.allSettled(pending)
+  const settled = await Promise.all(pending)
 
   const statuses = new Map<string, RepoStatus>()
   const errors = new Map<string, string>()
@@ -55,6 +55,17 @@ export async function scan(
   }
 
   return { repos, statuses, errors }
+}
+
+// Attach the rejection handler while the walk runs: a git status that fails
+// early would otherwise sit as an unhandled rejection until Promise.all settles.
+function settle(
+  promise: Promise<RepoStatus>,
+): Promise<PromiseSettledResult<RepoStatus>> {
+  return promise.then(
+    (value) => ({ status: 'fulfilled', value }),
+    (reason: unknown) => ({ status: 'rejected', reason }),
+  )
 }
 
 export async function readStatus(repoPath: string): Promise<RepoStatus> {
