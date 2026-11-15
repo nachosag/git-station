@@ -167,6 +167,10 @@ As a developer scanning many repositories, I want each row to show the branch, a
 
   Verified by: eye (written 2026-11-14). Measured with `scan()` on this machine: 23 repos, 23 statuses, first repo announced 15 ms after start, total 562 ms against 659 ms for the old scan-then-read sequence. Walk mechanics stay covered by `src/repo.test.ts`; `scan` itself is thin orchestration over `findRepos` + `readStatus`, both already covered.
 - [ ] Given a repository where git itself fails, when its status cannot be read, then the row renders with an error marker and the app keeps running.
+
+  Verified by: src/status.test.ts — `readStatus` → 'reports an error instead of a status when git fails' (planned); error marker in the row: eye (planned)
+
+  Design open (2026-11-14): the first approach — union retagged with `kind`/`message`, a `RepoRow` router choosing between `StatusRow` and `UnreadableRow`, and `Detail` as a `Frame` with `Inspect`/`Unreadable` slots — was discarded as unreadable before committing and reverted from the tree. What survives: the removal of the unused `readStatuses` helper. Agreed but to be re-written: `readStatus` capturing stderr and checking the exit code to detect git's failure. Still open: the view-side design (how `Listing` and `Detail` render the error) — to be revisited in a fresh conversation; the tagged-union indirection is off the table.
 - [x] Given the parser test suite, when run, then fixtures for porcelain v2 (branch lines, file entries, renames, detached, no upstream) all pass.
 
   Verified by: src/status.test.ts — `parseStatus` fixtures (written)

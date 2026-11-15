@@ -138,6 +138,3 @@ function convert(value: string | undefined): Count {
   return value ? Number(value.slice(1)) : null
 }
 
-export function readStatuses(paths: string[]): Promise<RepoStatus[]> {
-  return Promise.all(paths.map((p) => readStatus(p)))
-}
