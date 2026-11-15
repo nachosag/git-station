@@ -235,9 +235,9 @@ As a developer about to act on a repository, I want to open it and see its path,
 
     Decision (2026-11-14): the status reading returns the list of files with their group, and the counts are derived from that list — not three separate counters — so the header and the groups below cannot disagree.
 - [ ] Given a repository with staged, unstaged, and untracked changes, when the detail renders, then the files appear grouped as staged / unstaged / untracked, and a renamed file displays as `old -> new`.
-  - [ ] Given the detail file list, when I press `j`/`k` or the arrows, then the list scrolls and the rest of the view stays put.
+  - [x] Given the detail file list, when I press `j`/`k` or the arrows, then the list scrolls and the rest of the view stays put.
 
-    Verified by: eye (written 2026-11-14 — `<scrollbox focused>` moves with `j`/`k`, arrows, PageUp/PageDown and Home/End; mouse wheel still works).
+    Verified by: eye (written 2026-11-14 — `<scrollbox focused>` moves with `j`/`k`, arrows, PageUp/PageDown and Home/End; mouse wheel still works; confirmed on a repository with more files than lines and on a short terminal, 2026-11-15).
 
     Decision (2026-11-14): keyboard scroll comes from the scrollbox's own focus handling instead of a `useKeyboard` handler calling `scrollBy`. It costs no code and brings paging keys for free; US-007 replaces it anyway when `j`/`k` has to move the file selection.
 - [ ] Given a clean repository, when the detail renders, then a clean-state message shows instead of empty groups.
