@@ -22,8 +22,8 @@ export function Detail(props: { view: DetailView }): ReactNode {
         <Info lines={props.view.info} />
         <Groups view={props.view} />
       </box>
-      <text>Esc: back</text>
-      <text>q: quit</text>
+      <text>Back: esc</text>
+      <text>Quit: q</text>
     </box>
   )
 }

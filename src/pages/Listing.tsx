@@ -1,8 +1,6 @@
-import type { ReactNode } from 'react'
+import { type ReactNode } from 'react'
 
 import type { RowView } from '../presenters.ts'
-
-import { EmptyState } from '../components/EmptyState.tsx'
 
 const WIDTHS = {
   repo: '35%',
@@ -15,20 +13,31 @@ const WIDTHS = {
 export function Listing(props: {
   rows: RowView[]
   selectedRow: number
+  input: string
+  isSearching: boolean
+  onInput: (value: string) => void
 }): ReactNode {
   return (
     <box>
+      <input
+        value={props.input}
+        onInput={props.onInput}
+        focused={props.isSearching}></input>
       {props.rows.length === 0 ? (
-        <EmptyState />
+        <text>
+          {props.input
+            ? `No repositories match "${props.input}"`
+            : 'No repositories were found - create one or check your config'}
+        </text>
       ) : (
         <Table
           rows={props.rows}
           selectedRow={props.selectedRow}
         />
       )}
-
-      <text>Enter: open</text>
-      <text>q: quit</text>
+      <text>{props.input === '' ? 'Search: /' : 'Clear filter: esc'}</text>
+      <text>Open: enter</text>
+      <text>Quit: q</text>
     </box>
   )
 }

@@ -2,7 +2,12 @@ import { describe, expect, test } from 'bun:test'
 
 import type { RepoStatus } from './status.ts'
 
-import { toDetailView, toRowViews } from './presenters.ts'
+import {
+  type RowView,
+  filterRows,
+  toDetailView,
+  toRowViews,
+} from './presenters.ts'
 
 const ERROR =
   'fatal: no es un repositorio git (ni ninguno de los directorios superiores): .git'
@@ -124,5 +129,52 @@ describe('presenters', () => {
       unstaged: [],
       untracked: [],
     })
+  })
+})
+
+describe('filterRows', () => {
+  test('ignores case and matches any part of the name', () => {
+    const rows: RowView[] = [
+      {
+        ahead: '',
+        behind: '',
+        branch: '',
+        dirty: '',
+        name: 'college',
+        path: '',
+      },
+      {
+        ahead: '',
+        behind: '',
+        branch: '',
+        dirty: '',
+        name: 'something-else',
+        path: '',
+      },
+    ]
+
+    expect(filterRows('COLL', rows)).toStrictEqual(rows.slice(0, 1))
+  })
+  test('returns every row then the query is empty', () => {
+    const rows: RowView[] = [
+      {
+        ahead: '',
+        behind: '',
+        branch: '',
+        dirty: '',
+        name: 'college',
+        path: '',
+      },
+      {
+        ahead: '',
+        behind: '',
+        branch: '',
+        dirty: '',
+        name: 'something-else',
+        path: '',
+      },
+    ]
+
+    expect(filterRows('', rows)).toStrictEqual(rows)
   })
 })

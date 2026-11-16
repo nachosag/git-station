@@ -15,7 +15,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | IMP-004 | Tighten the status naming and path reading   | Done        |
 | IMP-005 | Compute the detail view only when it opens   | Done        |
 | US-003  | See the state of each repository at a glance | Done        |
-| US-004  | Filter the list by name                      | Not started |
+| US-004  | Filter the list by name                      | Done        |
 | US-005  | Inspect one repository in detail             | Done        |
 | US-006  | Trust the ahead/behind I see                 | Not started |
 | US-007  | Stage and unstage files                      | Not started |
@@ -43,7 +43,7 @@ Tracking rules:
 - Assumption: criteria that say "an external `git status` / `git log` confirms" are verified from a second terminal — git itself is the oracle, since gs wraps it.
 - Assumption: ahead/behind shown anywhere reflects local refs (last fetched state); only US-006 introduces network.
 - Resolved: the binary will be named `git-station`, not `gs` — the ghostscript collision on `/usr/bin/gs` is avoided entirely. The `bin` entry in package.json should use that name.
-- Open question: US-004 (filter) is Could — confirm whether it ships in v1 or moves to v2.
+- Resolved (2026-11-15): US-004 (filter) ships in v1 — the user confirmed it stays. Priority in the backlog stays Could, but it is done before US-006.
 
 ## Out of scope
 
@@ -130,6 +130,8 @@ As a developer with repositories scattered across my home directory, I want `gs`
 
   Verified by: eye (chosen 2026-11-11: dedicated `EmptyState` component)
 
+  Reversed (2026-11-16): the component is gone — `src/components/EmptyState.tsx` was a five-line `<text>` with one caller, so US-004 needed the same place to show a second message and deleting it beat adding a prop. The empty state is now a `<text>` inside `Listing`.
+
 **Notes / open questions**
 
 - SPECS.md §Discovery (D1): prune list, config format, and `.git` as a file counting as a repository. Walker mechanics are unit-tested with temporary fixtures.
@@ -192,6 +194,8 @@ As a developer scanning many repositories, I want each row to show the branch, a
 
 ### US-004: Filter the list by name
 
+Closing questions: pending
+
 **Epic:** E1 · **Priority:** Could · **Size:** S · **Depends on:** US-003
 
 **Story**
@@ -199,10 +203,29 @@ As a developer with dozens of repositories, I want to narrow the list by typing 
 
 **Acceptance criteria**
 
-- [ ] Given the populated list, when I press `/` and type part of a repository name, then only matching rows remain (case-insensitive).
-- [ ] Given a filter whose query matches nothing, then an explicit no-matches state renders instead of a blank screen.
-- [ ] Given an active filter, when I clear the query, then the full list returns.
-- [ ] Given an active filter with results, when I press Enter, then the detail opens for the selected result.
+- [x] Given the populated list, when I press `/` and type part of a repository name, then only matching rows remain (case-insensitive).
+
+  Verified by: src/presenters.test.ts — `filterRows` → 'ignores case and matches any part of the name', 'returns every row when the query is empty' (written 2026-11-16). Eye (written 2026-11-16 — `bun run dev`, `/` then `coll`, the list narrows and typing does not move the selection).
+
+  Approach chosen (2026-11-15): the filtered list is derived during render from the query state — no second copy of the rows in state, so clearing the query cannot leave a stale list. The rule itself lives in `filterRows` (`src/presenters.ts`), so it is testable.
+- [x] Given a filter whose query matches nothing, then an explicit no-matches state renders instead of a blank screen.
+
+  Verified by: eye (written 2026-11-16 — `zzz` shows `No repositories match "zzz"`, and with no query the "No repositories were found" text still shows).
+
+  Decision (2026-11-16): the message is a `<text>` with a ternary inside `Listing`, replacing the deleted `EmptyState` component.
+- [x] Given an active filter, when I clear the query, then the full list returns.
+
+  Verified by: eye (written 2026-11-16 — backspace to empty and `Esc` both bring every row back).
+- [x] Given an active filter, when I come back to the list from the detail, then the query is still visible in the list and a hint says which key clears it, and `Esc` on the list clears the filter.
+
+  Verified by: eye (written 2026-11-16 — `coll` → Enter → Esc shows the field still holding `coll` and the hint `Clear filter: esc`; Esc then brings every row back).
+
+  Decision (2026-11-16): the query is shown once, in the search field itself, with `value={props.input}` so it survives the detail view unmounting the list. A separate `filter: …` line was drawn first and removed: the field already renders its text unfocused, so the line repeated it. The clear hint replaces the `Search: /` hint line while a filter is active. Written into SPECS.md §States and the keyboard map before the code.
+- [x] Given an active filter with results, when I press Enter, then the detail opens for the selected result.
+
+  Verified by: eye (written 2026-11-16 — `coll` → Enter → detail of `college`; Esc from the detail returns to the still-filtered list). Done together with criterion 1 because the filter was not usable without it.
+
+  Decision (2026-11-16): the Enter branch inside the searching guard also clears `isSearching`, so the detail does not open with the search field still focused (which would swallow `j`/`k`). It is guarded by `visibleRows.length > 0`: with no matches `currentRow` is -1 and `screens.detail` would render `null` — a blank screen.
 
 **Notes / open questions**
 
@@ -432,7 +455,7 @@ As a developer with many local repositories, I want to delete a repository direc
 | US-001 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Absorbed bootstrap and `bin` entry as the walking skeleton               |
 | US-002 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | none                                                                     |
 | US-003 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Split row status (list) from file detail (US-005)                        |
-| US-004 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Kept as Could pending v1/v2 confirmation                                 |
+| US-004 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Could priority, confirmed to ship in v1 (2026-11-15)                     |
 | US-005 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Read-only inspection split from staging                                  |
 | US-006 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Implicit fetch-on-open split from on-demand fetch                        |
 | US-007 | ✔   | ✔   | ✔   | ✔   | ✔   | ✔   | Stage/unstage kept as one toggle capability                              |
@@ -481,6 +504,7 @@ Make `git-station` installable by someone who does not have bun: every release p
 
 **Notes / open questions**
 
+- Decision (2026-11-15): deferred to the end of the backlog. The user wants the release work — CI, tag, binary, README install line — after every other story is done, so this improvement goes last instead of before the next story's first step.
 - Verified 2026-11-12: `bun build --compile src/index.tsx` produces a 96 MB self-contained binary that runs from another directory, opentui's native library included.
 - Cross-compiling from Linux to another OS fails until that platform's opentui package is installed; CI builds on Linux instead.
 - `latest/download/<asset>` gives a stable URL, so the install line never changes between versions.

@@ -98,3 +98,9 @@ function fileLines(status: RepoStatus, group: File['status']): string[] {
       return `\t ${marker} ${name}`
     })
 }
+
+export function filterRows(query: string, rows: RowView[]): RowView[] {
+  return query
+    ? rows.filter((row) => row.name.toLowerCase().includes(query.toLowerCase()))
+    : rows
+}
