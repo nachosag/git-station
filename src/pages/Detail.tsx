@@ -2,6 +2,8 @@ import type { ReactNode } from 'react'
 
 import type { DetailView } from '../presenters.ts'
 
+import { HintBar } from '../components/HintBar.tsx'
+
 export function Detail(props: { view: DetailView }): ReactNode {
   return (
     <box
@@ -22,8 +24,12 @@ export function Detail(props: { view: DetailView }): ReactNode {
         <Info lines={props.view.info} />
         <Groups view={props.view} />
       </box>
-      <text>Back: esc</text>
-      <text>Quit: q</text>
+      <HintBar
+        hints={[
+          { key: 'esc', action: 'Back' },
+          { key: 'q', action: 'Quit' },
+        ]}
+      />
     </box>
   )
 }

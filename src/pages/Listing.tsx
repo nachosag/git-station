@@ -2,6 +2,8 @@ import { type ReactNode } from 'react'
 
 import type { RowView } from '../presenters.ts'
 
+import { HintBar } from '../components/HintBar.tsx'
+
 const WIDTHS = {
   repo: '35%',
   dirty: '10%',
@@ -17,6 +19,11 @@ export function Listing(props: {
   isSearching: boolean
   onInput: (value: string) => void
 }): ReactNode {
+  const hints = [
+    { key: 'enter', action: 'Open' },
+    { key: 'q', action: 'Quit' },
+  ]
+
   return (
     <box>
       <input
@@ -35,9 +42,11 @@ export function Listing(props: {
           selectedRow={props.selectedRow}
         />
       )}
-      <text>{props.query === '' ? 'Search: /' : 'Clear filter: esc'}</text>
-      <text>Open: enter</text>
-      <text>Quit: q</text>
+      {props.query === '' ? (
+        <HintBar hints={[{ key: '/', action: 'Search' }, ...hints]} />
+      ) : (
+        <HintBar hints={[{ key: 'esc', action: 'Clear filter' }, ...hints]} />
+      )}
     </box>
   )
 }

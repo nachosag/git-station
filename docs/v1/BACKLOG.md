@@ -546,9 +546,9 @@ The views have grown by accretion: `Listing` renders the search field, the no-ma
 - [x] Given `App` and `Listing`, then the search text is named `query` everywhere (state, setter and prop).
 
   Verified by: `bun run check` green (24 tests unchanged) and eye (written 2026-11-16). `query`/`setQuery` in `App`, `query` prop in `Listing`; `onInput` keeps its name because it mirrors the field's event.
-- [ ] Given the key hints at the bottom of both views, then they come from one component, and changing a view's hints touches one place.
+- [x] Given the key hints at the bottom of both views, then they come from one component, and changing a view's hints touches one place.
 
-  Verified by: eye (planned 2026-11-16).
+  Verified by: eye (written 2026-11-16 — `HintBar` takes `hints: { key, action }[]` and renders one `<text>` per hint; `Listing` keeps Open/Quit in one array plus a conditional first hint, `Detail` keeps Back/Quit; all five lines render with the same text and order as before).
 - [ ] Given the list table and the detail file groups, then both render through the same row primitive and the column sizes are declared once.
 - [ ] Given the search field and its clear hint, then they are one component that takes `query`, `searching` and the change handler.
 - [ ] Given both views, then behavior is unchanged: list selection, filtering, no-matches state, detail header, groups and scroll, all checked by eye.
