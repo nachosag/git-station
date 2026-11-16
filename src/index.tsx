@@ -10,13 +10,8 @@ import { loadConfig } from './config.ts'
 import { Detail } from './pages/Detail.tsx'
 import { Listing } from './pages/Listing.tsx'
 import { Loading } from './pages/Loading.tsx'
-import {
-  type DetailView,
-  type RowView,
-  toDetailView,
-  toRowViews,
-} from './presenters.ts'
-import { scan } from './status.ts'
+import { type RowView, toDetailView, toRowViews } from './presenters.ts'
+import { type RepoStatus, scan } from './status.ts'
 
 type ViewStates = 'list' | 'detail' | 'loading'
 
@@ -24,8 +19,9 @@ function App(props: { renderer: CliRenderer }): ReactNode {
   const [view, setView] = useState<ViewStates>('loading')
   const [found, setFound] = useState(0)
   const [rows, setRows] = useState<RowView[]>([])
-  const [details, setDetails] = useState<DetailView[]>([])
   const [selectedRow, setSelectedRow] = useState(0)
+  const [readable, setReadable] = useState(new Map<string, RepoStatus>())
+  const [unreadable, setUnreadable] = useState(new Map<string, string>())
 
   const screens = {
     loading: <Loading length={found} />,
@@ -35,21 +31,20 @@ function App(props: { renderer: CliRenderer }): ReactNode {
         selectedRow={selectedRow}
       />
     ),
-    detail: <Detail view={details[selectedRow]!} />,
+    detail: rows[selectedRow] ? (
+      <Detail
+        view={toDetailView(rows[selectedRow].path, readable, unreadable)}
+      />
+    ) : null,
   }
 
   useEffect(() => {
     loadConfig(path.join(os.homedir(), '.config', 'git-station', 'config.json'))
-      .then((options) =>
-        scan(options, () => setFound((n) => n + 1)),
-      )
+      .then((options) => scan(options, () => setFound((n) => n + 1)))
       .then((result) => {
+        setReadable(result.readable)
+        setUnreadable(result.unreadable)
         setRows(toRowViews(result.repos, result.readable, result.unreadable))
-        setDetails(
-          result.repos.map((repo) =>
-            toDetailView(repo, result.readable, result.unreadable),
-          ),
-        )
         setView('list')
       })
   }, [])

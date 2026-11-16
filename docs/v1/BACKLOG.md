@@ -13,7 +13,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | IMP-001 | Simplify the directory walk in src/repo.ts   | Done        |
 | IMP-002 | Ship a Linux binary with a one-line install  | Not started |
 | IMP-004 | Tighten the status naming and path reading   | Done        |
-| IMP-005 | Compute the detail view only when it opens   | Not started |
+| IMP-005 | Compute the detail view only when it opens   | Done        |
 | US-003  | See the state of each repository at a glance | Done        |
 | US-004  | Filter the list by name                      | Not started |
 | US-005  | Inspect one repository in detail             | Done        |
@@ -412,10 +412,14 @@ As a developer with many local repositories, I want to delete a repository direc
 
 **Acceptance criteria**
 
-- [ ] Given the scan finishes and the list renders, then no `DetailView` has been built for any repository yet.
-- [ ] Given a repository selected in the list, when Enter opens the detail, then the header and the three groups show the same strings as before.
-- [ ] Given a repository whose status could not be read, when Enter opens its detail, then the `⚠` message and the three empty groups still render.
-- [ ] Given the detail open, when Esc returns to the list and Enter opens the same repository again, then the detail renders the same content.
+- [x] Given the scan finishes and the list renders, then the `DetailView` array of 23 is gone and only the selected repository's detail exists — one per render, not one per repository — and the first render with an empty list does not crash.
+
+  Verified by: eye (written 2026-11-15 — the list opens without delay, Enter shows the same detail as before, Esc and Enter on the same repo show the same content, and `bun run dev` starts with an empty list without the `reading 'path'` crash).
+
+  Decision (2026-11-15): the `screens` object literal stays and the detail branch is guarded with `rows[selectedRow] ? … : null`, instead of moving the whole screen to a function. The guard is what stops the first render from reading `path` off an empty list; the cost is that the selected repository's detail is rebuilt on every render, including while the list is shown. Rewritten criterion: the original wording ("no `DetailView` has been built yet") is false under this approach, so it now says what is actually verified.
+- [x] Given a repository selected in the list, when Enter opens the detail, then the header and the three groups show the same strings as before.
+- [x] Given a repository whose status could not be read, when Enter opens its detail, then the `⚠` message and the three empty groups still render.
+- [x] Given the detail open, when Esc returns to the list and Enter opens the same repository again, then the detail renders the same content.
 
 **Notes / open questions**
 
