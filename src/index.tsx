@@ -27,9 +27,9 @@ function App(props: { renderer: CliRenderer }): ReactNode {
   const [selectedRow, setSelectedRow] = useState(0)
   const [readable, setReadable] = useState(new Map<string, RepoStatus>())
   const [unreadable, setUnreadable] = useState(new Map<string, string>())
-  const [input, setInput] = useState('')
+  const [query, setQuery] = useState('')
   const [isSearching, setIsSearching] = useState(false)
-  const visibleRows = filterRows(input, rows)
+  const visibleRows = filterRows(query, rows)
   const currentRow = Math.min(selectedRow, visibleRows.length - 1)
 
   const screens = {
@@ -38,9 +38,9 @@ function App(props: { renderer: CliRenderer }): ReactNode {
       <Listing
         rows={visibleRows}
         selectedRow={currentRow}
-        input={input}
+        query={query}
         isSearching={isSearching}
-        onInput={setInput}
+        onInput={setQuery}
       />
     ),
     detail: visibleRows[currentRow] ? (
@@ -67,7 +67,7 @@ function App(props: { renderer: CliRenderer }): ReactNode {
     if (isSearching) {
       if (key.name === 'escape') {
         setIsSearching(false)
-        setInput('')
+        setQuery('')
       }
       if (key.name === 'return' && visibleRows.length > 0) {
         setIsSearching(false)
@@ -79,7 +79,7 @@ function App(props: { renderer: CliRenderer }): ReactNode {
     if (key.name === '/') setIsSearching(true)
     if (key.name === 'return' && view === 'list') setView('detail')
     if (key.name === 'escape' && view === 'detail') setView('list')
-    if (key.name === 'escape' && view === 'list') setInput('')
+    if (key.name === 'escape' && view === 'list') setQuery('')
     if (view === 'list' && (key.name === 'j' || key.name === 'down'))
       setSelectedRow((i) => Math.min(i + 1, visibleRows.length - 1))
     if (view === 'list' && (key.name === 'k' || key.name === 'up'))

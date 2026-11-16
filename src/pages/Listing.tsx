@@ -13,20 +13,20 @@ const WIDTHS = {
 export function Listing(props: {
   rows: RowView[]
   selectedRow: number
-  input: string
+  query: string
   isSearching: boolean
   onInput: (value: string) => void
 }): ReactNode {
   return (
     <box>
       <input
-        value={props.input}
+        value={props.query}
         onInput={props.onInput}
         focused={props.isSearching}></input>
       {props.rows.length === 0 ? (
         <text>
-          {props.input
-            ? `No repositories match "${props.input}"`
+          {props.query
+            ? `No repositories match "${props.query}"`
             : 'No repositories were found - create one or check your config'}
         </text>
       ) : (
@@ -35,7 +35,7 @@ export function Listing(props: {
           selectedRow={props.selectedRow}
         />
       )}
-      <text>{props.input === '' ? 'Search: /' : 'Clear filter: esc'}</text>
+      <text>{props.query === '' ? 'Search: /' : 'Clear filter: esc'}</text>
       <text>Open: enter</text>
       <text>Quit: q</text>
     </box>

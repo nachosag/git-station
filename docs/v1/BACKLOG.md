@@ -14,6 +14,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | IMP-002 | Ship a Linux binary with a one-line install  | Not started |
 | IMP-004 | Tighten the status naming and path reading   | Done        |
 | IMP-005 | Compute the detail view only when it opens   | Done        |
+| IMP-006 | Componentize the UI layer                    | In progress |
 | US-003  | See the state of each repository at a glance | Done        |
 | US-004  | Filter the list by name                      | Done        |
 | US-005  | Inspect one repository in detail             | Done        |
@@ -194,7 +195,9 @@ As a developer scanning many repositories, I want each row to show the branch, a
 
 ### US-004: Filter the list by name
 
-Closing questions: pending
+Closing questions: done
+
+Chosen at close (2026-11-16): proposal 4 (rename `input` → `query`) done as the first step of `IMP-006`, and the full UI componentization as `IMP-006`, which goes before US-006. Proposals 1 (split the key handler) and 3 (headless key test) were not taken; 3 is recorded under IMP-006 to revisit after the pass.
 
 **Epic:** E1 · **Priority:** Could · **Size:** S · **Depends on:** US-003
 
@@ -528,4 +531,27 @@ Three cleanups accepted when US-003 closed: the two maps returned by `scan` are 
 **Notes**
 
 - `IMP-003` stays reserved for the list-scrolling proposal noted under US-005.
+
+### IMP-006: Componentize the UI layer
+
+**Priority:** polish (before US-006) · **Size:** M · **Depends on:** US-004, US-005
+
+**Description**
+
+The views have grown by accretion: `Listing` renders the search field, the no-matches message, the table, and three hint lines in one `return`; `Detail` repeats the same `<text>` hint pattern; the list table and the detail file groups are two unrelated renderings of the same idea. Before US-006 to US-011 add fetch, pull, push, stage and commit keys, split the repeated visual elements into components so each screen composes them instead of re-implementing them. Scope: structure only — what the screens show does not change.
+
+**Acceptance criteria**
+
+- [x] Given `App` and `Listing`, then the search text is named `query` everywhere (state, setter and prop).
+
+  Verified by: `bun run check` green (24 tests unchanged) and eye (written 2026-11-16). `query`/`setQuery` in `App`, `query` prop in `Listing`; `onInput` keeps its name because it mirrors the field's event.
+- [ ] Given the key hints at the bottom of both views, then they come from one component, and changing a view's hints touches one place.
+- [ ] Given the list table and the detail file groups, then both render through the same row primitive and the column sizes are declared once.
+- [ ] Given the search field and its clear hint, then they are one component that takes `query`, `searching` and the change handler.
+- [ ] Given both views, then behavior is unchanged: list selection, filtering, no-matches state, detail header, groups and scroll, all checked by eye.
+
+**Notes / open questions**
+
+- Every test today is `eye`: this pass must not need new tests, since the output strings and keystrokes stay the same. If a step turns out to change behavior, that is a sign the step was too big.
+- A headless test of the key sequence (`/` → `coll` → Enter → Esc) was proposed at US-004's close and not taken. Revisit after this pass, when the components have stable props to test against.
 
