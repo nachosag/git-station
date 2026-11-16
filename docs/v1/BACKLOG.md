@@ -15,7 +15,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | IMP-004 | Tighten the status naming and path reading   | Done        |
 | US-003  | See the state of each repository at a glance | Done        |
 | US-004  | Filter the list by name                      | Not started |
-| US-005  | Inspect one repository in detail             | In progress |
+| US-005  | Inspect one repository in detail             | Done        |
 | US-006  | Trust the ahead/behind I see                 | Not started |
 | US-007  | Stage and unstage files                      | Not started |
 | US-008  | Commit the staged changes                    | Not started |
@@ -215,6 +215,8 @@ Drill into one repository and trust what the screen shows.
 
 **Epic:** E2 · **Priority:** Must · **Size:** S · **Depends on:** US-003
 
+Closing questions: pending
+
 **Story**
 As a developer about to act on a repository, I want to open it and see its path, branch, upstream, ahead/behind, and every pending file, so that I understand its exact state before doing anything.
 
@@ -248,12 +250,16 @@ As a developer about to act on a repository, I want to open it and see its path,
   Verified by: src/presenters.test.ts — `toDetailView` → 'a clean repository reports no pending files' (written); the broken-repository test gains the `isClean: false` assertion. Message on screen: eye (written 2026-11-15 — `Repo is up to date` renders in place of the three groups).
 
   Decision (2026-11-15): the presenter decides. `DetailView` gains an `isClean` boolean so the views stay dumb; it is set from the files list in the readable branch and stays `false` for a broken repository, which also has three empty groups.
-- [ ] Given a repository in detached HEAD, when the detail renders, then the header shows `detached` without crashing.
-- [ ] Given the detail view, when I press Esc, then the list returns with the previous selection preserved.
+- [x] Given a repository in detached HEAD, when the detail renders, then the header shows `detached` without crashing.
+
+  Verified by: eye (written 2026-11-15 — `~/tmp/detached-demo` opens with `branch: detached`, `upstream: —`, `ahead: ↑ —`, `behind: ↓ —` and no crash). No code change needed: `parseStatus` already returns `detached` and `toDetailView` renders it.
+- [x] Given the detail view, when I press Esc, then the list returns with the previous selection preserved.
+
+  Verified by: eye (written 2026-11-15). No code change needed: `selectedRow` lives in `App`, which owns both views, so unmounting the detail never resets it.
 
 **Notes / open questions**
 
-- UI pass in progress (uncommitted, 2026-11-14): the detail file list is a `scrollbox` (mouse wheel and keyboard both scroll), inside a centered 80% column, with the header line above and the key hints below. Pending in this pass: a per-group marker with color instead of the hardcoded `M`, and fixed column widths like the list table.
+- Detail layout (2026-11-15): the file list is a `scrollbox` (mouse wheel and keyboard both scroll) inside a centered 80% column, header line above, key hints below. Two items from the layout pass were not taken and stay open as closing proposals: a per-group marker with color instead of the hardcoded `M`, and fixed column widths like the list table.
 - Known bug (2026-11-14): on a short terminal (large font/zoom) the key hints line overlaps the last file rows. `minHeight={0}` on the scrollbox did not fix it; next suspects are the row box around `Info` + `Groups` and the percentage-width chain.
 - Decision (2026-11-14): the status reading returns the list of files with their group, and the counts are derived from that list.
 - Proposed but not accepted yet: `IMP-003`, make the repository list scroll the same way (selection kept visible with `scrollChildIntoView`).
