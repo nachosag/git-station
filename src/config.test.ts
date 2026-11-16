@@ -56,6 +56,20 @@ describe('loadConfig', () => {
 
     await fs.rm(tmpDir, { recursive: true, force: true })
   })
+
+  test('drops entries that are not strings', async () => {
+    const { tmpDir, file } = await createConfig(
+      JSON.stringify({ roots: [os.tmpdir()], ignores: [42, 'ignoreme'] }),
+    )
+    const { roots, ignores } = await loadConfig(file)
+
+    expect(roots).toStrictEqual([os.homedir(), os.tmpdir()])
+    expect([...ignores].toSorted()).toStrictEqual(
+      [...pruneList, 'ignoreme'].toSorted(),
+    )
+
+    await fs.rm(tmpDir, { recursive: true, force: true })
+  })
 })
 
 type ConfigFile = {

@@ -220,3 +220,4 @@ How the agent talks to the human. This file is independent of the workflow: the 
 - Binary name resolved: `git-station` (the `gs`/ghostscript collision is avoided). The `bin` entry in package.json already points at `src/index.tsx`. Still avoid global installs (`bun i -g`) that could shadow system binaries — use the repo-local script instead.
 - `README.md`'s run command (`bun run index.ts`) is stale; the real entry is `bun run dev` (which runs `src/index.tsx`).
 - The discovery prune list and config loading live in `src/config.ts` and must stay in sync with the default list in SPECS.md §Discovery.
+- `@total-typescript/ts-reset` is installed (`src/reset.d.ts`, side-effect import): `JSON.parse` returns `unknown` instead of `any`, and `Array.isArray` narrows to `unknown[]`. Any parsed JSON — the config file today — must be narrowed (`typeof` + `in` + `Array.isArray` + filter to string) before use.
