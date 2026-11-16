@@ -243,7 +243,11 @@ As a developer about to act on a repository, I want to open it and see its path,
     Verified by: eye (written 2026-11-14 — `<scrollbox focused>` moves with `j`/`k`, arrows, PageUp/PageDown and Home/End; mouse wheel still works; confirmed on a repository with more files than lines and on a short terminal, 2026-11-15).
 
     Decision (2026-11-14): keyboard scroll comes from the scrollbox's own focus handling instead of a `useKeyboard` handler calling `scrollBy`. It costs no code and brings paging keys for free; US-007 replaces it anyway when `j`/`k` has to move the file selection.
-- [ ] Given a clean repository, when the detail renders, then a clean-state message shows instead of empty groups.
+- [x] Given a clean repository, when the detail renders, then a clean-state message shows instead of empty groups.
+
+  Verified by: src/presenters.test.ts — `toDetailView` → 'a clean repository reports no pending files' (written); the broken-repository test gains the `isClean: false` assertion. Message on screen: eye (written 2026-11-15 — `Repo is up to date` renders in place of the three groups).
+
+  Decision (2026-11-15): the presenter decides. `DetailView` gains an `isClean` boolean so the views stay dumb; it is set from the files list in the readable branch and stays `false` for a broken repository, which also has three empty groups.
 - [ ] Given a repository in detached HEAD, when the detail renders, then the header shows `detached` without crashing.
 - [ ] Given the detail view, when I press Esc, then the list returns with the previous selection preserved.
 

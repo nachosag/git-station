@@ -12,6 +12,7 @@ export type RowView = {
 }
 
 export type DetailView = {
+  isClean: boolean
   path: string
   info: string[]
   staged: string[]
@@ -63,6 +64,7 @@ export function toDetailView(
 
   if (!status) {
     return {
+      isClean: false,
       path: repo,
       info: [`⚠ ${unreadable.get(repo) ?? 'unreadable'}`],
       staged: [],
@@ -72,6 +74,7 @@ export function toDetailView(
   }
 
   return {
+    isClean: status.files.length === 0,
     path: repo,
     info: [
       `branch: ${status.branch}`,

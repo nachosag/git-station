@@ -25,6 +25,7 @@ describe('presenters', () => {
     ])
 
     expect(toDetailView('/tmp', readable, unreadable)).toStrictEqual({
+      isClean: false,
       path: '/tmp',
       info: [`⚠ ${ERROR}`],
       staged: [],
@@ -68,6 +69,7 @@ describe('presenters', () => {
     expect(
       toDetailView('/home/me/git-station', readable, new Map<string, string>()),
     ).toStrictEqual({
+      isClean: false,
       path: '/home/me/git-station',
       info: [
         'branch: main',
@@ -95,5 +97,32 @@ describe('presenters', () => {
     expect(
       toDetailView('/home/me/demo', readable, new Map<string, string>()).staged,
     ).toStrictEqual(['\t M viejo.txt -> nuevo.txt'])
+  })
+
+  test('a clean repository reports no pending files', () => {
+    const status: RepoStatus = {
+      branch: 'main',
+      upstream: 'origin/main',
+      dirty: false,
+      files: [],
+      ahead: 0,
+      behind: 0,
+    }
+    const readable = new Map<string, RepoStatus>().set('/home/me/demo', status)
+    expect(
+      toDetailView('/home/me/demo', readable, new Map<string, string>()),
+    ).toStrictEqual({
+      info: [
+        'branch: main',
+        'upstream: origin/main',
+        'ahead: ↑ 0',
+        'behind: ↓ 0',
+      ],
+      isClean: true,
+      path: '/home/me/demo',
+      staged: [],
+      unstaged: [],
+      untracked: [],
+    })
   })
 })

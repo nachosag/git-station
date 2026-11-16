@@ -46,24 +46,30 @@ function Groups(props: { view: DetailView }): ReactNode {
       focused={true}
       minHeight={0}
       flexGrow={1}>
-      <box>
-        <text>staged ({props.view.staged.length})</text>
-        {props.view.staged.map((file) => (
-          <text key={file}>{file}</text>
-        ))}
-      </box>
-      <box>
-        <text>unstaged ({props.view.unstaged.length})</text>
-        {props.view.unstaged.map((file) => (
-          <text key={file}>{file}</text>
-        ))}
-      </box>
-      <box>
-        <text>untracked ({props.view.untracked.length})</text>
-        {props.view.untracked.map((file) => (
-          <text key={file}>{file}</text>
-        ))}
-      </box>
+      {props.view.isClean ? (
+        <text>Repo is up to date</text>
+      ) : (
+        <>
+          <box>
+            <text>staged ({props.view.staged.length})</text>
+            {props.view.staged.map((file) => (
+              <text key={file}>{file}</text>
+            ))}
+          </box>
+          <box>
+            <text>unstaged ({props.view.unstaged.length})</text>
+            {props.view.unstaged.map((file) => (
+              <text key={file}>{file}</text>
+            ))}
+          </box>
+          <box>
+            <text>untracked ({props.view.untracked.length})</text>
+            {props.view.untracked.map((file) => (
+              <text key={file}>{file}</text>
+            ))}
+          </box>
+        </>
+      )}
     </scrollbox>
   )
 }
