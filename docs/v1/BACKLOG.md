@@ -13,6 +13,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | IMP-001 | Simplify the directory walk in src/repo.ts   | Done        |
 | IMP-002 | Ship a Linux binary with a one-line install  | Not started |
 | IMP-004 | Tighten the status naming and path reading   | Done        |
+| IMP-005 | Compute the detail view only when it opens   | Not started |
 | US-003  | See the state of each repository at a glance | Done        |
 | US-004  | Filter the list by name                      | Not started |
 | US-005  | Inspect one repository in detail             | Done        |
@@ -215,7 +216,7 @@ Drill into one repository and trust what the screen shows.
 
 **Epic:** E2 · **Priority:** Must · **Size:** S · **Depends on:** US-003
 
-Closing questions: pending
+Closing questions: done
 
 **Story**
 As a developer about to act on a repository, I want to open it and see its path, branch, upstream, ahead/behind, and every pending file, so that I understand its exact state before doing anything.
@@ -400,6 +401,25 @@ As a developer with many local repositories, I want to delete a repository direc
 
 - There is no git command that deletes a regular repository — it is a recursive filesystem delete. Worktrees go through `git worktree remove --force`: it cleans the origin's worktree registry (no prune needed), and `--force` is deliberate — git's own dirty guard is bypassed because the confirmation screen already showed the dirty state of every repo in the deletion set.
 - Decision (2026-11-10): dirty repositories warn but do not block. The dirty check runs over every repository in the deletion set, not just the selected one — otherwise the warning lies for the umbrella case (clean parent, dirty child).
+
+### IMP-005: Compute the detail view only when it opens
+
+**Priority:** polish · **Size:** S · **Depends on:** US-005
+
+**Description**
+
+`App` currently builds one `DetailView` per repository as soon as the scan finishes and keeps the whole array in state — 23 of them on this machine, for a view that shows one at a time. Build the detail view for the selected repository only, when the detail opens, instead of precomputing all of them.
+
+**Acceptance criteria**
+
+- [ ] Given the scan finishes and the list renders, then no `DetailView` has been built for any repository yet.
+- [ ] Given a repository selected in the list, when Enter opens the detail, then the header and the three groups show the same strings as before.
+- [ ] Given a repository whose status could not be read, when Enter opens its detail, then the `⚠` message and the three empty groups still render.
+- [ ] Given the detail open, when Esc returns to the list and Enter opens the same repository again, then the detail renders the same content.
+
+**Notes / open questions**
+
+- A test may not be worth it: the strings come from `toDetailView`, already covered by `src/presenters.test.ts`; what changes is when it is called, and that is visible on screen. Decide the `Verified by` line when the step is planned.
 
 ## INVEST check
 
