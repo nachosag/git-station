@@ -13,6 +13,8 @@ git-station (`gs`) is a keyboard-driven terminal UI to discover, monitor, and ma
 | D5  | Git adapter  | Always shell out to the `git` binary via `Bun.spawn` with `git -C <path>`. No git library. `git status --porcelain=v2 --branch` is the single source of repo state.                      |
 | D6  | UI language  | All on-screen text is English in v1 (decision 2026-11-11). A localized UI (Spanish first) is a v2 candidate.                                                                             |
 
+| D7  | Theme        | Colors and shared styles come from one theme file of tokens; screens never hardcode them (decision 2026-11-16).                                                                          |
+
 ## Goals (v1)
 
 - Show every detected repository with: name, current branch, dirty indicator, ahead/behind counts vs upstream.

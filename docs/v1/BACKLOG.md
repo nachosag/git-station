@@ -15,6 +15,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | IMP-004 | Tighten the status naming and path reading   | Done        |
 | IMP-005 | Compute the detail view only when it opens   | Done        |
 | IMP-006 | Componentize the UI layer                    | In progress |
+| IMP-007 | Theme and component styling                  | Not started |
 | US-003  | See the state of each repository at a glance | Done        |
 | US-004  | Filter the list by name                      | Done        |
 | US-005  | Inspect one repository in detail             | Done        |
@@ -546,6 +547,8 @@ The views have grown by accretion: `Listing` renders the search field, the no-ma
 
   Verified by: `bun run check` green (24 tests unchanged) and eye (written 2026-11-16). `query`/`setQuery` in `App`, `query` prop in `Listing`; `onInput` keeps its name because it mirrors the field's event.
 - [ ] Given the key hints at the bottom of both views, then they come from one component, and changing a view's hints touches one place.
+
+  Verified by: eye (planned 2026-11-16).
 - [ ] Given the list table and the detail file groups, then both render through the same row primitive and the column sizes are declared once.
 - [ ] Given the search field and its clear hint, then they are one component that takes `query`, `searching` and the change handler.
 - [ ] Given both views, then behavior is unchanged: list selection, filtering, no-matches state, detail header, groups and scroll, all checked by eye.
@@ -554,4 +557,27 @@ The views have grown by accretion: `Listing` renders the search field, the no-ma
 
 - Every test today is `eye`: this pass must not need new tests, since the output strings and keystrokes stay the same. If a step turns out to change behavior, that is a sign the step was too big.
 - A headless test of the key sequence (`/` → `coll` → Enter → Esc) was proposed at US-004's close and not taken. Revisit after this pass, when the components have stable props to test against.
+- Plan (2026-11-16): the layout is `src/pages/` (the three existing screens) plus `src/components/`. The criteria map to components: hints → `HintBar` taking `hints: {key, action}[]` (hints as data, so the new keys of US-006+ become entries, not code); row primitive → `Cols`, under `Table`'s Header/Row, with `Group` for the detail file blocks; search field → `SearchField` taking `query`, `searching` and the change handler. One-use visuals stay local to their page: `Info`, the centered detail header, the no-matches message. Colors move with the code unchanged; the new look is IMP-007's.
+- Open (decide when the row-primitive step is presented): the detail file line is a single string (`\t M name`); rendering it through `Cols` as marker + name columns changes the spacing slightly, while keeping it a string leaves the shared-primitive criterion half-met.
+
+### IMP-007: Theme and component styling
+
+**Priority:** polish (after IMP-006, before US-006) · **Size:** M · **Depends on:** IMP-006
+
+**Description**
+
+Accepted 2026-11-16 while planning IMP-006. The components land with today's colors so the structure pass stays verifiable (output identical, string by string); the visual language gets its own pass on top of stable props. Today three `gray` usages mean three different things (detail header background, selected-row background, column-label foreground) and the style choices are hardcoded in the views. This improvement first defines the styling standard, then applies it: colors and shared styles come from one theme file of tokens (SPECS D7), each component owns its look and reads the tokens, and the screens never hardcode colors. opentui 0.5.x supports `border`, `borderStyle`, `title`, `titleColor`, `padding` and `margin` (confirmed against the API docs 2026-11-16).
+
+**Acceptance criteria**
+
+- [ ] Given the styling standard, then it is written into SPECS.md before any styling code: token naming, where styles live (theme file vs component), and direct props vs the `style` prop.
+- [ ] Given the theme, then it is one file of tokens (at least: `selection`, `muted`, `warning`) and no screen or component hardcodes a color.
+- [ ] Given each component, then its look comes from the theme: `HintBar` (key vs action), `Table` (column labels, selected row), `Group` (title), `SearchField`, the detail header, and `Loading`.
+- [ ] Given both views, then behavior is unchanged: keys, data flow and screen structure are identical; only the look changes.
+
+**Notes / open questions**
+
+- The standard is defined at this improvement's first step, with the opentui API in view, and recorded in SPECS.md.
+- Per-state colors (e.g. the behind count highlighted when it is above zero) would need the presenters to return structured cells instead of preformatted strings (`'↑ 2'`). The first pass colors whole lines and leaves that decision open.
+- Add tokens only when a component needs one; the set above is the floor, not the ceiling.
 
