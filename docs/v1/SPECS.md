@@ -8,7 +8,7 @@ git-station (`gs`) is a keyboard-driven terminal UI to discover, monitor, and ma
 | --- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | D1  | Discovery    | Hybrid: walk `$HOME` pruning heavy directories + optional config for extra roots and ignores. No cache in v1 (scan on open).                                                             |
 | D2  | Layout       | Stacked full-screen views: the list is the home screen; `Enter` opens the detail view; `Esc` goes back. No split panes.                                                                  |
-| D3  | Detail scope | Header + file list (staged/unstaged/untracked) + one-line commit + fetch/pull/push. No log, diff, or branch checkout in v1.                                                              |
+| D3  | Detail scope | Header + file list (staged/unstaged/untracked) + one-line commit + fetch/pull/push. No diff or branch checkout in v1; the commit graph is its own page, opened from the detail with `g` (US-013, added 2026-11-17). |
 | D4  | Network      | The list always shows local state (`git status`). Opening a detail view triggers a background `fetch` (with indicator) followed by a re-status. No fetch-all, no other implicit network. |
 | D5  | Git adapter  | Always shell out to the `git` binary via `Bun.spawn` with `git -C <path>`. No git library. `git status --porcelain=v2 --branch` is the single source of repo state.                      |
 | D6  | UI language  | All on-screen text is English in v1 (decision 2026-11-11). A localized UI (Spanish first) is a v2 candidate.                                                                             |
@@ -102,7 +102,7 @@ States: scanning (progress indicator while the walk runs; its look is designed i
 
 ### Detail view
 
-Sections, top to bottom:
+Sections, top to bottom (the look is designed in §Design, detail page):
 
 1. Header: absolute path, branch, upstream, ahead/behind, dirty counts (staged / unstaged / untracked).
 2. Files: three groups — staged, unstaged, untracked. One row per file; renames display `old -> new`.
@@ -110,6 +110,10 @@ Sections, top to bottom:
 4. Feedback line: the running operation (`fetch…`, `push…`), its output, or the last error's stderr.
 
 Opening the detail view renders the local status immediately; a background `fetch` runs (D4) and a re-status refreshes ahead/behind when it completes.
+
+### Graph view
+
+Opens from the detail view with `g` and returns with `esc`. Shows the repository's commit graph — its design dialogue is the next one to happen; this section grows when that lands.
 
 ## Design (D7)
 
@@ -123,7 +127,7 @@ The design is defined in full, page by page (expanded 2026-11-17): which compone
 
 ### List page (2026-11-17)
 
-Chosen in dialogue and prototyped outside the repo (live-server); proto 9 is the visual reference. A full redesign was chosen over keeping the structure (2026-11-17).
+Chosen in dialogue and prototyped with live-server (2026-11-17, before prototypes were kept in-repo — proto 9 is no longer on disk). A full redesign was chosen over keeping the structure (2026-11-17).
 
 - **Panel**: centered on screen, does not span the full width, thin border with sharp corners, surface background; nothing is written on the border line.
 - **Layout, top to bottom**: title band, table header, scrollable list, hints line. No permanent search bar — the filter lives in the title band (keyboard-first: no visible UI invites the mouse).
@@ -135,25 +139,51 @@ Chosen in dialogue and prototyped outside the repo (live-server); proto 9 is the
 - **Empty state**: `No repositories match "q"` rendered above the list; no repositories found keeps its dedicated hint.
 - **Loading state** (designed 2026-11-17, variant B of the prototype): a bare centered counter — `found: N`, the number in the attention color, three muted dots pulsing after it. No panel, no title band, no hints: the counter sits directly on the terminal background. When the list is complete, the counter swaps for the panel in one frame — the panel with its title band is drawn only then. The progress bar from the pre-redesign list is gone.
 
+### Detail page (2026-11-17)
+
+Chosen in dialogue and prototyped in-repo: `prototipes/Detail.html` (the page, accepted) and `prototipes/ActionPanel.html` (the action panel, accepted) are the visual references.
+
+- **Panel**: the same language as the list page — centered, does not span the full width, thin border with sharp corners, surface background; nothing is written on the border line.
+- **Header, one row of three cells**: `branch → upstream` (left), the repository's path (center, muted, with `$HOME` abbreviated to `~`; a path that still does not fit truncates from the left keeping the repository's name visible), and `↑N / ↓M` (right, attention; idle sides keep their dash). The single row replaces the old title band plus path line.
+- **File groups**: staged, unstaged and untracked as three sections with muted titles and counts, separated by faint horizontal bars. One row per file: the marker in a fixed column (attention) and the path. A path that overflows truncates in the middle — first directory, `…`, file name — so head and tail survive; tail-only truncation is rejected (two homonymous files in different directories would be indistinguishable).
+- **Selection**: one cursor moves across the whole file list — the arrows cross group boundaries and wrap around the entire list (circular navigation is an app-wide standard). The selected row shows the selection background; there is no separate group focus and no switch key.
+- **Quick hints adapt to the group of the selected row**: `unstage: space` while it sits in staged, `stage: space` otherwise. The hints line spans the panel width — `move: ↑↓`, the stage/unstage hint, `panel: p`, `graph: g`, `back: esc`, `quit: q`. The direct shortcuts (`c`, `s`, `f`, `P`) are not hinted; the panel documents them.
+- **Feedback line**: the running operation, its output, or the last error's stderr sits between the file list and the hints line, spanning the panel width.
+- **States**: a clean repository shows `Repo is up to date` in place of the groups; a broken repository shows `⚠ message` there and its action panel carries only the repo section. The commit input (hidden until `c`; `enter` commits, `esc` cancels) and the feedback line behave per §Views (detail view).
+- **Action panel** (opens with `p`; a scrim dims the page behind it): a floating centered box of the same language holding the full catalog grouped by scope — staged, unstaged, untracked (the category actions), repo, and file (the selected row; its section title shows `file:` left and the file name right, muted, truncating). All five sections are always present. Section titles sit in the attention color aligned with the action rows; sections separate by gap plus faint bar. The selection starts on the first row; the arrows are circular; `enter` runs, `esc` closes. Keys mean one thing per context: `p` opens the panel from the detail page and runs pull inside it.
+- **Search**: the bar at the top of the panel stays inactive until `?` activates it — the query renders in the attention color and `clear: esc` appears top-right; typing filters the rows and hides the sections left empty; `esc` clears and exits search back to navigation. The bar exists because the catalog is wide and must stay usable as features land.
+- **Descriptions**: hidden by default; `+` toggles them below each action's name. Discard actions render in the warning color.
+- **Direct shortcuts**: right-aligned in the attention color next to the actions that earned them (`c` commit, `s` stage all pending, `f` fetch, `p` pull in-panel, `P` push) and working from the detail page without opening the panel — except `p`, which is the panel's own key.
+- **Scaling rules** (the panel is the component that absorbs future features): every action lives in exactly one scope section (row, category or repo); a direct hotkey is earned by popularity and an action without one stays reachable through the panel. The panel is one component with a catalog per page, so other pages can host their own.
+
 ## Keyboard map (draft — adjust during implementation)
+
+Arrow navigation wraps around everywhere — it is an app-wide standard, not a per-page decision.
 
 | View   | Key                 | Action                                        |
 | ------ | ------------------- | --------------------------------------------- |
-| List   | `j` / `k` or arrows | Move selection                                |
+| List   | `j` / `k` or arrows | Move selection (wraps around)                 |
 | List   | `Enter`             | Open detail (search focused: confirm filter)  |
 | List   | `?`                 | Filter by name (swaps the title band)         |
 | List   | `Esc`               | Clear the active filter                       |
 | List   | `r`                 | Refresh statuses                              |
 | List   | `d`                 | Delete repository (typed-name confirmation)   |
 | List   | `q`                 | Quit                                          |
-| Detail | `Esc`               | Back to list (cancels the commit input first) |
-| Detail | `j` / `k`           | Move over files                               |
-| Detail | `Space`             | Toggle stage/unstage file                     |
-| Detail | `a`                 | Stage all                                     |
+| Detail | `j` / `k` or arrows | Move selection across the groups (wraps around) |
+| Detail | `Space`             | Stage/unstage the selected file               |
+| Detail | `s`                 | Stage all pending                             |
 | Detail | `c`                 | Open commit input                             |
 | Detail | `f`                 | Fetch                                         |
-| Detail | `p`                 | Pull                                          |
 | Detail | `P`                 | Push                                          |
+| Detail | `p`                 | Open the action panel (inside it: run pull)   |
+| Detail | `g`                 | Open the graph page                           |
+| Detail | `Esc`               | Back to list (closes panel/search/input first)|
+| Detail | `q`                 | Quit                                          |
+| Panel  | `↑` / `↓`           | Move selection (wraps around)                 |
+| Panel  | `?`                 | Activate search (`Esc` clears and exits it)   |
+| Panel  | `+`                 | Toggle action descriptions                    |
+| Panel  | `Enter`             | Run the selected action                       |
+| Panel  | `Esc`               | Close the panel                               |
 
 ## Edge cases
 

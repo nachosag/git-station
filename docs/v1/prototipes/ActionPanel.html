@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>gs — action panel (solo, ampliado)</title>
+<style>
+  :root {
+    --bg: #16161e;
+    --surface: #1a1b26;
+    --border: #3b4261;
+    --separator: #282c3f;
+    --text: #c0caf5;
+    --muted: #565f89;
+    --attention: #e0af68;
+    --warning: #f7768e;
+    --selection: #2f334d;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: "JetBrains Mono", "Fira Code", monospace;
+    height: 100vh; display: flex; align-items: center; justify-content: center;
+  }
+  .actionbox {
+    width: 62ch; max-height: 86vh; background: var(--surface); border: 1px solid var(--border);
+    display: flex; flex-direction: column; padding: 0.7rem 0;
+  }
+  .asearch {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 1.25rem 0.6rem; border-bottom: 1px solid var(--separator); flex: none;
+  }
+  .asearch input {
+    width: 100%; background: transparent; border: none; outline: none;
+    color: var(--text); font: inherit;
+  }
+  .asearch input::placeholder { color: var(--muted); }
+  .asearch .clear { color: var(--muted); white-space: nowrap; visibility: hidden; }
+  .asearch .clear b { color: var(--attention); font-weight: normal; }
+  .asearch.active input { color: var(--attention); }
+  .asearch.active .clear { visibility: visible; }
+  .alist { overflow-y: auto; padding: 0.5rem 0; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+  .acat { padding-top: 1.2rem; margin-top: 0.4rem; border-top: 1px solid var(--separator); }
+  .acat:first-child { padding-top: 0.4rem; border-top: none; margin-top: 0; }
+  .acat .cat {
+    display: flex; justify-content: space-between; align-items: baseline;
+    color: var(--attention); padding: 0 1.25rem 0.35rem 1.6rem;
+  }
+  .acat .cat .ctx { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-left: 2rem; }
+  .arow {
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+    padding: 0.32rem 1.25rem 0.32rem 1.6rem; line-height: 1.5;
+  }
+  .arow.selected { background: var(--selection); }
+  .arow .stack { min-width: 0; }
+  .arow .what { color: var(--text); white-space: nowrap; }
+  .arow .what.danger { color: var(--warning); }
+  .arow .why { display: none; color: var(--muted); font-size: 0.85rem; }
+  .actionbox.show-why .arow .why { display: block; }
+  .arow .keys { color: var(--attention); white-space: nowrap; }
+  .abhints {
+    display: flex; justify-content: space-between; color: var(--muted); font-size: 0.85rem;
+    padding: 0.7rem 1.25rem 0.3rem; border-top: 1px solid var(--separator); margin-top: 0.7rem;
+  }
+  .abhints b { color: var(--attention); font-weight: normal; }
+</style>
+</head>
+<body>
+
+  <div class="actionbox" id="actionbox">
+    <div class="asearch" id="asearchrow">
+      <input id="asearch" placeholder="Search" autocomplete="off">
+      <span class="clear">clear: <b>esc</b></span>
+    </div>
+    <div class="alist" id="alist">
+      <div class="acat">
+        <div class="cat">staged</div>
+        <div class="arow"><div class="stack"><div class="what">commit</div><div class="why">write a commit with the staged files</div></div><span class="keys">c</span></div>
+        <div class="arow"><div class="stack"><div class="what">unstage all</div><div class="why">empty the staged group</div></div><span class="keys"></span></div>
+      </div>
+      <div class="acat">
+        <div class="cat">unstaged</div>
+        <div class="arow"><div class="stack"><div class="what">stage all</div><div class="why">stage every pending file</div></div><span class="keys">s</span></div>
+        <div class="arow"><div class="stack"><div class="what danger">discard changes</div><div class="why">drop the unstaged changes</div></div><span class="keys"></span></div>
+      </div>
+      <div class="acat">
+        <div class="cat">untracked</div>
+        <div class="arow"><div class="stack"><div class="what">stage all</div><div class="why">stage the untracked files</div></div><span class="keys"></span></div>
+        <div class="arow"><div class="stack"><div class="what danger">discard changes</div><div class="why">delete the untracked files (git clean)</div></div><span class="keys"></span></div>
+      </div>
+      <div class="acat">
+        <div class="cat">repo</div>
+        <div class="arow"><div class="stack"><div class="what">fetch</div><div class="why">refresh upstream state</div></div><span class="keys">f</span></div>
+        <div class="arow"><div class="stack"><div class="what">pull</div><div class="why">integrate upstream commits</div></div><span class="keys">p</span></div>
+        <div class="arow"><div class="stack"><div class="what">push</div><div class="why">send local commits</div></div><span class="keys">P</span></div>
+        <div class="arow"><div class="stack"><div class="what">refresh status</div><div class="why">re-read every file group</div></div><span class="keys"></span></div>
+        <div class="arow"><div class="stack"><div class="what">open in editor</div><div class="why">open this repo in $EDITOR</div></div><span class="keys"></span></div>
+        <div class="arow"><div class="stack"><div class="what">open terminal here</div><div class="why">drop into a shell in this repo</div></div><span class="keys"></span></div>
+        <div class="arow"><div class="stack"><div class="what">copy path</div><div class="why">copy the repo path to the clipboard</div></div><span class="keys"></span></div>
+        <div class="arow"><div class="stack"><div class="what">copy remote url</div><div class="why">copy the upstream URL to the clipboard</div></div><span class="keys"></span></div>
+        <div class="arow"><div class="stack"><div class="what">open on remote</div><div class="why">open the repository's web page</div></div><span class="keys"></span></div>
+      </div>
+      <div class="acat">
+        <div class="cat">file: <span class="ctx">.obsidian/workspace.json</span></div>
+        <div class="arow"><div class="stack"><div class="what">open in editor</div><div class="why">open this file in $EDITOR</div></div><span class="keys"></span></div>
+        <div class="arow"><div class="stack"><div class="what">open on remote</div><div class="why">open this file's page on the remote</div></div><span class="keys"></span></div>
+        <div class="arow"><div class="stack"><div class="what">copy path</div><div class="why">copy the file path to the clipboard</div></div><span class="keys"></span></div>
+        <div class="arow"><div class="stack"><div class="what danger">discard changes</div><div class="why">drop this file's changes</div></div><span class="keys"></span></div>
+      </div>
+    </div>
+    <div class="abhints">
+      <span>move: <b>↑↓</b></span>
+      <span>search: <b>?</b></span>
+      <span>describe: <b>+</b></span>
+      <span>run: <b>enter</b></span>
+      <span>close: <b>esc</b></span>
+    </div>
+  </div>
+
+<script>
+  const box = document.getElementById("actionbox");
+  const row = document.getElementById("asearchrow");
+  const input = document.getElementById("asearch");
+  const cats = [...box.querySelectorAll(".acat")];
+
+  const visibleRows = () =>
+    cats.flatMap((c) => [...c.querySelectorAll(".arow")]).filter((r) => r.style.display !== "none");
+
+  function select(target) {
+    box.querySelectorAll(".arow.selected").forEach((r) => r.classList.remove("selected"));
+    if (target) target.classList.add("selected");
+    target?.scrollIntoView({ block: "nearest" });
+  }
+  const current = () => box.querySelector(".arow.selected");
+
+  function filter() {
+    const q = input.value.trim().toLowerCase();
+    for (const cat of cats) {
+      let any = false;
+      for (const item of cat.querySelectorAll(".arow")) {
+        const hit = item.querySelector(".what").textContent.toLowerCase().includes(q);
+        item.style.display = hit ? "" : "none";
+        any = any || hit;
+      }
+      cat.style.display = any ? "" : "none";
+    }
+    const rows = visibleRows();
+    if (!rows.includes(current())) select(rows[0] ?? null);
+  }
+
+  function enterSearch() {
+    row.classList.add("active");
+    input.focus();
+  }
+
+  function exitSearch() {
+    row.classList.remove("active");
+    input.value = "";
+    filter();
+    input.blur();
+  }
+
+  input.addEventListener("input", filter);
+
+  document.addEventListener("keydown", (e) => {
+    const searching = document.activeElement === input;
+    if (e.key === "?") { e.preventDefault(); enterSearch(); return; }
+    if (e.key === "+") { e.preventDefault(); box.classList.toggle("show-why"); return; }
+    if (e.key === "Escape") {
+      e.preventDefault();
+      if (searching) exitSearch();          // sale del modo búsqueda, vuelve a flechas
+      else reset();
+      return;
+    }
+    const rows = visibleRows();
+    const i = rows.indexOf(current());
+    if (e.key === "ArrowDown") { e.preventDefault(); select(rows[(i + 1) % rows.length]); }
+    if (e.key === "ArrowUp") { e.preventDefault(); select(rows[(i - 1 + rows.length) % rows.length]); }
+  });
+
+  function reset() {
+    input.value = "";
+    cats.forEach((c) => (c.style.display = ""));
+    cats.forEach((c) => c.querySelectorAll(".arow").forEach((r) => (r.style.display = "")));
+    select(visibleRows()[0]);
+  }
+
+  // estado inicial: primera fila seleccionada, búsqueda inactiva
+  select(visibleRows()[0]);
+</script>
+</body>
+</html>

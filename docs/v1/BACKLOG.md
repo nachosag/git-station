@@ -18,6 +18,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | IMP-007 | Theme and component styling                  | In progress |
 | IMP-008 | Declare the table columns once               | Done        |
 | IMP-009 | Confirm the search with Enter before moving  | Done        |
+| IMP-010 | Wire the full action catalog                 | Not started |
 | US-003  | See the state of each repository at a glance | Done        |
 | US-004  | Filter the list by name                      | Done        |
 | US-005  | Inspect one repository in detail             | Done        |
@@ -28,6 +29,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | US-010  | Pull from upstream                           | Not started |
 | US-011  | Push to upstream                             | Not started |
 | US-012  | Delete a repository from the list            | Not started |
+| US-013  | View the commit graph                        | Not started |
 
 Tracking rules:
 
@@ -433,6 +435,22 @@ As a developer with many local repositories, I want to delete a repository direc
 - There is no git command that deletes a regular repository — it is a recursive filesystem delete. Worktrees go through `git worktree remove --force`: it cleans the origin's worktree registry (no prune needed), and `--force` is deliberate — git's own dirty guard is bypassed because the confirmation screen already showed the dirty state of every repo in the deletion set.
 - Decision (2026-11-10): dirty repositories warn but do not block. The dirty check runs over every repository in the deletion set, not just the selected one — otherwise the warning lies for the umbrella case (clean parent, dirty child).
 
+### US-013: View the commit graph
+
+**Epic:** E2 · **Priority:** Must · **Size:** M · **Depends on:** US-005
+
+**Story**
+As a developer reading where a repository has been, I want to open its commit graph from the detail view with `g`, so that I can follow the history without leaving `gs`.
+
+**Acceptance criteria**
+
+- [ ] Given the detail view, when I press `g`, then the graph page opens for that repository and `esc` returns to the detail.
+- [ ] The page's design dialogue (the next one to happen) writes its full design into SPECS.md §Design and defines the rest of the criteria — what the graph shows, how it renders, how it navigates.
+
+**Notes / open questions**
+
+- Requested 2026-11-17 during the detail page design: the quick action `graph: g` ships with the detail rebuild; the page itself is designed right after IMP-007 closes. The commit history log left the v2 candidates to become this story; per-file diff and branch checkout stay v2.
+
 ### IMP-005: Compute the detail view only when it opens
 
 **Priority:** polish · **Size:** S · **Depends on:** US-005
@@ -594,9 +612,9 @@ Expanded (2026-11-17): the pass defines the design in its totality, page by page
 
   Verified by: eye (written 2026-11-17 — el usuario confirmó que el texto dice lo que eligió: la variante B del prototipo, contador pelado `found: N` sobre el fondo de la terminal con tres puntos muteados pulsando, sin panel ni hints hasta que la lista está completa; la barra de progreso desaparece de §Discovery y de M2)
 
-- [ ] The detail page design is written into SPECS.md in full, same shape as the list page step.
+- [x] The detail page design is written into SPECS.md in full, same shape as the list page step.
 
-  Verified by: eye (planned)
+  Verified by: eye (written 2026-11-17 — el usuario confirmó que el texto dice lo que elegimos: detail con header de una fila y selección única circular, action panel contextual de cinco secciones con búsqueda (`?`), descripciones (`+`) y atajos naranjas; el prototipo aceptado vive en `prototipes/Detail.html` y `prototipes/ActionPanel.html`. Durante la revisión del texto se agregaron: flechas circulares como estándar de la app, fuera `tab`, y la quick action `graph: g` que origina US-013)
 
 - [ ] Given the theme, then it is one file of tokens (at least: `selection`, `muted`, `warning`) and no screen or component hardcodes a color.
 
@@ -617,7 +635,7 @@ Expanded (2026-11-17): the pass defines the design in its totality, page by page
 - Decided (2026-11-17): semantic tokens, one theme file of tokens only, direct props first — recorded in SPECS.md §Design.
 - Per-state colors (e.g. the behind count highlighted when it is above zero) would need the presenters to return structured cells instead of preformatted strings (`'↑ 2'`). The first pass colors whole lines and leaves that decision open.
 - Add tokens only when a component needs one; the set above is the floor, not the ceiling.
-- Design dialogue (2026-11-17): every page's discussion opens with one question — redesign from scratch or keep the structure — before any detail; the look is prototyped as HTML outside the repo and reviewed live in the browser (live-server) before being written into SPECS.md.
+- Design dialogue (2026-11-17): every page's discussion opens with one question — redesign from scratch or keep the structure — before any detail; the look is prototyped as HTML (kept in `prototipes/` since 2026-11-17) and reviewed live in the browser (live-server) before being written into SPECS.md.
 - Listing page (2026-11-17): full redesign chosen over keeping the structure — centered panel that does not span the full width, scrollable repository list (absorbs the list-scroll proposal noted under US-005; `IMP-003` stays reserved for it), minimalist look, taking full advantage of opentui (`border`, `borderStyle`, `title`, `padding`). The "only the look changes" wording of the behavior criterion becomes false under a redesign: it will be rewritten when the design lands in SPECS.md.
 
 ### IMP-008: Declare the table columns once
@@ -655,4 +673,23 @@ Requested 2026-11-16, in the middle of IMP-006. First reading corrected by the u
 **Notes / open questions**
 
 - The early-return guard inside `isSearching` is what keeps the field's keyboard separate: flattening it into `isSearching && ...` conditions let one key press fire both the confirm and the open (React state closures do not update mid-handler), plus `q` quit and `j`/`k` moved while typing. The guard stays.
+
+### IMP-010: Wire the full action catalog
+
+**Priority:** polish (before US-006) · **Size:** M · **Depends on:** IMP-007
+
+**Description**
+
+Accepted 2026-11-17 while designing the detail page (option A of two): the action panel designed in §Design (detail page) shows the full catalog — 19 actions across five scope sections — but only the five story actions are wired when IMP-007 closes. This improvement wires the rest so the panel opens complete and its search bar earns its keep from day one: unstage all, refresh status, open in editor (repo and file), open terminal here, copy path (repo and file), copy remote url, open on remote (repo and file), and the three discard actions. Every one is shell-level or a single git command — no new plumbing. Goes before US-006.
+
+**Acceptance criteria**
+
+- [ ] Given the detail view, when the action panel opens, then every catalog action is listed and running a utility one produces its effect (the editor opens on the repo or file, the clipboard holds the path or the remote URL, the terminal drops into the repo, the remote page opens in the browser).
+- [ ] Given pending changes, then stage all, unstage all, and the discards move exactly the files their section describes and an external `git status` confirms the tree.
+- [ ] Given a discard action, then a confirmation step guards it before anything is dropped — it is irreversible, and its row renders in the warning color.
+- [ ] Given a failing utility action (no remote configured, no clipboard, no `$EDITOR`), then its error shows in the feedback line and the app keeps running.
+
+**Notes / open questions**
+
+- The design already describes the catalog (§Design, detail page); this improvement only wires it. Scope was chosen over leaving the panel half-empty at the rebuild — the alternative (no search bar in v1, catalog deferred to v2) was rejected the same day.
 

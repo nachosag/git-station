@@ -190,6 +190,8 @@ How the agent talks to the human. This file is independent of the workflow: the 
 - Tracker: `docs/v1/BACKLOG.md`.
 - Review trigger: "revisá mi código" is the formal review request.
 - User level: junior with TypeScript and this stack (bun, opentui, React); new to git internals beyond everyday usage.
+- Prototypes live in `docs/v1/prototipes/` (law since 2026-11-17): every HTML prototype of a page is saved there with the page's name (`Detail.html`, `Listing.html`), including the accepted version — never only in a temp directory.
+- Prototype workflow (law since 2026-11-17): one prototype per conversation. If during a prototype another page's prototype becomes necessary, it is punted to a new conversation and the current one keeps going on the prototype at hand. New requirements from the user's feedback are annotated as they arrive (into the tracker and SPECS when scope-relevant), not reconstructed at the end. Design dialogue opens every page with the redesign-or-keep question; variants are offered as numbered options with trade-offs; minor fixes reuse the current prototype number, design changes get the next one; prototypes are served live (live-server) for real-time feedback.
 
 ## Source of truth
 
