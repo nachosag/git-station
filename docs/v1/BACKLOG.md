@@ -590,11 +590,9 @@ Expanded (2026-11-17): the pass defines the design in its totality, page by page
 
   Verified by: eye (written 2026-11-17 — el usuario confirmó que la sección §Design dice exactamente lo que eligió: tokens semánticos, `theme.ts` con los tokens y nada más, props directas primero y `style` solo como último recurso)
 
-- [ ] The list page design is written into SPECS.md in full: which components it shows and in what order, sizes and percentages, spacing, and the look of every element — including its states (loading, empty, filtered).
+- [x] The list page design is written into SPECS.md in full: which components it shows and in what order, sizes and percentages, spacing, and the look of every element — including its states (loading, empty, filtered).
 
-  Verified by: eye (planned)
-
-  Progress (2026-11-17): the design is in SPECS.md §Design (list page) from the prototyping dialogue — everything except the loading state, which is still to design; the criterion stays open until that last piece lands.
+  Verified by: eye (written 2026-11-17 — el usuario confirmó que el texto dice lo que eligió: la variante B del prototipo, contador pelado `found: N` sobre el fondo de la terminal con tres puntos muteados pulsando, sin panel ni hints hasta que la lista está completa; la barra de progreso desaparece de §Discovery y de M2)
 
 - [ ] The detail page design is written into SPECS.md in full, same shape as the list page step.
 

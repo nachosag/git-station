@@ -65,7 +65,7 @@ Algorithm on every launch:
 1. Read `~/.config/git-station/config.json` if present. A missing file means defaults; it is never an error.
 2. Recursively walk `$HOME` plus every root from config, skipping any directory whose name is in the prune list or matches config `ignores`. Repositories are reported at any depth: the walk descends into a repository found inside another one, so nested loose clones are their own rows (e.g. a sandbox repo gitignored by its parent).
 3. A directory containing a `.git` entry — a directory or a file (worktrees) — is a repository.
-4. While the walk runs, show an animated progress bar (no percentage — the total is unknowable) plus a running "found: N" counter. When the walk finishes, the bar fills and the full list renders. Decision (2026-11-11): the list no longer fills incrementally; it renders once at the end.
+4. While the scan runs, show a bare centered `found: N` counter — no progress bar (redesigned 2026-11-17; the look is designed in §Design, list page). The counter covers the whole scan: the walk plus every repository's status read, since the list renders once, complete, at the end. Decisions: the list never fills incrementally (2026-11-11); the loading screen stays until the last status arrives (2026-11-14).
 
 Default prune list: `.git` (git's internal storage, never a repository), `node_modules`, `.cache`, `.npm`, `.bun`, `.venv`, `venv`, `.cargo`, `.rustup`, `.m2`, `.gradle`, `.local`, `target`, `dist`, `build`, `Library`, `AppData`.
 
@@ -133,7 +133,7 @@ Chosen in dialogue and prototyped outside the repo (live-server); proto 9 is the
 - **Rows**: faint horizontal separators only (never vertical), extra line spacing between rows, selection shown as a background; the list scrolls with mouse and keyboard and keeps the selection visible while scrolling.
 - **Hints**: one line spanning the panel width, `action: key` with the key in the attention color: `move: ↑↓`, `open: enter`, `filter: ?`, `clear: esc`, `quit: q`. With an active filter the filter hint shows the query — `filter: "viv"` — so a filtered list is never silent.
 - **Empty state**: `No repositories match "q"` rendered above the list; no repositories found keeps its dedicated hint.
-- **Loading state**: still to design — the scan progress bar look is the one open piece of this page.
+- **Loading state** (designed 2026-11-17, variant B of the prototype): a bare centered counter — `found: N`, the number in the attention color, three muted dots pulsing after it. No panel, no title band, no hints: the counter sits directly on the terminal background. When the list is complete, the counter swaps for the panel in one frame — the panel with its title band is drawn only then. The progress bar from the pre-redesign list is gone.
 
 ## Keyboard map (draft — adjust during implementation)
 
@@ -177,7 +177,7 @@ Chosen in dialogue and prototyped outside the repo (live-server); proto 9 is the
 Each milestone is independently verifiable against its done criteria. Progress is tracked in [BACKLOG.md](./BACKLOG.md); this file stays spec-only.
 
 - **M1 Base TUI** — bootstrap/destroy on all exit paths; two placeholder views; `q` and Ctrl+C exit clean; resize-safe; `typecheck`, `lint`, `fmt:check` green; `bin` field in `package.json`.
-- **M2 Discovery** — pruned `$HOME` walk + config; progress bar with found-count while scanning, list renders on completion; scanning and empty states.
+- **M2 Discovery** — pruned `$HOME` walk + config; bare found-count while scanning (no progress bar, 2026-11-17), list renders on completion; scanning and empty states.
 - **M3 Status** — rows show id, `name / branch`, and merged ahead/behind (`↑N / ↓M` in the attention color, dashes for idle sides, empty cell when idle); each repository's status is read as soon as the walk finds it, so the list renders complete as soon as the last status arrives (decision 2026-11-14: no half-filled rows); porcelain parser unit-tested.
 - **M4 Detail read-only** — header + grouped file list; background fetch on open with indicator and re-status.
 - **M5 Stage + commit** — `Space` / `a` stage and unstage (untracked via `rm --cached`); `c` + `Enter` commits; errors inline; status refreshes after commit.
