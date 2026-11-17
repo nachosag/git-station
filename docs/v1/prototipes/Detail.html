@@ -82,12 +82,16 @@
   /* action panel: ActionPanel.html loaded via iframe, floating centered like the real panel.
      The panel's own body goes transparent when embedded, so the dimmed page shows around it. */
   .scrim { position: absolute; inset: 0; background: rgba(22, 22, 30, 0.65); display: none; }
+  /* Lives inside the page panel, so its percentages resolve against it:
+     centered over the panel, taller than before, never escaping it.
+     z-index keeps it above the scrim, which the JS appends after it. */
   .page-frame {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
     width: min(62ch, 90%);
-    max-height: 86%;
-    height: min(24rem, 86%);
+    max-height: 88%;
+    height: min(30rem, 88%);
     border: none; background: transparent; display: none;
+    z-index: 1;
   }
   .panel.dimmed .meta, .panel.dimmed .files, .panel.dimmed .hints { opacity: 0.3; }
 
@@ -128,9 +132,9 @@
           <span>back: <kbd>esc</kbd></span>
           <span>quit: <kbd>q</kbd></span>
         </div>
+        <iframe class="page-frame" id="panelFrame" src="ActionPanel.html"></iframe>
       </div>
     </div>
-  <iframe class="page-frame" id="panelFrame" src="ActionPanel.html"></iframe>
 <script>
   // File-list navigation: one cursor crosses group boundaries and wraps around
   // the whole list (the app-wide standard). The quick hint adapts per group.

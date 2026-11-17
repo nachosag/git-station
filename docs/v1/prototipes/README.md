@@ -39,7 +39,7 @@ One test-terminal size for every prototype, so screenshots compare the same canv
 
 - **Terminal** (`.term`): `80rem × min(42rem, calc(100vh - 4rem))`, centered on a `100vh` body with `2rem` of breathing room — the canvas fills the window's height and caps at `42rem` on tall monitors. Pages never fill the terminal edge to edge in the design, and the prototype must show that — the terminal background stays visible around the panel.
 - **Page panels** (Listing, Detail): `width: min(110ch, 92%)`, `height: min(36rem, 94%)` — a centered panel that never spans the full terminal.
-- **Floating surfaces** (ActionPanel): `width: min(62ch, 90%)`, `max-height: 86%` — always smaller than the hosting page's panel, centered over it.
+- **Floating surfaces** (ActionPanel): `width: min(62ch, 90%)` — standalone `max-height: 86%` of the window; embedded in Detail the iframe lives inside the page panel and is `height: min(30rem, 88%)` **of it**, so it centers over the page and can never escape it.
 
 ## Shared chrome
 

@@ -139,8 +139,16 @@
 
   function select(target) {
     box.querySelectorAll(".arow.selected").forEach((r) => r.classList.remove("selected"));
-    if (target) target.classList.add("selected");
-    target?.scrollIntoView({ block: "nearest" });
+    if (!target) return;
+    target.classList.add("selected");
+    target.scrollIntoView({ block: "nearest" });
+    // Navigating back up into a section can leave its title above the fold:
+    // the row alone was already visible, so "nearest" never scrolls back.
+    // When the selection lands on a section's first row, bring the section in.
+    const cat = target.closest(".acat");
+    if (target === cat.querySelector(".arow") && cat.getBoundingClientRect().top < alist.getBoundingClientRect().top) {
+      cat.scrollIntoView({ block: "start" });
+    }
   }
   const current = () => box.querySelector(".arow.selected");
 
