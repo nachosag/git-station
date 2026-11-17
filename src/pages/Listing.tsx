@@ -2,6 +2,7 @@ import { type ReactNode } from 'react'
 
 import type { RowView } from '../presenters.ts'
 
+import { Cols } from '../components/Cols.tsx'
 import { HintBar } from '../components/HintBar.tsx'
 
 const WIDTHS = {
@@ -11,6 +12,14 @@ const WIDTHS = {
   ahead: '10%',
   behind: '10%',
 } as const
+
+const COLUMNS = [
+  { key: 'repo', field: 'name', width: WIDTHS.repo },
+  { key: 'dirty', field: 'dirty', width: WIDTHS.dirty },
+  { key: 'branch', field: 'branch', width: WIDTHS.branch },
+  { key: 'ahead', field: 'ahead', width: WIDTHS.ahead },
+  { key: 'behind', field: 'behind', width: WIDTHS.behind },
+] as const
 
 export function Listing(props: {
   rows: RowView[]
@@ -72,46 +81,26 @@ function Table(props: { rows: RowView[]; selectedRow: number }): ReactNode {
 
 function Header(): ReactNode {
   return (
-    <box flexDirection='row'>
-      <text
-        width={WIDTHS.repo}
-        fg='gray'>
-        repo
-      </text>
-      <text
-        width={WIDTHS.dirty}
-        fg='gray'>
-        dirty
-      </text>
-      <text
-        width={WIDTHS.branch}
-        fg='gray'>
-        branch
-      </text>
-      <text
-        width={WIDTHS.ahead}
-        fg='gray'>
-        ahead
-      </text>
-      <text
-        width={WIDTHS.behind}
-        fg='gray'>
-        behind
-      </text>
-    </box>
+    <Cols
+      cells={COLUMNS.map((column) => ({
+        key: column.key,
+        text: column.key,
+        width: column.width,
+      }))}
+    />
   )
 }
 
 function Row(props: { view: RowView; isSelected: boolean }): ReactNode {
   return (
-    <box
-      flexDirection='row'
-      {...(props.isSelected ? { backgroundColor: 'gray' } : {})}>
-      <text width={WIDTHS.repo}>{props.view.name}</text>
-      <text width={WIDTHS.dirty}>{props.view.dirty}</text>
-      <text width={WIDTHS.branch}>{props.view.branch}</text>
-      <text width={WIDTHS.ahead}>{props.view.ahead}</text>
-      <text width={WIDTHS.behind}>{props.view.behind}</text>
+    <box {...(props.isSelected ? { backgroundColor: 'gray' } : {})}>
+      <Cols
+        cells={COLUMNS.map((column) => ({
+          key: column.key,
+          text: props.view[column.field],
+          width: column.width,
+        }))}
+      />
     </box>
   )
 }

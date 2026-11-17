@@ -16,6 +16,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | IMP-005 | Compute the detail view only when it opens   | Done        |
 | IMP-006 | Componentize the UI layer                    | In progress |
 | IMP-007 | Theme and component styling                  | Not started |
+| IMP-008 | Declare the table columns once               | Done        |
 | US-003  | See the state of each repository at a glance | Done        |
 | US-004  | Filter the list by name                      | Done        |
 | US-005  | Inspect one repository in detail             | Done        |
@@ -549,7 +550,9 @@ The views have grown by accretion: `Listing` renders the search field, the no-ma
 - [x] Given the key hints at the bottom of both views, then they come from one component, and changing a view's hints touches one place.
 
   Verified by: eye (written 2026-11-16 — `HintBar` takes `hints: { key, action }[]` and renders one `<text>` per hint; `Listing` keeps Open/Quit in one array plus a conditional first hint, `Detail` keeps Back/Quit; all five lines render with the same text and order as before).
-- [ ] Given the list table and the detail file groups, then both render through the same row primitive and the column sizes are declared once.
+- [x] Given the list table and the detail file groups, then both render through the same row primitive and the column sizes are declared once.
+
+  Verified by: eye (written 2026-11-16 — `bun run dev`: la tabla y los grupos del detalle muestran lo mismo, con el marcador en columna fija y el nombre a lo ancho). Con la opción 2 los tests existentes de `presenters` se actualizaron a la nueva forma del dato (`FileCell`); no se agregaron tests nuevos. `Cols` es el único primitivo de fila: `Header`/`Row` en `Listing` y los tres grupos en `Detail`. Anchos: `WIDTHS` en `Listing`, `FILE_WIDTHS` en `Detail`, cada uno declarado una vez.
 - [ ] Given the search field and its clear hint, then they are one component that takes `query`, `searching` and the change handler.
 - [ ] Given both views, then behavior is unchanged: list selection, filtering, no-matches state, detail header, groups and scroll, all checked by eye.
 
@@ -580,4 +583,22 @@ Accepted 2026-11-16 while planning IMP-006. The components land with today's col
 - The standard is defined at this improvement's first step, with the opentui API in view, and recorded in SPECS.md.
 - Per-state colors (e.g. the behind count highlighted when it is above zero) would need the presenters to return structured cells instead of preformatted strings (`'↑ 2'`). The first pass colors whole lines and leaves that decision open.
 - Add tokens only when a component needs one; the set above is the floor, not the ceiling.
+
+### IMP-008: Declare the table columns once
+
+**Priority:** polish · **Size:** S · **Depends on:** IMP-006
+
+**Description**
+
+Accepted 2026-11-16 as a proposal after the shared row primitive landed: `Header` and `Row` in `Listing.tsx` each wrote out the same five cells with the same keys and order. The widths came from `WIDTHS` (one declaration), but the table's shape was duplicated. A single `COLUMNS` list next to `WIDTHS` is now the only place that declares which columns exist, their order and their widths; both views map over it.
+
+**Acceptance criteria**
+
+- [x] Given `Header` and `Row`, then both build their cells from one `COLUMNS` list, so adding or reordering a column touches one place.
+
+  Verified by: `bun run check` green (25 tests unchanged) and eye (written 2026-11-16 — the table shows the same five columns in the same order; output identical).
+
+**Notes / open questions**
+
+- `field` exists because the `repo` column displays `RowView.name`: the header label and React key are `repo`, but the property is `name`. Indexing `props.view[column.key]` raised TS7053, hence the separate field.
 

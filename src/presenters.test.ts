@@ -82,9 +82,9 @@ describe('presenters', () => {
         'ahead: ↑ 2',
         'behind: ↓ —',
       ],
-      staged: ['\t M src/a.ts'],
-      unstaged: ['\t M src/b.ts'],
-      untracked: ['\t ? notes.md'],
+      staged: [{ marker: 'M', name: 'src/a.ts' }],
+      unstaged: [{ marker: 'M', name: 'src/b.ts' }],
+      untracked: [{ marker: '?', name: 'notes.md' }],
     })
   })
 
@@ -101,7 +101,7 @@ describe('presenters', () => {
 
     expect(
       toDetailView('/home/me/demo', readable, new Map<string, string>()).staged,
-    ).toStrictEqual(['\t M viejo.txt -> nuevo.txt'])
+    ).toStrictEqual([{ marker: 'M', name: 'viejo.txt -> nuevo.txt' }])
   })
 
   test('a clean repository reports no pending files', () => {

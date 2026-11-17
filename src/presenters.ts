@@ -15,9 +15,14 @@ export type DetailView = {
   isClean: boolean
   path: string
   info: string[]
-  staged: string[]
-  unstaged: string[]
-  untracked: string[]
+  staged: FileCell[]
+  unstaged: FileCell[]
+  untracked: FileCell[]
+}
+
+export type FileCell = {
+  marker: string
+  name: string
 }
 
 const DASH = '—'
@@ -88,14 +93,14 @@ export function toDetailView(
   }
 }
 
-function fileLines(status: RepoStatus, group: File['status']): string[] {
+function fileLines(status: RepoStatus, group: File['status']): FileCell[] {
   const marker = group === 'untracked' ? '?' : 'M'
 
   return status.files
     .filter((file) => file.status === group)
     .map((file) => {
       const name = file.oldPath ? `${file.oldPath} -> ${file.path}` : file.path
-      return `\t ${marker} ${name}`
+      return { marker, name }
     })
 }
 

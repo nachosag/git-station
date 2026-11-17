@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 
 import type { DetailView } from '../presenters.ts'
 
+import { Cols } from '../components/Cols.tsx'
 import { HintBar } from '../components/HintBar.tsx'
 
 export function Detail(props: { view: DetailView }): ReactNode {
@@ -47,6 +48,7 @@ function Info(props: { lines: string[] }): ReactNode {
 }
 
 function Groups(props: { view: DetailView }): ReactNode {
+  const FILE_WIDTHS = { marker: 4, name: 'auto' } as const
   return (
     <scrollbox
       focused={true}
@@ -59,19 +61,49 @@ function Groups(props: { view: DetailView }): ReactNode {
           <box>
             <text>staged ({props.view.staged.length})</text>
             {props.view.staged.map((file) => (
-              <text key={file}>{file}</text>
+              <Cols
+                key={file.name}
+                cells={[
+                  {
+                    key: 'marker',
+                    text: file.marker,
+                    width: FILE_WIDTHS['marker'],
+                  },
+                  { key: 'name', text: file.name, width: FILE_WIDTHS['name'] },
+                ]}
+              />
             ))}
           </box>
           <box>
             <text>unstaged ({props.view.unstaged.length})</text>
             {props.view.unstaged.map((file) => (
-              <text key={file}>{file}</text>
+              <Cols
+                key={file.name}
+                cells={[
+                  {
+                    key: 'marker',
+                    text: file.marker,
+                    width: FILE_WIDTHS['marker'],
+                  },
+                  { key: 'name', text: file.name, width: FILE_WIDTHS['name'] },
+                ]}
+              />
             ))}
           </box>
           <box>
             <text>untracked ({props.view.untracked.length})</text>
             {props.view.untracked.map((file) => (
-              <text key={file}>{file}</text>
+              <Cols
+                key={file.name}
+                cells={[
+                  {
+                    key: 'marker',
+                    text: file.marker,
+                    width: FILE_WIDTHS['marker'],
+                  },
+                  { key: 'name', text: file.name, width: FILE_WIDTHS['name'] },
+                ]}
+              />
             ))}
           </box>
         </>
