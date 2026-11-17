@@ -17,6 +17,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | IMP-006 | Componentize the UI layer                    | In progress |
 | IMP-007 | Theme and component styling                  | Not started |
 | IMP-008 | Declare the table columns once               | Done        |
+| IMP-009 | Confirm the search with Enter before moving  | Done        |
 | US-003  | See the state of each repository at a glance | Done        |
 | US-004  | Filter the list by name                      | Done        |
 | US-005  | Inspect one repository in detail             | Done        |
@@ -553,8 +554,14 @@ The views have grown by accretion: `Listing` renders the search field, the no-ma
 - [x] Given the list table and the detail file groups, then both render through the same row primitive and the column sizes are declared once.
 
   Verified by: eye (written 2026-11-16 — `bun run dev`: la tabla y los grupos del detalle muestran lo mismo, con el marcador en columna fija y el nombre a lo ancho). Con la opción 2 los tests existentes de `presenters` se actualizaron a la nueva forma del dato (`FileCell`); no se agregaron tests nuevos. `Cols` es el único primitivo de fila: `Header`/`Row` en `Listing` y los tres grupos en `Detail`. Anchos: `WIDTHS` en `Listing`, `FILE_WIDTHS` en `Detail`, cada uno declarado una vez.
-- [ ] Given the search field and its clear hint, then they are one component that takes `query`, `searching` and the change handler.
+- [ ] Given the search field, then it is one component that takes `query`, `searching` and the change handler; the clear hint stays in `Listing`, in the conditional `HintBar`.
+
+  Verified by: eye (planned)
+
+  Decision (2026-11-16): approach B — the component is the field only, so the screen stays exactly as it is today. The original wording ("the search field and its clear hint are one component") was false under this approach, so it now says what is actually verified.
 - [ ] Given both views, then behavior is unchanged: list selection, filtering, no-matches state, detail header, groups and scroll, all checked by eye.
+
+  Verified by: eye (planned)
 
 **Notes / open questions**
 
@@ -601,4 +608,22 @@ Accepted 2026-11-16 as a proposal after the shared row primitive landed: `Header
 **Notes / open questions**
 
 - `field` exists because the `repo` column displays `RowView.name`: the header label and React key are `repo`, but the property is `name`. Indexing `props.view[column.key]` raised TS7053, hence the separate field.
+
+### IMP-009: Confirm the search with Enter before moving
+
+**Priority:** polish · **Size:** S · **Depends on:** US-004
+
+**Description**
+
+Requested 2026-11-16, in the middle of IMP-006. First reading corrected by the user: while the search field is focused the keyboard belongs to it — no row movement. What is missing is the way out: today the only paths away from the field lose the filter (Esc clears it) or go through the detail view (Enter opens it). Design chosen (B): while typing, `Enter` confirms the filter and leaves the field keeping the query; a second `Enter` opens the detail; `Esc` keeps clearing the filter in every state. SPECS.md §States and §Keyboard map record it.
+
+**Acceptance criteria**
+
+- [x] Given the search field focused after typing a query with matches, when I press `Enter`, then the field is left with the query and its filtered rows intact, `j`/`k` and the arrows move the highlight among them, and a second `Enter` opens the detail of the selected row.
+
+  Verified by: eye (written 2026-11-16 — `bun run dev`: Enter tras escribir confirma y deja la query con el marcado en la lista, `j`/`k` mueven entre las filtradas y el segundo Enter abre el detalle). `bun run check` verde (25 tests).
+
+**Notes / open questions**
+
+- The early-return guard inside `isSearching` is what keeps the field's keyboard separate: flattening it into `isSearching && ...` conditions let one key press fire both the confirm and the open (React state closures do not update mid-handler), plus `q` quit and `j`/`k` moved while typing. The guard stays.
 

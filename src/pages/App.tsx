@@ -63,20 +63,19 @@ export function App(props: { renderer: CliRenderer }): ReactNode {
   useKeyboard((key) => {
     // va siendo hora de un refactor de esta parte
     if (rows.length === 0) return
+    if (rows.length === 0) return
     if (isSearching) {
       if (key.name === 'escape') {
         setIsSearching(false)
         setQuery('')
       }
-      if (key.name === 'return' && visibleRows.length > 0) {
-        setIsSearching(false)
-        setView('detail')
-      }
+      if (key.name === 'return') setIsSearching(false)
       return
     }
     if (key.name === 'q') props.renderer.destroy()
     if (key.name === '/') setIsSearching(true)
-    if (key.name === 'return' && view === 'list') setView('detail')
+    if (key.name === 'return' && view === 'list' && visibleRows.length > 0)
+      setView('detail')
     if (key.name === 'escape' && view === 'detail') setView('list')
     if (key.name === 'escape' && view === 'list') setQuery('')
     if (view === 'list' && (key.name === 'j' || key.name === 'down'))

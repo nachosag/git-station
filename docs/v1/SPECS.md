@@ -98,7 +98,7 @@ name                 branch           ●    ↑2 ↓0
 - `●`: dirty indicator — present when the index or working tree has changes, empty when clean.
 - `↑N ↓M`: ahead/behind vs upstream; `—` when there is no upstream.
 
-States: scanning (progress indicator while the walk runs), empty (no repositories found, with a hint), filtered (`/` narrows by name substring; while a filter is active the list shows it on its own line above the table, together with the key that clears it — a filtered list is never silent).
+States: scanning (progress indicator while the walk runs), empty (no repositories found, with a hint), filtered (`/` narrows by name substring; while a filter is active the list shows it on its own line above the table, together with the key that clears it — a filtered list is never silent). While the search field is focused the keyboard belongs to it: no row movement, `Enter` confirms the filter and leaves the field keeping the query, `Esc` clears it — a second `Enter` then opens the detail.
 
 ### Detail view
 
@@ -116,7 +116,7 @@ Opening the detail view renders the local status immediately; a background `fetc
 | View   | Key                 | Action                                        |
 | ------ | ------------------- | --------------------------------------------- |
 | List   | `j` / `k` or arrows | Move selection                                |
-| List   | `Enter`             | Open detail                                   |
+| List   | `Enter`             | Open detail (search focused: confirm filter)  |
 | List   | `/`                 | Filter by name                                |
 | List   | `Esc`               | Clear the active filter                       |
 | List   | `r`                 | Refresh statuses                              |
