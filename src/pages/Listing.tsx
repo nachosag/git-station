@@ -85,6 +85,7 @@ function Table(props: { rows: RowView[]; selectedRow: number }): ReactNode {
 function Header(): ReactNode {
   return (
     <Cols
+      fg={theme.muted}
       cells={COLUMNS.map((column) => ({
         key: column.key,
         text: column.key,

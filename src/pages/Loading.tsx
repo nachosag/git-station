@@ -1,5 +1,7 @@
 import { type ReactNode, useEffect, useState } from 'react'
 
+import { theme } from '../theme.ts'
+
 export function Loading(props: { length: number }): ReactNode {
   const [tick, setTick] = useState(0)
 
@@ -17,7 +19,11 @@ export function Loading(props: { length: number }): ReactNode {
 
   return (
     <box>
-      {props.length > 0 && <text>found: {props.length}</text>}
+      {props.length > 0 && (
+        <text>
+          found: <span fg={theme.attention}>{props.length}</span>
+        </text>
+      )}
 
       <text>{bar}</text>
     </box>

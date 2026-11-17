@@ -60,7 +60,7 @@ function Groups(props: { view: DetailView }): ReactNode {
       ) : (
         <>
           <box>
-            <text>staged ({props.view.staged.length})</text>
+            <text fg={theme.muted}>staged ({props.view.staged.length})</text>
             {props.view.staged.map((file) => (
               <Cols
                 key={file.name}
@@ -76,7 +76,9 @@ function Groups(props: { view: DetailView }): ReactNode {
             ))}
           </box>
           <box>
-            <text>unstaged ({props.view.unstaged.length})</text>
+            <text fg={theme.muted}>
+              unstaged ({props.view.unstaged.length})
+            </text>
             {props.view.unstaged.map((file) => (
               <Cols
                 key={file.name}
@@ -92,7 +94,9 @@ function Groups(props: { view: DetailView }): ReactNode {
             ))}
           </box>
           <box>
-            <text>untracked ({props.view.untracked.length})</text>
+            <text fg={theme.muted}>
+              untracked ({props.view.untracked.length})
+            </text>
             {props.view.untracked.map((file) => (
               <Cols
                 key={file.name}

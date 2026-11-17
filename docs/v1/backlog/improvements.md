@@ -154,9 +154,11 @@ Expanded (2026-11-17): the pass defines the design in its totality, page by page
 
   Decision (2026-11-17): `Detail`'s header reads `selection` instead of gaining a fourth token — `selection` is the only background role that exists today, and the header gets its own role (or disappears into the panel) in the redesign step, where its look is designed.
 
-- [ ] Given each component, then its look comes from the theme: `HintBar` (key vs action), `Table` (column labels, selected row), `Group` (title), `SearchField`, the detail header, and `Loading`.
+- [x] Given each component, then its look comes from the theme: `HintBar` (key vs action), `Table` (column labels, selected row), `Group` (title), `SearchField`, the detail header, and `Loading`.
 
-  Verified by: eye (planned)
+  Verified by: eye (written 2026-11-17 — el usuario confirmó en `bun run dev`: claves de los hints y el número de `found: N` en naranja, etiquetas de columna y títulos de grupo en gris; `bun run check` verde, 25 tests).
+
+  Decision (2026-11-17): `Cols` recibe un `fg?: string` opcional para todas sus celdas, no un color por celda — el header es el único que lo necesita hoy. Se pasa con spread condicional porque `exactOptionalPropertyTypes` no acepta un prop `fg` presente con valor `undefined`.
 
 - [ ] Given both views, then the data flow and the information shown stay identical (display-only: dirty, ahead and behind merge into one `✱ / ↑N / ↓M` column, per the page designs), keys follow the updated keyboard map, and the screens are rebuilt to match SPECS.md §Design.
 

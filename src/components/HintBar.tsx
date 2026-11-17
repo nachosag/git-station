@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 
+import { theme } from '../theme.ts'
+
 export function HintBar(props: {
   hints: { key: string; action: string }[]
 }): ReactNode {
@@ -7,7 +9,7 @@ export function HintBar(props: {
     <>
       {props.hints.map((hint) => (
         <text key={hint.action}>
-          {hint.action}: {hint.key}
+          {hint.action}: <span fg={theme.attention}>{hint.key}</span>
         </text>
       ))}
     </>
