@@ -15,7 +15,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | IMP-004 | Tighten the status naming and path reading   | Done        |
 | IMP-005 | Compute the detail view only when it opens   | Done        |
 | IMP-006 | Componentize the UI layer                    | Done        |
-| IMP-007 | Theme and component styling                  | Not started |
+| IMP-007 | Theme and component styling                  | In progress |
 | IMP-008 | Declare the table columns once               | Done        |
 | IMP-009 | Confirm the search with Enter before moving  | Done        |
 | US-003  | See the state of each repository at a glance | Done        |
@@ -574,22 +574,43 @@ The views have grown by accretion: `Listing` renders the search field, the no-ma
 
 ### IMP-007: Theme and component styling
 
-**Priority:** polish (after IMP-006, before US-006) · **Size:** M · **Depends on:** IMP-006
+**Priority:** polish (after IMP-006, before US-006) · **Size:** L · **Depends on:** IMP-006
 
 **Description**
 
-Accepted 2026-11-16 while planning IMP-006. The components land with today's colors so the structure pass stays verifiable (output identical, string by string); the visual language gets its own pass on top of stable props. Today three `gray` usages mean three different things (detail header background, selected-row background, column-label foreground) and the style choices are hardcoded in the views. This improvement first defines the styling standard, then applies it: colors and shared styles come from one theme file of tokens (SPECS D7), each component owns its look and reads the tokens, and the screens never hardcode colors. opentui 0.5.x supports `border`, `borderStyle`, `title`, `titleColor`, `padding` and `margin` (confirmed against the API docs 2026-11-16).
+Accepted 2026-11-16 while planning IMP-006. The components land with today's colors so the structure pass stays verifiable (output identical, string by string); the visual language gets its own pass on top of stable props. Today three `gray` usages mean three different things (detail header background, selected-row background, column-label foreground) and the style choices are hardcoded in the views. opentui 0.5.x supports `border`, `borderStyle`, `title`, `titleColor`, `padding` and `margin` (confirmed against the API docs 2026-11-16).
+
+Expanded (2026-11-17): the pass defines the design in its totality, page by page — which components each page shows and in what order, sizes and spacing, and the look of every element — plus colors and visual details. First the standard, then each page's design in dialogue, then the implementation. Approaches chosen (2026-11-17): semantic tokens (named for the role they play, never for their color value), one `theme.ts` holding the tokens and nothing else, and direct props always with the `style` prop only when no direct prop covers the need.
 
 **Acceptance criteria**
 
-- [ ] Given the styling standard, then it is written into SPECS.md before any styling code: token naming, where styles live (theme file vs component), and direct props vs the `style` prop.
+- [x] The styling standard is written into SPECS.md (§Design) before any styling code: token naming, where styles live (theme file vs component), and direct props vs the `style` prop.
+
+  Verified by: eye (written 2026-11-17 — el usuario confirmó que la sección §Design dice exactamente lo que eligió: tokens semánticos, `theme.ts` con los tokens y nada más, props directas primero y `style` solo como último recurso)
+
+- [ ] The list page design is written into SPECS.md in full: which components it shows and in what order, sizes and percentages, spacing, and the look of every element — including its states (loading, empty, filtered).
+
+  Verified by: eye (planned)
+
+- [ ] The detail page design is written into SPECS.md in full, same shape as the list page step.
+
+  Verified by: eye (planned)
+
 - [ ] Given the theme, then it is one file of tokens (at least: `selection`, `muted`, `warning`) and no screen or component hardcodes a color.
+
+  Verified by: grep — sin valores de color en src/ fuera de theme.ts + eye (planned)
+
 - [ ] Given each component, then its look comes from the theme: `HintBar` (key vs action), `Table` (column labels, selected row), `Group` (title), `SearchField`, the detail header, and `Loading`.
+
+  Verified by: eye (planned)
+
 - [ ] Given both views, then behavior is unchanged: keys, data flow and screen structure are identical; only the look changes.
+
+  Verified by: eye (planned)
 
 **Notes / open questions**
 
-- The standard is defined at this improvement's first step, with the opentui API in view, and recorded in SPECS.md.
+- Decided (2026-11-17): semantic tokens, one theme file of tokens only, direct props first — recorded in SPECS.md §Design.
 - Per-state colors (e.g. the behind count highlighted when it is above zero) would need the presenters to return structured cells instead of preformatted strings (`'↑ 2'`). The first pass colors whole lines and leaves that decision open.
 - Add tokens only when a component needs one; the set above is the floor, not the ceiling.
 

@@ -13,7 +13,7 @@ git-station (`gs`) is a keyboard-driven terminal UI to discover, monitor, and ma
 | D5  | Git adapter  | Always shell out to the `git` binary via `Bun.spawn` with `git -C <path>`. No git library. `git status --porcelain=v2 --branch` is the single source of repo state.                      |
 | D6  | UI language  | All on-screen text is English in v1 (decision 2026-11-11). A localized UI (Spanish first) is a v2 candidate.                                                                             |
 
-| D7  | Theme        | Colors and shared styles come from one theme file of tokens; screens never hardcode them (decision 2026-11-16).                                                                          |
+| D7 | Theme | Colors and shared styles come from one theme file of tokens; screens never hardcode them. The styling standard and each page's design live in §Design (D7) (expanded 2026-11-17). |
 
 ## Goals (v1)
 
@@ -110,6 +110,16 @@ Sections, top to bottom:
 4. Feedback line: the running operation (`fetch…`, `push…`), its output, or the last error's stderr.
 
 Opening the detail view renders the local status immediately; a background `fetch` runs (D4) and a re-status refreshes ahead/behind when it completes.
+
+## Design (D7)
+
+The design is defined in full, page by page (expanded 2026-11-17): which components each page shows and in what order, sizes and spacing, and the look of every element — plus colors and visual details. Each page's design is written here before its implementation step; the list page and the detail page get one subsection each.
+
+### Styling standard (2026-11-17)
+
+- Tokens are semantic: named for the role they play (`selection`, `muted`, `warning`), never for their color value. A token is added only when a component needs it.
+- One theme file (`theme.ts`) holds the tokens and nothing else. Every component reads its colors from it; no screen or component hardcodes a color.
+- Direct props always (`bg`, `fg`, …); the `style` prop only when no direct prop covers the need.
 
 ## Keyboard map (draft — adjust during implementation)
 
