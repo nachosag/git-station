@@ -152,7 +152,9 @@ As a developer scanning many repositories, I want each row to show the branch, a
 
 **Acceptance criteria**
 
-- [x] Given a repository with a dirty working tree, 2 commits ahead and 1 behind its upstream (per local refs), when the list renders, then its row shows the name, the branch, a dirty mark, and ahead 2 / behind 1.
+- [x] Given a repository with a dirty working tree, 2 commits ahead and 1 behind its upstream (per local refs), when the list renders, then its row shows id, `name / branch` and `↑2 / ↓1`.
+
+  Rewritten (2026-11-17): the IMP-007 list-page redesign (SPECS.md §Design, list page) removed the dirty mark from the list — the dirty data is redundant at list level and stays visible in the detail view — and merged ahead/behind into one `↑N / ↓M` column. Display change only; the parsing and the data behind the rows are unchanged.
   - [x] Given one repository, when its status is read, then the branch line yields the branch name and ahead/behind, and yields `detached` and `—` when there is a detached HEAD or no upstream.
 
     Verified by: src/status.test.ts — `parseStatus` → 'reports the branch and ahead/behind from the status header', 'reports detached and no upstream with no ahead/behind' (written)
@@ -592,6 +594,8 @@ Expanded (2026-11-17): the pass defines the design in its totality, page by page
 
   Verified by: eye (planned)
 
+  Progress (2026-11-17): the design is in SPECS.md §Design (list page) from the prototyping dialogue — everything except the loading state, which is still to design; the criterion stays open until that last piece lands.
+
 - [ ] The detail page design is written into SPECS.md in full, same shape as the list page step.
 
   Verified by: eye (planned)
@@ -604,15 +608,19 @@ Expanded (2026-11-17): the pass defines the design in its totality, page by page
 
   Verified by: eye (planned)
 
-- [ ] Given both views, then behavior is unchanged: keys, data flow and screen structure are identical; only the look changes.
+- [ ] Given both views, then the data flow and the information shown stay identical (display-only: ahead/behind merges into one column and the dirty mark leaves the list, per the page designs), keys follow the updated keyboard map, and the screens are rebuilt to match SPECS.md §Design.
 
   Verified by: eye (planned)
+
+  Rewritten (2026-11-17): the original wording ("keys, data flow and screen structure are identical; only the look changes") became false under the full redesign of the list page — the filter key changed from `/` to `?`, the screen structure changes (title band, merged columns), and the dirty mark leaves the list by design.
 
 **Notes / open questions**
 
 - Decided (2026-11-17): semantic tokens, one theme file of tokens only, direct props first — recorded in SPECS.md §Design.
 - Per-state colors (e.g. the behind count highlighted when it is above zero) would need the presenters to return structured cells instead of preformatted strings (`'↑ 2'`). The first pass colors whole lines and leaves that decision open.
 - Add tokens only when a component needs one; the set above is the floor, not the ceiling.
+- Design dialogue (2026-11-17): every page's discussion opens with one question — redesign from scratch or keep the structure — before any detail; the look is prototyped as HTML outside the repo and reviewed live in the browser (live-server) before being written into SPECS.md.
+- Listing page (2026-11-17): full redesign chosen over keeping the structure — centered panel that does not span the full width, scrollable repository list (absorbs the list-scroll proposal noted under US-005; `IMP-003` stays reserved for it), minimalist look, taking full advantage of opentui (`border`, `borderStyle`, `title`, `padding`). The "only the look changes" wording of the behavior criterion becomes false under a redesign: it will be rewritten when the design lands in SPECS.md.
 
 ### IMP-008: Declare the table columns once
 

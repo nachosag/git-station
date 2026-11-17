@@ -98,7 +98,7 @@ name                 branch           ●    ↑2 ↓0
 - `●`: dirty indicator — present when the index or working tree has changes, empty when clean.
 - `↑N ↓M`: ahead/behind vs upstream; `—` when there is no upstream.
 
-States: scanning (progress indicator while the walk runs), empty (no repositories found, with a hint), filtered (`/` narrows by name substring; while a filter is active the list shows it on its own line above the table, together with the key that clears it — a filtered list is never silent). While the search field is focused the keyboard belongs to it: no row movement, `Enter` confirms the filter and leaves the field keeping the query, `Esc` clears it — a second `Enter` then opens the detail.
+States: scanning (progress indicator while the walk runs; its look is designed in §Design, list page), empty (no repositories found, with a hint), filtered (`?` swaps the title band for the filter input; the active query is shown in the hints line — a filtered list is never silent). While the filter input is active the keyboard belongs to it: no row movement, `Enter` confirms the filter and closes the input keeping the query, `Esc` clears it — a second `Enter` then opens the detail.
 
 ### Detail view
 
@@ -121,13 +121,27 @@ The design is defined in full, page by page (expanded 2026-11-17): which compone
 - One theme file (`theme.ts`) holds the tokens and nothing else. Every component reads its colors from it; no screen or component hardcodes a color.
 - Direct props always (`bg`, `fg`, …); the `style` prop only when no direct prop covers the need.
 
+### List page (2026-11-17)
+
+Chosen in dialogue and prototyped outside the repo (live-server); proto 9 is the visual reference. A full redesign was chosen over keeping the structure (2026-11-17).
+
+- **Panel**: centered on screen, does not span the full width, thin border with sharp corners, surface background; nothing is written on the border line.
+- **Layout, top to bottom**: title band, table header, scrollable list, hints line. No permanent search bar — the filter lives in the title band (keyboard-first: no visible UI invites the mouse).
+- **Title band**: one row tall, exactly matching the data rows' height. Idle it shows `git-station`, muted and centered. `?` swaps its content for the filter input (same slot, nothing moves or is covered); the typed text is centered and in the attention color. `Enter` confirms the filter and restores the title; `Esc` clears the filter and restores it.
+- **Table**: three visual columns, header and cells centered alike — `id` (the repository's stable index in the full scan, muted, never colored), `repo / branch` (one cell: the name in the text color, ` / branch` muted), and `ahead / behind` (one column on the right: `↑N / ↓M` in the attention color; a one-sided state keeps its dash, `↑1 / —`; an idle repository shows an empty cell).
+- **No dirty mark in the list** — decided 2026-11-17: the dirty data is redundant at list level; it stays visible in the detail view.
+- **Rows**: faint horizontal separators only (never vertical), extra line spacing between rows, selection shown as a background; the list scrolls with mouse and keyboard and keeps the selection visible while scrolling.
+- **Hints**: one line spanning the panel width, `action: key` with the key in the attention color: `move: ↑↓`, `open: enter`, `filter: ?`, `clear: esc`, `quit: q`. With an active filter the filter hint shows the query — `filter: "viv"` — so a filtered list is never silent.
+- **Empty state**: `No repositories match "q"` rendered above the list; no repositories found keeps its dedicated hint.
+- **Loading state**: still to design — the scan progress bar look is the one open piece of this page.
+
 ## Keyboard map (draft — adjust during implementation)
 
 | View   | Key                 | Action                                        |
 | ------ | ------------------- | --------------------------------------------- |
 | List   | `j` / `k` or arrows | Move selection                                |
 | List   | `Enter`             | Open detail (search focused: confirm filter)  |
-| List   | `/`                 | Filter by name                                |
+| List   | `?`                 | Filter by name (swaps the title band)         |
 | List   | `Esc`               | Clear the active filter                       |
 | List   | `r`                 | Refresh statuses                              |
 | List   | `d`                 | Delete repository (typed-name confirmation)   |
@@ -164,7 +178,7 @@ Each milestone is independently verifiable against its done criteria. Progress i
 
 - **M1 Base TUI** — bootstrap/destroy on all exit paths; two placeholder views; `q` and Ctrl+C exit clean; resize-safe; `typecheck`, `lint`, `fmt:check` green; `bin` field in `package.json`.
 - **M2 Discovery** — pruned `$HOME` walk + config; progress bar with found-count while scanning, list renders on completion; scanning and empty states.
-- **M3 Status** — rows show name, branch/detached, dirty, `↑N ↓M` or `—`; each repository's status is read as soon as the walk finds it, so the list renders complete as soon as the last status arrives (decision 2026-11-14: no half-filled rows); porcelain parser unit-tested.
+- **M3 Status** — rows show id, `name / branch`, and merged ahead/behind (`↑N / ↓M` in the attention color, dashes for idle sides, empty cell when idle); each repository's status is read as soon as the walk finds it, so the list renders complete as soon as the last status arrives (decision 2026-11-14: no half-filled rows); porcelain parser unit-tested.
 - **M4 Detail read-only** — header + grouped file list; background fetch on open with indicator and re-status.
 - **M5 Stage + commit** — `Space` / `a` stage and unstage (untracked via `rm --cached`); `c` + `Enter` commits; errors inline; status refreshes after commit.
 - **M6 Network ops** — `f` / `p` / `P` run async with running state, output/stderr inline, status refresh on completion; the UI never blocks.
