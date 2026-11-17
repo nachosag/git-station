@@ -148,9 +148,11 @@ Expanded (2026-11-17): the pass defines the design in its totality, page by page
 
   Verified by: eye (written 2026-11-17 — el usuario confirmó que el texto dice lo que elegimos: detail con header de una fila y selección única circular, action panel contextual de cinco secciones con búsqueda (`?`), descripciones (`+`) y atajos naranjas; el prototipo aceptado vive en `prototipes/Detail.html` y `prototipes/ActionPanel.html`. Durante la revisión del texto se agregaron: flechas circulares como estándar de la app, fuera `tab`, y la quick action `graph: g` que origina US-013)
 
-- [ ] Given the theme, then it is one file of tokens (at least: `selection`, `muted`, `warning`) and no screen or component hardcodes a color.
+- [x] Given the theme, then it is one file of tokens (at least: `selection`, `muted`, `warning`) and no screen or component hardcodes a color.
 
-  Verified by: grep — sin valores de color en src/ fuera de theme.ts + eye (planned)
+  Verified by: grep — sin valores de color en `src/` fuera de `theme.ts`, corrido al cerrar (written 2026-11-17) + eye (written 2026-11-17 — `bun run dev`: la fila seleccionada y el header del detalle se ven igual que antes). `bun run check` verde (25 tests).
+
+  Decision (2026-11-17): `Detail`'s header reads `selection` instead of gaining a fourth token — `selection` is the only background role that exists today, and the header gets its own role (or disappears into the panel) in the redesign step, where its look is designed.
 
 - [ ] Given each component, then its look comes from the theme: `HintBar` (key vs action), `Table` (column labels, selected row), `Group` (title), `SearchField`, the detail header, and `Loading`.
 

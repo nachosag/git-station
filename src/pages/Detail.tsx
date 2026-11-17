@@ -4,6 +4,7 @@ import type { DetailView } from '../presenters.ts'
 
 import { Cols } from '../components/Cols.tsx'
 import { HintBar } from '../components/HintBar.tsx'
+import { theme } from '../theme.ts'
 
 export function Detail(props: { view: DetailView }): ReactNode {
   return (
@@ -13,7 +14,7 @@ export function Detail(props: { view: DetailView }): ReactNode {
       alignItems='center'>
       <text
         textAlign='center'
-        bg='gray'
+        bg={theme.selection}
         width='80%'>
         {props.view.path}
       </text>

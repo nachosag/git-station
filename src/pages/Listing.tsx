@@ -5,6 +5,7 @@ import type { RowView } from '../presenters.ts'
 import { Cols } from '../components/Cols.tsx'
 import { HintBar } from '../components/HintBar.tsx'
 import { SearchField } from '../components/SearchField.tsx'
+import { theme } from '../theme.ts'
 
 const WIDTHS = {
   repo: '35%',
@@ -95,7 +96,7 @@ function Header(): ReactNode {
 
 function Row(props: { view: RowView; isSelected: boolean }): ReactNode {
   return (
-    <box {...(props.isSelected ? { backgroundColor: 'gray' } : {})}>
+    <box {...(props.isSelected ? { backgroundColor: theme.selection } : {})}>
       <Cols
         cells={COLUMNS.map((column) => ({
           key: column.key,
