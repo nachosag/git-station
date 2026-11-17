@@ -14,7 +14,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | IMP-002 | Ship a Linux binary with a one-line install  | Not started |
 | IMP-004 | Tighten the status naming and path reading   | Done        |
 | IMP-005 | Compute the detail view only when it opens   | Done        |
-| IMP-006 | Componentize the UI layer                    | In progress |
+| IMP-006 | Componentize the UI layer                    | Done        |
 | IMP-007 | Theme and component styling                  | Not started |
 | IMP-008 | Declare the table columns once               | Done        |
 | IMP-009 | Confirm the search with Enter before moving  | Done        |
@@ -561,14 +561,14 @@ The views have grown by accretion: `Listing` renders the search field, the no-ma
   Decision (2026-11-16): the prop is `isSearching`, not `searching` — it keeps the name `Listing` already used, so no prop was renamed just to move.
 
   Decision (2026-11-16): approach B — the component is the field only, so the screen stays exactly as it is today. The original wording ("the search field and its clear hint are one component") was false under this approach, so it now says what is actually verified.
-- [ ] Given both views, then behavior is unchanged: list selection, filtering, no-matches state, detail header, groups and scroll, all checked by eye.
+- [x] Given both views, then behavior is unchanged: list selection, filtering, no-matches state, detail header, groups and scroll, all checked by eye.
 
-  Verified by: eye (planned)
+  Verified by: eye (written 2026-11-16 — recorrida completa de ambas vistas en `bun run dev`: selección con `j`/`k`, filtro con `/`, mensaje de sin coincidencias, header del detalle, los tres grupos y el scroll).
 
 **Notes / open questions**
 
 - Every test today is `eye`: this pass must not need new tests, since the output strings and keystrokes stay the same. If a step turns out to change behavior, that is a sign the step was too big.
-- A headless test of the key sequence (`/` → `coll` → Enter → Esc) was proposed at US-004's close and not taken. Revisit after this pass, when the components have stable props to test against.
+- A headless test of the key sequence (`/` → `coll` → Enter → Esc) was proposed at US-004's close and not taken. Revisited after IMP-006 (2026-11-16) and declined by the user — the eye checks stand; do not raise it again.
 - Plan (2026-11-16): the layout is `src/pages/` (the three existing screens) plus `src/components/`. The criteria map to components: hints → `HintBar` taking `hints: {key, action}[]` (hints as data, so the new keys of US-006+ become entries, not code); row primitive → `Cols`, under `Table`'s Header/Row, with `Group` for the detail file blocks; search field → `SearchField` taking `query`, `searching` and the change handler. One-use visuals stay local to their page: `Info`, the centered detail header, the no-matches message. Colors move with the code unchanged; the new look is IMP-007's.
 - Open (decide when the row-primitive step is presented): the detail file line is a single string (`\t M name`); rendering it through `Cols` as marker + name columns changes the spacing slightly, while keeping it a string leaves the shared-primitive criterion half-met.
 
