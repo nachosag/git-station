@@ -3,36 +3,49 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>git-station — proto 9</title>
+<title>git-station — proto 11</title>
 <style>
-  /* Tokens: semantic, same idea as the opentui theme.ts will be. One place to rename. */
+  /* Tokens: the shared prototype standard (see README.md) — semantic, one place, theme.ts mirrors it. */
   :root {
-    --bg: #0e1218;          /* page behind the panel */
-    --surface: #141a23;     /* panel background */
-    --border: #2b3543;
-    --separator: #1c2431;   /* faint line between rows */
-    --text: #ccd6e4;
-    --muted: #5d6a7a;
-    --selection: #273243;
-    --attention: #d7a65f;   /* keys, ahead/behind, selected id */
-    --font: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --bg: #16161e;          /* terminal background behind the panel */
+    --surface: #1a1b26;     /* panel background */
+    --border: #3b4261;
+    --separator: #282c3f;   /* faint line between rows */
+    --text: #c0caf5;
+    --muted: #565f89;
+    --attention: #e0af68;   /* keys, dirty/ahead/behind, search query */
+    --warning: #f7768e;     /* destructive actions */
+    --selection: #2f334d;   /* selected-row background */
+    --font: "JetBrains Mono", "Fira Code", monospace;
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; }
+  /* The prototype terminal: a fixed-size canvas like the real app would fill */
   body {
     margin: 0;
     background: var(--bg);
     color: var(--text);
-    font: 15px/1.5 var(--font);
+    font: 16px/1.5 var(--font);
     display: grid;
     place-items: center;
+    padding: 2rem;
+  }
+  .term {
+    width: 80rem;
+    max-width: 100%;
+    height: min(42rem, calc(100vh - 4rem));
+    position: relative;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   /* Centered panel, sharp corners; nothing written on the border line */
   .panel {
     position: relative;
-    width: min(880px, 90vw);
-    height: min(660px, 88vh);
+    width: min(110ch, 92%);
+    height: min(36rem, 94%);
     background: var(--surface);
     border: 1px solid var(--border);
     padding: 0 0 0.7rem;
@@ -40,14 +53,25 @@
     flex-direction: column;
   }
 
-  /* Title band: shows the app name while idle; pressing ? swaps it for the
-     filter input. The band is permanent, so nothing ever moves or is covered. */
+  /* Search band: idle shows the placeholder only; with an active search it
+     shows the query on the left and the "clear: esc" hint on the right.
+     The hints line at the bottom is gone — the band is the status line. */
   .band {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
     padding: 0.55rem 2rem;
     border-bottom: 1px solid var(--border);
-    text-align: center;
   }
-  .band-title { color: var(--muted); letter-spacing: 0.05em; }
+  .band .query {
+    color: var(--attention);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .band .clear-hint { color: var(--muted); white-space: nowrap; }
+  .band .clear-hint kbd { color: var(--attention); }
   .band input {
     background: none;
     border: none;
@@ -56,17 +80,17 @@
     font: inherit;
     caret-color: var(--attention);
     padding: 0;
-    text-align: center;
+    text-align: left;
     width: 100%;
   }
   .band input::placeholder { color: var(--muted); }
 
   .attention { color: var(--attention); }
 
-  /* Table: id | repo/branch | ahead/behind (one column, on the right) */
+  /* Table: id | repo/branch | dirty/ahead/behind (one column, on the right) */
   .thead, .row {
     display: grid;
-    grid-template-columns: 5ch 1fr 14ch;
+    grid-template-columns: 5ch 1fr 22ch;
     column-gap: 1rem;
     padding: 0 2rem;
     align-items: baseline;
@@ -77,6 +101,8 @@
     flex: 1;
     overflow-y: auto;
     padding-bottom: 0.4rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
   }
   .row {
     padding-top: 0.55rem;
@@ -92,7 +118,7 @@
   .sync .sep, .sync .none { color: var(--muted); }
   .dim { color: var(--muted); }
 
-  .empty { padding: 1rem 1.2rem; color: var(--muted); text-align: center; }
+  .empty { padding: 1rem 2rem; color: var(--muted); text-align: center; }
 
   /* Hints: one line spanning the full panel width, "action: key" */
   .hints {
@@ -117,65 +143,63 @@
     color: var(--muted);
     font-size: 13px;
   }
-
-  .list::-webkit-scrollbar { width: 8px; }
-  .list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 0; }
 </style>
 </head>
 <body>
+  <div class="term">
   <main class="panel">
     <div class="band">
-      <span id="bandTitle">git-station</span>
-      <input id="q" placeholder="filter repositories" hidden spellcheck="false" autocomplete="off">
+      <input id="q" placeholder="search" spellcheck="false" autocomplete="off">
+      <span class="clear-hint" id="clearHint" hidden>cancel: <kbd>esc</kbd></span>
     </div>
 
     <div class="thead">
-      <span>id</span><span>repo / branch</span><span>ahead / behind</span>
+      <span>#</span><span>repo / branch</span><span>dirty / ahead / behind</span>
     </div>
 
-    <div class="empty" id="empty" hidden></div>
     <div class="list" id="list"></div>
+    <div class="empty" id="empty" hidden></div>
 
     <div class="hints">
       <span>move: <kbd>&uarr;&darr;</kbd></span>
       <span>open: <kbd>enter</kbd></span>
-      <span id="filterHint">filter: <kbd>?</kbd></span>
-      <span>clear: <kbd>esc</kbd></span>
+      <span>search: <kbd>?</kbd></span>
       <span>quit: <kbd>q</kbd></span>
     </div>
   </main>
+  </div>
 
-  <span class="proto-tag">proto 9</span>
+  <span class="proto-tag">proto 11</span>
 
 <script>
-  // Fake data shaped like the real RowView: name, branch, ahead, behind (or null).
+  // Fake data shaped like the real RowView: name, branch, dirty, ahead, behind (or null).
   // Mocked with variety: every sync-column state appears at least once.
   const data = [
-    { name: "detached-demo",            branch: "detached",                 ahead: null, behind: null },
-    { name: "rename-demo",              branch: "main",                     ahead: null, behind: null },
-    { name: "vivarium",                 branch: "main",                     ahead: null, behind: null },
-    { name: "career-hub",               branch: "main",                     ahead: null, behind: 1 },
-    { name: "open-design",              branch: "main",                     ahead: null, behind: null },
-    { name: "git-station",              branch: "main",                     ahead: 1,    behind: null },
-    { name: "theme-night-city",         branch: "feature/delta-night-city", ahead: 2,    behind: 1 },
-    { name: "templates",                branch: "main",                     ahead: 5,    behind: null },
-    { name: "tetris",                   branch: "master",                   ahead: null, behind: null },
-    { name: "college",                  branch: "main",                     ahead: null, behind: 3 },
-    { name: "opencode-voice-dictation", branch: "main",                     ahead: null, behind: null },
-    { name: "notebooklm-gallery",       branch: "main",                     ahead: null, behind: null },
-    { name: "jobspy-mcp-server",        branch: "main",                     ahead: null, behind: null },
-    { name: "portfolio",                branch: "main",                     ahead: null, behind: null },
-    { name: "memories",                 branch: "main",                     ahead: null, behind: null },
-    { name: "pair-programming",         branch: "main",                     ahead: null, behind: null },
-    { name: "exercism",                 branch: "main",                     ahead: null, behind: null },
-    { name: "challenges",               branch: "main",                     ahead: null, behind: null },
-    { name: "code-road",                branch: "master",                   ahead: null, behind: null },
-    { name: "kata-machine",             branch: "main",                     ahead: null, behind: null },
-    { name: "node-lab",                 branch: "main",                     ahead: null, behind: null },
-    { name: "i-have-adhd",              branch: "main",                     ahead: null, behind: null },
-    { name: "vivarium-ui",              branch: "main",                     ahead: null, behind: null },
-    { name: "vivarium-core",            branch: "main",                     ahead: null, behind: null },
-    { name: "pi-messages",              branch: "main",                     ahead: null, behind: 2 },
+    { name: "detached-demo",            branch: "detached",                 dirty: false, ahead: null, behind: null },
+    { name: "rename-demo",              branch: "main",                     dirty: true,  ahead: null, behind: null },
+    { name: "vivarium",                 branch: "main",                     dirty: true,  ahead: null, behind: null },
+    { name: "career-hub",               branch: "main",                     dirty: false, ahead: null, behind: 1 },
+    { name: "open-design",              branch: "main",                     dirty: true,  ahead: null, behind: 1 },
+    { name: "git-station",              branch: "main",                     dirty: false, ahead: 1,    behind: null },
+    { name: "theme-night-city",         branch: "feature/delta-night-city", dirty: true,  ahead: 2,    behind: 1 },
+    { name: "templates",                branch: "main",                     dirty: false, ahead: 5,    behind: null },
+    { name: "tetris",                   branch: "master",                   dirty: false, ahead: null, behind: null },
+    { name: "college",                  branch: "main",                     dirty: true,  ahead: null, behind: 3 },
+    { name: "opencode-voice-dictation", branch: "main",                     dirty: false, ahead: null, behind: null },
+    { name: "notebooklm-gallery",       branch: "main",                     dirty: false, ahead: null, behind: null },
+    { name: "jobspy-mcp-server",        branch: "main",                     dirty: true,  ahead: null, behind: null },
+    { name: "portfolio",                branch: "main",                     dirty: false, ahead: null, behind: null },
+    { name: "memories",                 branch: "main",                     dirty: false, ahead: null, behind: null },
+    { name: "pair-programming",         branch: "main",                     dirty: false, ahead: null, behind: null },
+    { name: "exercism",                 branch: "main",                     dirty: true,  ahead: 1,    behind: null },
+    { name: "challenges",               branch: "main",                     dirty: false, ahead: null, behind: null },
+    { name: "code-road",                branch: "master",                   dirty: false, ahead: null, behind: null },
+    { name: "kata-machine",             branch: "main",                     dirty: false, ahead: null, behind: null },
+    { name: "node-lab",                 branch: "main",                     dirty: false, ahead: null, behind: null },
+    { name: "i-have-adhd",              branch: "main",                     dirty: true,  ahead: null, behind: 1 },
+    { name: "vivarium-ui",              branch: "main",                     dirty: false, ahead: null, behind: null },
+    { name: "vivarium-core",            branch: "main",                     dirty: false, ahead: null, behind: null },
+    { name: "pi-messages",              branch: "main",                     dirty: true,  ahead: null, behind: 2 },
   ];
 
   const list = document.getElementById("list");
@@ -206,23 +230,35 @@
       branch.textContent = " / " + r.branch;
       repo.append(name, branch);
 
-      // One sync column on the right: "↑1 / ↓2" in the attention color; blank when idle,
-      // but "↑1 / —" and "— / ↓2" keep their dash.
+      // One sync column on the right: "✱ / ↑1 / ↓2" — dirty, ahead, behind.
+      // A segment with no value shows a dash when others have one;
+      // the whole cell stays empty when the repository is fully idle.
       const sync = document.createElement("span");
-      if (!r.ahead && !r.behind) {
+      const hasDirty = r.dirty, hasAhead = !!r.ahead, hasBehind = !!r.behind;
+      const any = hasDirty || hasAhead || hasBehind;
+      if (!any) {
         sync.textContent = "";
       } else {
         sync.className = "sync";
-        const a = document.createElement("span");
-        a.textContent = r.ahead ? "↑" + r.ahead : "—";
-        if (!r.ahead) a.className = "none";
-        const sep = document.createElement("span");
-        sep.className = "sep";
-        sep.textContent = " / ";
-        const b = document.createElement("span");
-        b.textContent = r.behind ? "↓" + r.behind : "—";
-        if (!r.behind) b.className = "none";
-        sync.append(a, sep, b);
+        const segs = [];
+        const mk = (value, none) => {
+          const s = document.createElement("span");
+          if (none) { s.className = "none"; s.textContent = "—"; }
+          else s.textContent = value;
+          segs.push(s);
+        };
+        if (hasDirty) mk("✱", false); else mk("", true);
+        if (hasAhead) mk("↑" + r.ahead, false); else mk("", true);
+        if (hasBehind) mk("↓" + r.behind, false); else mk("", true);
+        segs.forEach((s, i) => {
+          if (i > 0) {
+            const sep = document.createElement("span");
+            sep.className = "sep";
+            sep.textContent = " / ";
+            sync.append(sep);
+          }
+          sync.append(s);
+        });
       }
 
       row.append(idx, repo, sync);
@@ -241,7 +277,10 @@
   }
 
   function move(delta) {
-    selected += delta;
+    // Circular navigation: one past the end wraps to the first row and back.
+    const n = visible.length;
+    if (n === 0) return;
+    selected = ((selected + delta) % n + n) % n;
     updateSelection();
   }
 
@@ -250,42 +289,49 @@
     visible = q ? data.filter(r => r.name.toLowerCase().includes(q)) : data;
     selected = 0;
     render();
-    updateFilterHint(q);
+    updateHint(q);
     const none = q && visible.length === 0;
     empty.hidden = !none;
-    if (none) empty.textContent = 'No repositories match "' + q + '"';
+    if (none) empty.textContent = 'No repository matches "' + q + '"';
   }
 
-  // Title band: idle shows "git-station"; ? swaps it for the filter input.
-  const bandTitle = document.getElementById("bandTitle");
-  const filterHint = document.getElementById("filterHint");
-  const hintDefault = filterHint.innerHTML;
+  // Search mode — the app-wide standard (same as ActionPanel): `?` activates it
+  // (hint visible immediately), typing filters live, `esc` clears the query and
+  // exits, `enter` confirms keeping the query. The hint shows while the mode is
+  // active OR a query remains.
+  const clearHint = document.getElementById("clearHint");
+  let searching = false;
 
-  function openPalette() { bandTitle.hidden = true; input.hidden = false; input.focus(); }
-  function closePalette() { input.blur(); input.hidden = true; bandTitle.hidden = false; }
-  function closePaletteClearing() { input.value = ""; filter(""); closePalette(); }
+  function updateHint(q) { clearHint.hidden = !(searching || q); }
 
-  function updateFilterHint(q) {
-    filterHint.textContent = "";
-    if (!q) { filterHint.innerHTML = hintDefault; return; }
-    const label = document.createTextNode("filter: ");
-    const value = document.createElement("span");
-    value.className = "attention";
-    value.textContent = '"' + q + '"';
-    filterHint.append(label, value);
+  function enterSearch() {
+    searching = true;
+    updateHint(input.value.trim().toLowerCase());
+    input.focus();
+  }
+
+  function exitSearchClearing() {
+    searching = false;
+    input.value = "";
+    filter("");
+    input.blur();
   }
 
   window.addEventListener("keydown", (e) => {
     const typing = document.activeElement === input;
     if (!typing) {
-      if (e.key === "?" || e.key === "/") { e.preventDefault(); return openPalette(); }
-      if (e.key === "Escape") { input.value = ""; filter(""); return; } // Esc clears in every state
+      if (e.key === "?" || e.key === "/") { e.preventDefault(); return enterSearch(); }
+      if (e.key === "Escape" && input.value) { input.value = ""; filter(""); return; }
       if (e.key === "j" || e.key === "ArrowDown") { e.preventDefault(); move(1); }
       if (e.key === "k" || e.key === "ArrowUp") { e.preventDefault(); move(-1); }
       return;
     }
-    if (e.key === "Enter") closePalette();
-    if (e.key === "Escape") closePaletteClearing();
+    if (e.key === "Enter") {
+      searching = false;
+      updateHint(input.value.trim().toLowerCase());
+      input.blur();
+    }
+    if (e.key === "Escape") exitSearchClearing();
   });
   input.addEventListener("input", () => filter(input.value));
 

@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>gs — detail page (A, con panel de acciones)</title>
+<title>gs — detail page</title>
 <style>
   :root {
     --bg: #16161e;
@@ -14,97 +14,89 @@
     --attention: #e0af68;
     --warning: #f7768e;
     --selection: #2f334d;
+    --font: "JetBrains Mono", "Fira Code", monospace;
   }
-  * { box-sizing: border-box; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
   body {
-    background: var(--bg); color: var(--text);
-    font-family: "JetBrains Mono", "Fira Code", monospace;
-    height: 100vh; display: flex; align-items: center; justify-content: center; gap: 5rem;
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.5 var(--font);
+    display: grid;
+    place-items: center;
+    padding: 2rem;
   }
-  .variant { display: flex; flex-direction: column; gap: 1rem; align-items: center; }
-  .label { color: var(--muted); font-size: 0.85rem; letter-spacing: 0.1em; }
-  .label b { color: var(--attention); }
-  .caption { color: var(--muted); font-size: 0.8rem; max-width: 46rem; text-align: center; line-height: 1.5; }
-  .caption code { color: var(--text); }
 
-  .term { width: 50rem; height: 34rem; padding: 1.2rem; }
-  .panel {
-    border: 1px solid var(--border); background: var(--surface);
-    width: 100%; height: 100%; display: flex; flex-direction: column;
+  .term {
+    width: 80rem;
+    max-width: 100%;
+    height: min(42rem, calc(100vh - 4rem));
     position: relative;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .panel {
+    position: relative;
+    width: min(110ch, 92%);
+    height: min(36rem, 94%);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0 0 0.7rem;
+    display: flex;
+    flex-direction: column;
   }
   .meta {
-    padding: 0.6rem 1rem; flex: none;
-    border-bottom: 1px solid var(--separator);
+    padding: 0.55rem 2rem; flex: none;
+    border-bottom: 1px solid var(--border);
     display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
   }
   .meta .left { justify-self: start; white-space: nowrap; }
   .meta .path { justify-self: center; color: var(--muted); white-space: nowrap; }
   .meta .ab { justify-self: end; color: var(--attention); white-space: nowrap; }
 
-  .files { flex: 1; overflow-y: auto; padding: 0.4rem 0.5rem; min-height: 0;
+  .files { flex: 1; overflow-y: auto; padding: 0.4rem 0; min-height: 0;
            scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
-  .group { padding: 0.6rem 0.5rem; }
+  .group { padding: 0.6rem 0; }
   .group + .group { border-top: 1px solid var(--separator); }
-  .gtitle { color: var(--muted); margin-bottom: 0.3rem; }
+  .gtitle { color: var(--muted); margin-bottom: 0.3rem; padding: 0 2rem; }
   .group.focused .gtitle { color: var(--text); }
-  .row { display: flex; padding: 0.15rem 0.5rem; }
+  .row { display: flex; padding: 0.55rem 2rem; }
   .row.selected { background: var(--selection); }
   .mark { display: inline-block; width: 2ch; color: var(--attention); flex: none; }
   .row .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .hints {
-    padding: 0.45rem 1rem; flex: none; border-top: 1px solid var(--separator);
+    padding: 0.6rem 2rem 0; flex: none; border-top: 1px solid var(--border);
     display: flex; justify-content: space-between; color: var(--muted);
   }
-  .hints b { color: var(--attention); font-weight: normal; }
+  kbd {
+    font: inherit;
+    color: var(--attention);
+    background: none;
+    border: none;
+    padding: 0;
+  }
 
-  /* dim + action panel */
-  .scrim { position: absolute; inset: 0; background: rgba(22, 22, 30, 0.65); }
-  .actionbox {
+  /* action panel: ActionPanel.html loaded via iframe, floating centered like the real panel.
+     The panel's own body goes transparent when embedded, so the dimmed page shows around it. */
+  .scrim { position: absolute; inset: 0; background: rgba(22, 22, 30, 0.65); display: none; }
+  .page-frame {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    width: 56ch; max-height: 82%; background: var(--surface); border: 1px solid var(--border);
-    display: flex; flex-direction: column;
+    width: min(62ch, 90%);
+    max-height: 86%;
+    height: min(24rem, 86%);
+    border: none; background: transparent; display: none;
   }
-  .ahead {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 0.5rem 1rem 0.3rem; flex: none;
-  }
-  .ahead .title { color: var(--text); }
-  .ahead b { color: var(--attention); font-weight: normal; }
-  .asearch { padding: 0 1rem 0.5rem; border-bottom: 1px solid var(--separator); flex: none; }
-  .asearch input {
-    width: 100%; background: transparent; border: none; outline: none;
-    color: var(--text); font: inherit;
-  }
-  .asearch input::placeholder { color: var(--muted); }
-  .alist { overflow-y: auto; padding: 0.3rem 0; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
-  .acat { padding-top: 0.5rem; }
-  .acat .cat { color: var(--attention); padding: 0 1rem 0.25rem 1.6rem; }
-  .acat .cat .ctx { color: var(--text); }
-  .arow {
-    display: flex; justify-content: space-between; align-items: center; gap: 1rem;
-    padding: 0.2rem 1rem 0.2rem 1.6rem;
-  }
-  .arow.selected { background: var(--selection); }
-  .arow .stack { min-width: 0; }
-  .arow .what { color: var(--text); white-space: nowrap; }
-  .arow .what.danger { color: var(--warning); }
-  .arow .why { display: none; color: var(--muted); font-size: 0.85rem; }
-  .actionbox.show-why .arow .why { display: block; }
-  .arow .keys { color: var(--attention); white-space: nowrap; }
-  .abhints {
-    display: flex; justify-content: space-between; color: var(--muted); font-size: 0.85rem;
-    padding: 0.5rem 1rem 0.4rem; border-top: 1px solid var(--separator);
-  }
-  .abhints b { color: var(--attention); font-weight: normal; }
+  .panel.dimmed .meta, .panel.dimmed .files, .panel.dimmed .hints { opacity: 0.3; }
+
 </style>
 </head>
 <body>
 
-  <!-- ============ detalle, foco en staged ============ -->
-  <div class="variant">
-    <div class="label">detalle, foco en <b>staged</b></div>
-    <div class="term">
+  <!-- ============ detalle ============ -->
+  <div class="term">
       <div class="panel">
         <div class="meta">
           <span class="left">main → origin/main</span>
@@ -129,139 +121,71 @@
           </div>
         </div>
         <div class="hints">
-          <span>move: <b>↑↓</b></span>
-          <span>unstage: <b>space</b></span>
-          <span>panel: <b>p</b></span>
-          <span>graph: <b>g</b></span>
-          <span>back: <b>esc</b></span>
-          <span>quit: <b>q</b></span>
+          <span>move: <kbd>↑↓</kbd></span>
+          <span id="quickHint">unstage: <kbd>space</kbd></span>
+          <span>panel: <kbd>p</kbd></span>
+          <span>graph: <kbd>g</kbd></span>
+          <span>back: <kbd>esc</kbd></span>
+          <span>quit: <kbd>q</kbd></span>
         </div>
       </div>
     </div>
-    <div class="caption">
-      El hint quick se adapta a la categoría de la fila seleccionada: acá dice <code>unstage: space</code>; con la fila en unstaged o untracked diría <code>stage: space</code>. Las flechas cruzan los grupos y envuelven la lista completa (navegación circular, estándar de la app). Los atajos <code>c</code>, <code>f</code>, <code>P</code>, <code>s</code> andan directo desde el detalle sin abrir el panel.
-    </div>
-  </div>
-
-  <!-- ============ action panel interactivo ============ -->
-  <div class="variant">
-    <div class="label">action panel (<b>a</b>) — escribí para filtrar, <b>?</b> muestra descripciones</div>
-    <div class="term">
-      <div class="panel">
-        <div class="meta">
-          <span class="left">main → origin/main</span>
-          <span class="path">~/vaults/college</span>
-          <span class="ab">↑ 0 / ↓ 0</span>
-        </div>
-        <div class="files">
-          <div class="group focused">
-            <div class="gtitle">staged (1)</div>
-            <div class="row selected"><span class="mark">M</span><span class="name">.obsidian/workspace.json</span></div>
-          </div>
-          <div class="group">
-            <div class="gtitle">unstaged (2)</div>
-            <div class="row"><span class="mark">M</span><span class="name">.obsidian/appearance.json</span></div>
-          </div>
-          <div class="group">
-            <div class="gtitle">untracked (3)</div>
-            <div class="row"><span class="mark">?</span><span class="name">ingenieria-de-software/…/Plan de Entrevista a LocalHost.pdf</span></div>
-          </div>
-        </div>
-        <div class="hints">
-          <span>move: <b>↑↓</b></span>
-          <span>unstage: <b>space</b></span>
-          <span>panel: <b>p</b></span>
-          <span>graph: <b>g</b></span>
-          <span>back: <b>esc</b></span>
-          <span>quit: <b>q</b></span>
-        </div>
-        <div class="scrim"></div>
-        <div class="actionbox" id="actionbox">
-          <div class="ahead"><span class="title">actions</span><span><b>esc</b></span></div>
-          <div class="asearch"><input id="asearch" placeholder="Search" autocomplete="off"></div>
-          <div class="alist" id="alist">
-            <div class="acat">
-              <div class="cat">file: <span class="ctx">.obsidian/workspace.json</span></div>
-              <div class="arow"><div class="stack"><div class="what">open in editor</div><div class="why">open this file in $EDITOR</div></div><span class="keys"></span></div>
-              <div class="arow"><div class="stack"><div class="what">copy path</div><div class="why">copy the file path to the clipboard</div></div><span class="keys"></span></div>
-              <div class="arow"><div class="stack"><div class="what danger">discard changes</div><div class="why">drop this file's changes</div></div><span class="keys"></span></div>
-            </div>
-            <div class="acat">
-              <div class="cat">staged</div>
-              <div class="arow"><div class="stack"><div class="what">commit</div><div class="why">write a commit with the staged files</div></div><span class="keys">c</span></div>
-              <div class="arow"><div class="stack"><div class="what">unstage all</div><div class="why">empty the staged group</div></div><span class="keys"></span></div>
-            </div>
-            <div class="acat">
-              <div class="cat">repo</div>
-              <div class="arow"><div class="stack"><div class="what">fetch</div><div class="why">refresh upstream state</div></div><span class="keys">f</span></div>
-              <div class="arow"><div class="stack"><div class="what">pull</div><div class="why">integrate upstream commits</div></div><span class="keys">p</span></div>
-              <div class="arow"><div class="stack"><div class="what">push</div><div class="why">send local commits</div></div><span class="keys">P</span></div>
-              <div class="arow"><div class="stack"><div class="what">refresh status</div><div class="why">re-read every file group</div></div><span class="keys"></span></div>
-              <div class="arow"><div class="stack"><div class="what">open in editor</div><div class="why">open this repo in $EDITOR</div></div><span class="keys"></span></div>
-              <div class="arow"><div class="stack"><div class="what">copy path</div><div class="why">copy the repo path to the clipboard</div></div><span class="keys"></span></div>
-              <div class="arow"><div class="stack"><div class="what">open on remote</div><div class="why">open the repository's web page</div></div><span class="keys"></span></div>
-            </div>
-          </div>
-          <div class="abhints">
-            <span>move: <b>↑↓</b></span>
-            <span>run: <b>enter</b></span>
-            <span>describe: <b>?</b></span>
-            <span>close: <b>esc</b></span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="caption">
-      La búsqueda filtra secciones enteras: una categoría sin coincidencias desaparece. Los atajos en naranja andan directo desde el detalle. <code>?</code> alterna las descripciones debajo de cada acción.
-    </div>
-  </div>
-
+  <iframe class="page-frame" id="panelFrame" src="ActionPanel.html"></iframe>
 <script>
-  const box = document.getElementById("actionbox");
-  const input = document.getElementById("asearch");
-  const cats = [...box.querySelectorAll(".acat")];
+  // File-list navigation: one cursor crosses group boundaries and wraps around
+  // the whole list (the app-wide standard). The quick hint adapts per group.
+  const rows = [...document.querySelectorAll(".files .row")];
+  const quickHint = document.getElementById("quickHint");
+  const panel = document.querySelector(".panel");
+  const frame = document.getElementById("panelFrame");
+  let panelOpen = false;
+  let current = rows.findIndex((r) => r.classList.contains("selected"));
 
-  const visibleRows = () =>
-    cats.flatMap((c) => [...c.querySelectorAll(".arow")]).filter((r) => r.style.display !== "none");
-
-  function select(row) {
-    box.querySelectorAll(".arow.selected").forEach((r) => r.classList.remove("selected"));
-    if (row) row.classList.add("selected");
+  function update() {
+    rows.forEach((r, i) => r.classList.toggle("selected", i === current));
+    const group = rows[current].closest(".group").querySelector(".gtitle").textContent;
+    const staged = group.startsWith("staged (");
+    quickHint.innerHTML = (staged ? "unstage" : "stage") + ": <kbd>space</kbd>";
+    rows[current].scrollIntoView({ block: "nearest" });
   }
-  const current = () => box.querySelector(".arow.selected");
 
-  input.addEventListener("input", () => {
-    const q = input.value.trim().toLowerCase();
-    for (const cat of cats) {
-      let any = false;
-      for (const row of cat.querySelectorAll(".arow")) {
-        const hit = row.querySelector(".what").textContent.toLowerCase().includes(q);
-        row.style.display = hit ? "" : "none";
-        any = any || hit;
-      }
-      cat.style.display = any ? "" : "none";
+  function ensureScrim() {
+    if (!document.querySelector(".scrim")) {
+      const s = document.createElement("div");
+      s.className = "scrim";
+      panel.append(s);
     }
-    const rows = visibleRows();
-    if (!rows.includes(current())) select(rows[0] ?? null);
+    return panel.querySelector(".scrim");
+  }
+  function openPanel() {
+    if (panelOpen) return;
+    panelOpen = true;
+    ensureScrim().style.display = "block";
+    panel.classList.add("dimmed");
+    frame.style.display = "block";
+    frame.focus();
+  }
+  function closePanel() {
+    if (!panelOpen) return;
+    panelOpen = false;
+    ensureScrim().style.display = "none";
+    panel.classList.remove("dimmed");
+    frame.style.display = "none";
+    window.focus();
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if (panelOpen) return; // the panel owns the keyboard while open
+    if (e.key === "p") { e.preventDefault(); openPanel(); return; }
+    if (e.key === "ArrowDown" || e.key === "j") { e.preventDefault(); current = (current + 1) % rows.length; update(); }
+    if (e.key === "ArrowUp" || e.key === "k") { e.preventDefault(); current = (current - 1 + rows.length) % rows.length; update(); }
+  });
+  // The panel's esc closes itself; the parent reacts via postMessage.
+  window.addEventListener("message", (e) => {
+    if (e.data === "close-panel") closePanel();
   });
 
-  input.addEventListener("keydown", (e) => {
-    if (e.key === "?") {
-      e.preventDefault();
-      box.classList.toggle("show-why");
-      return;
-    }
-    if (e.key === "Escape") {
-      e.preventDefault();
-      box.style.display = "none";
-      box.parentElement.querySelector(".scrim").style.display = "none";
-      return;
-    }
-    const rows = visibleRows();
-    const i = rows.indexOf(current());
-    if (e.key === "ArrowDown") { e.preventDefault(); select(rows[Math.min(rows.length - 1, i + 1)]); }
-    if (e.key === "ArrowUp") { e.preventDefault(); select(rows[Math.max(0, i - 1)]); }
-  });
+  update();
 </script>
 </body>
 </html>

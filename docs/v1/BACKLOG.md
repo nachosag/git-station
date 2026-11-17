@@ -154,9 +154,9 @@ As a developer scanning many repositories, I want each row to show the branch, a
 
 **Acceptance criteria**
 
-- [x] Given a repository with a dirty working tree, 2 commits ahead and 1 behind its upstream (per local refs), when the list renders, then its row shows id, `name / branch` and `↑2 / ↓1`.
+- [x] Given a repository with a dirty working tree, 2 commits ahead and 1 behind its upstream (per local refs), when the list renders, then its row shows id, `name / branch` and `✱ / ↑2 / ↓1`.
 
-  Rewritten (2026-11-17): the IMP-007 list-page redesign (SPECS.md §Design, list page) removed the dirty mark from the list — the dirty data is redundant at list level and stays visible in the detail view — and merged ahead/behind into one `↑N / ↓M` column. Display change only; the parsing and the data behind the rows are unchanged.
+  Rewritten (2026-11-17): the IMP-007 list-page redesign (SPECS.md §Design, list page) merged dirty, ahead and behind into one `✱ / ↑N / ↓M` column — dirty was first removed as redundant and brought back the same day (protos 10–11). Display change only; the parsing and the data behind the rows are unchanged.
   - [x] Given one repository, when its status is read, then the branch line yields the branch name and ahead/behind, and yields `detached` and `—` when there is a detached HEAD or no upstream.
 
     Verified by: src/status.test.ts — `parseStatus` → 'reports the branch and ahead/behind from the status header', 'reports detached and no upstream with no ahead/behind' (written)
@@ -624,7 +624,7 @@ Expanded (2026-11-17): the pass defines the design in its totality, page by page
 
   Verified by: eye (planned)
 
-- [ ] Given both views, then the data flow and the information shown stay identical (display-only: ahead/behind merges into one column and the dirty mark leaves the list, per the page designs), keys follow the updated keyboard map, and the screens are rebuilt to match SPECS.md §Design.
+- [ ] Given both views, then the data flow and the information shown stay identical (display-only: dirty, ahead and behind merge into one `✱ / ↑N / ↓M` column, per the page designs), keys follow the updated keyboard map, and the screens are rebuilt to match SPECS.md §Design.
 
   Verified by: eye (planned)
 
@@ -637,6 +637,8 @@ Expanded (2026-11-17): the pass defines the design in its totality, page by page
 - Add tokens only when a component needs one; the set above is the floor, not the ceiling.
 - Design dialogue (2026-11-17): every page's discussion opens with one question — redesign from scratch or keep the structure — before any detail; the look is prototyped as HTML (kept in `prototipes/` since 2026-11-17) and reviewed live in the browser (live-server) before being written into SPECS.md.
 - Listing page (2026-11-17): full redesign chosen over keeping the structure — centered panel that does not span the full width, scrollable repository list (absorbs the list-scroll proposal noted under US-005; `IMP-003` stays reserved for it), minimalist look, taking full advantage of opentui (`border`, `borderStyle`, `title`, `padding`). The "only the look changes" wording of the behavior criterion becomes false under a redesign: it will be rewritten when the design lands in SPECS.md.
+- Listing revisions (2026-11-17, protos 10–11, feedback annotated as it arrived): dirty returns inside the merged `dirty / ahead / behind` column; the band becomes an always-visible search input on the left with `clear: esc` on the right while a query is active (the `git-station` title dropped); hints restored as `move / open / search / quit`; the arrows wrap around (app-wide standard); the no-matches message standard `No {type} matches "q"` lands in the Listing and in `prototipes/ActionPanel.html`; `prototipes/Detail.html` is trimmed to the page-only variant — the action panel lives only in `prototipes/ActionPanel.html` (the detail page uses the panel and dims the page behind it, per §Design).
+- Cross-page standard pass (2026-11-17, live review feedback on Listing + Detail): the shared chrome now lives in `prototipes/README.md` (§Shared chrome) — `2rem` horizontal rhythm, `0.55rem` row padding, structural lines in `--border` vs internal separators in `--separator`, `<kbd>` keys, thin scrollbars, and the font pinned at `16px/1.5` (the `110ch` panel width depends on the font size, which is why Listing and Detail rendered at different widths). `Detail.html` adopts Listing's frame and chrome: its hint bar and rows were cramped, and its body drifted from the standard (no breathing room, unpinned font). Both page panels grow to `min(36rem, 94%)` on a viewport-tall terminal — both were capped at `28rem` and wasted vertical screen. Listing adopts Detail's width through the shared frame, and its `id` column header becomes `#`. ActionPanel aligns keys (`<b>` → `<kbd>`) and its structural lines to the standard; its compact type and indents stay (floating-surface scale).
 
 ### IMP-008: Declare the table columns once
 

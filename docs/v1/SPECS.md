@@ -98,7 +98,7 @@ name                 branch           ●    ↑2 ↓0
 - `●`: dirty indicator — present when the index or working tree has changes, empty when clean.
 - `↑N ↓M`: ahead/behind vs upstream; `—` when there is no upstream.
 
-States: scanning (progress indicator while the walk runs; its look is designed in §Design, list page), empty (no repositories found, with a hint), filtered (`?` swaps the title band for the filter input; the active query is shown in the hints line — a filtered list is never silent). While the filter input is active the keyboard belongs to it: no row movement, `Enter` confirms the filter and closes the input keeping the query, `Esc` clears it — a second `Enter` then opens the detail.
+States: scanning (progress indicator while the walk runs; its look is designed in §Design, list page), empty (no repositories found, with a hint), filtered (`?` activates search mode on the band input; the active query stays visible in the band — a filtered list is never silent). While search mode is active the keyboard belongs to the input: no row movement, `Enter` confirms the filter and exits the mode keeping the query, `Esc` cancels — clears the query and exits the mode.
 
 ### Detail view
 
@@ -130,13 +130,13 @@ The design is defined in full, page by page (expanded 2026-11-17): which compone
 Chosen in dialogue and prototyped with live-server (2026-11-17, before prototypes were kept in-repo — proto 9 is no longer on disk). A full redesign was chosen over keeping the structure (2026-11-17).
 
 - **Panel**: centered on screen, does not span the full width, thin border with sharp corners, surface background; nothing is written on the border line.
-- **Layout, top to bottom**: title band, table header, scrollable list, hints line. No permanent search bar — the filter lives in the title band (keyboard-first: no visible UI invites the mouse).
-- **Title band**: one row tall, exactly matching the data rows' height. Idle it shows `git-station`, muted and centered. `?` swaps its content for the filter input (same slot, nothing moves or is covered); the typed text is centered and in the attention color. `Enter` confirms the filter and restores the title; `Esc` clears the filter and restores it.
-- **Table**: three visual columns, header and cells centered alike — `id` (the repository's stable index in the full scan, muted, never colored), `repo / branch` (one cell: the name in the text color, ` / branch` muted), and `ahead / behind` (one column on the right: `↑N / ↓M` in the attention color; a one-sided state keeps its dash, `↑1 / —`; an idle repository shows an empty cell).
-- **No dirty mark in the list** — decided 2026-11-17: the dirty data is redundant at list level; it stays visible in the detail view.
-- **Rows**: faint horizontal separators only (never vertical), extra line spacing between rows, selection shown as a background; the list scrolls with mouse and keyboard and keeps the selection visible while scrolling.
-- **Hints**: one line spanning the panel width, `action: key` with the key in the attention color: `move: ↑↓`, `open: enter`, `filter: ?`, `clear: esc`, `quit: q`. With an active filter the filter hint shows the query — `filter: "viv"` — so a filtered list is never silent.
-- **Empty state**: `No repositories match "q"` rendered above the list; no repositories found keeps its dedicated hint.
+- **Layout, top to bottom**: search band, table header, scrollable list, hints line.
+- **Search band** (revised 2026-11-17, protos 10–11): one row tall, exactly matching the data rows' height. An always-visible input sits on the left, placeholder `search` in the muted color; the typed query renders in the attention color. `?` activates search mode (the same app-wide behavior as the action panel's search): `cancel: esc` appears on the band's right while the mode is active or a query remains; `enter` confirms the filter and leaves the field keeping the query; `esc` cancels — clears the query and exits the mode. No app title is shown — the `git-station` title was tried in the band and dropped the same day.
+- **Table**: three visual columns, header and cells centered alike — `id` (the repository's stable index in the full scan, muted, never colored), `repo / branch` (one cell: the name in the text color, ` / branch` muted), and `dirty / ahead / behind` (one column on the right: `✱ / ↑N / ↓M` in the attention color; a missing segment keeps its dash — `✱ / — / —`, `— / ↑1 / —`; a fully idle repository shows an empty cell).
+- **Dirty mark** — reversed 2026-11-17: it had been removed from the list as redundant, then brought back the same day as the `✱` segment of the merged column.
+- **Rows**: faint horizontal separators only (never vertical), extra line spacing between rows, selection shown as a background; the list scrolls with mouse and keyboard and keeps the selection visible while scrolling; the arrows wrap around both ends (the app-wide standard).
+- **Hints**: one line spanning the panel width, `action: key` with the key in the attention color: `move: ↑↓`, `open: enter`, `search: ?`, `quit: q`. The clear hint is not here — while a query is active it lives on the band's right, and the band itself shows the query, so a filtered list is never silent.
+- **Empty state**: `No repository matches "q"` rendered above the list — the app-wide standard form is `No {type} matches "q"`; no repositories found keeps its dedicated hint.
 - **Loading state** (designed 2026-11-17, variant B of the prototype): a bare centered counter — `found: N`, the number in the attention color, three muted dots pulsing after it. No panel, no title band, no hints: the counter sits directly on the terminal background. When the list is complete, the counter swaps for the panel in one frame — the panel with its title band is drawn only then. The progress bar from the pre-redesign list is gone.
 
 ### Detail page (2026-11-17)
@@ -151,7 +151,7 @@ Chosen in dialogue and prototyped in-repo: `prototipes/Detail.html` (the page, a
 - **Feedback line**: the running operation, its output, or the last error's stderr sits between the file list and the hints line, spanning the panel width.
 - **States**: a clean repository shows `Repo is up to date` in place of the groups; a broken repository shows `⚠ message` there and its action panel carries only the repo section. The commit input (hidden until `c`; `enter` commits, `esc` cancels) and the feedback line behave per §Views (detail view).
 - **Action panel** (opens with `p`; a scrim dims the page behind it): a floating centered box of the same language holding the full catalog grouped by scope — staged, unstaged, untracked (the category actions), repo, and file (the selected row; its section title shows `file:` left and the file name right, muted, truncating). All five sections are always present. Section titles sit in the attention color aligned with the action rows; sections separate by gap plus faint bar. The selection starts on the first row; the arrows are circular; `enter` runs, `esc` closes. Keys mean one thing per context: `p` opens the panel from the detail page and runs pull inside it.
-- **Search**: the bar at the top of the panel stays inactive until `?` activates it — the query renders in the attention color and `clear: esc` appears top-right; typing filters the rows and hides the sections left empty; `esc` clears and exits search back to navigation. The bar exists because the catalog is wide and must stay usable as features land.
+- **Search**: the bar at the top of the panel stays inactive until `?` activates it — the query renders in the attention color and `cancel: esc` appears top-right; typing filters the rows and hides the sections left empty; a query with no matches shows `No action matches "q"` (the app-wide `No {type} matches "q"` standard), so the panel is never silently blank; `esc` cancels — clears the query and exits search back to navigation. The bar exists because the catalog is wide and must stay usable as features land.
 - **Descriptions**: hidden by default; `+` toggles them below each action's name. Discard actions render in the warning color.
 - **Direct shortcuts**: right-aligned in the attention color next to the actions that earned them (`c` commit, `s` stage all pending, `f` fetch, `p` pull in-panel, `P` push) and working from the detail page without opening the panel — except `p`, which is the panel's own key.
 - **Scaling rules** (the panel is the component that absorbs future features): every action lives in exactly one scope section (row, category or repo); a direct hotkey is earned by popularity and an action without one stays reachable through the panel. The panel is one component with a catalog per page, so other pages can host their own.
@@ -164,8 +164,8 @@ Arrow navigation wraps around everywhere — it is an app-wide standard, not a p
 | ------ | ------------------- | --------------------------------------------- |
 | List   | `j` / `k` or arrows | Move selection (wraps around)                 |
 | List   | `Enter`             | Open detail (search focused: confirm filter)  |
-| List   | `?`                 | Filter by name (swaps the title band)         |
-| List   | `Esc`               | Clear the active filter                       |
+| List   | `?`                 | Search (focuses the band input)               |
+| List   | `Esc`               | Cancel search (clears the query, exits mode)  |
 | List   | `r`                 | Refresh statuses                              |
 | List   | `d`                 | Delete repository (typed-name confirmation)   |
 | List   | `q`                 | Quit                                          |
@@ -208,7 +208,7 @@ Each milestone is independently verifiable against its done criteria. Progress i
 
 - **M1 Base TUI** — bootstrap/destroy on all exit paths; two placeholder views; `q` and Ctrl+C exit clean; resize-safe; `typecheck`, `lint`, `fmt:check` green; `bin` field in `package.json`.
 - **M2 Discovery** — pruned `$HOME` walk + config; bare found-count while scanning (no progress bar, 2026-11-17), list renders on completion; scanning and empty states.
-- **M3 Status** — rows show id, `name / branch`, and merged ahead/behind (`↑N / ↓M` in the attention color, dashes for idle sides, empty cell when idle); each repository's status is read as soon as the walk finds it, so the list renders complete as soon as the last status arrives (decision 2026-11-14: no half-filled rows); porcelain parser unit-tested.
+- **M3 Status** — rows show id, `name / branch`, and merged dirty/ahead/behind (`✱ / ↑N / ↓M` in the attention color, dashes for missing sides, empty cell when fully idle); each repository's status is read as soon as the walk finds it, so the list renders complete as soon as the last status arrives (decision 2026-11-14: no half-filled rows); porcelain parser unit-tested.
 - **M4 Detail read-only** — header + grouped file list; background fetch on open with indicator and re-status.
 - **M5 Stage + commit** — `Space` / `a` stage and unstage (untracked via `rm --cached`); `c` + `Enter` commits; errors inline; status refreshes after commit.
 - **M6 Network ops** — `f` / `p` / `P` run async with running state, output/stderr inline, status refresh on completion; the UI never blocks.
