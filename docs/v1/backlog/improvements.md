@@ -166,6 +166,34 @@ Expanded (2026-11-17): the pass defines the design in its totality, page by page
 
   Rewritten (2026-11-17): the original wording ("keys, data flow and screen structure are identical; only the look changes") became false under the full redesign of the list page — the filter key changed from `/` to `?`, the screen structure changes (title band, merged columns), and the dirty mark leaves the list by design.
 
+  Split (2026-11-17): the criterion covers the data shape, three screens and the keyboard map; it cannot be one sitting. These sub-steps are the plan.
+
+  - [x] The presenters hand the views the data in the new shape: one display string for the `✱ / ↑N / ↓M` column (dashes for missing segments, empty for an idle repository), and the detail header's three values (branch -> upstream, path, ahead / behind). No status data changes.
+
+    Verified by: src/presenters.test.ts — all nine tests rewritten for the new shape (written 2026-11-17). `bun run check` green (28 tests).
+
+    Decision (2026-11-17): `RowView` is now `{ repoPath, repoName, branch, display }` and `DetailView.repoPath` replaces `path`; the names avoid colliding with a file's `path`. The header's branch/upstream separator is `->`, matching the rename display; SPECS.md §Design was updated to match.
+
+  - [ ] `Loading` is the bare centered `found: N` counter with three muted dots pulsing, directly on the terminal background — no panel, no title, no hints, no progress bar.
+
+    Verified by: eye (planned)
+
+  - [ ] `Listing` is rebuilt to SPECS.md §Design: centered bordered panel, search band with `?` and `cancel: esc`, `id` / `repo / branch` / merged-mark columns, faint separators, scrolling that keeps the selection visible, hints line, and the empty and no-matches states.
+
+    Verified by: eye (planned)
+
+  - [ ] `Detail`'s page is rebuilt to SPECS.md §Design: one-row header, the three file groups with one circular cursor, adapted hints, the feedback line, and the clean and broken states.
+
+    Verified by: eye (planned)
+
+  - [ ] The action panel opens from `p` with the five scope sections, its inactive search bar, `+` descriptions, circular selection and the scrim over the page; it lists the full catalog and the five story actions are wired.
+
+    Verified by: eye (planned)
+
+  - [ ] The keyboard map across both views follows SPECS.md: `?` focuses search, arrows wrap around everywhere, `Esc` unwinds one layer, direct shortcuts work from the detail page and `q` quits.
+
+    Verified by: eye (planned)
+
 **Notes / open questions**
 
 - Decided (2026-11-17): semantic tokens, one theme file of tokens only, direct props first — recorded in SPECS.md §Design.

@@ -44,7 +44,11 @@ export function App(props: { renderer: CliRenderer }): ReactNode {
     ),
     detail: visibleRows[currentRow] ? (
       <Detail
-        view={toDetailView(visibleRows[currentRow].path, readable, unreadable)}
+        view={toDetailView(
+          visibleRows[currentRow].repoPath,
+          readable,
+          unreadable,
+        )}
       />
     ) : null,
   }

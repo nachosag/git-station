@@ -16,11 +16,9 @@ const WIDTHS = {
 } as const
 
 const COLUMNS = [
-  { key: 'repo', field: 'name', width: WIDTHS.repo },
-  { key: 'dirty', field: 'dirty', width: WIDTHS.dirty },
+  { key: 'repo', field: 'repoName', width: WIDTHS.repo },
   { key: 'branch', field: 'branch', width: WIDTHS.branch },
-  { key: 'ahead', field: 'ahead', width: WIDTHS.ahead },
-  { key: 'behind', field: 'behind', width: WIDTHS.behind },
+  { key: 'display', field: 'display', width: WIDTHS.dirty },
 ] as const
 
 export function Listing(props: {
@@ -72,7 +70,7 @@ function Table(props: { rows: RowView[]; selectedRow: number }): ReactNode {
         <Header />
         {props.rows.map((row, i) => (
           <Row
-            key={row.path}
+            key={row.repoPath}
             view={row}
             isSelected={i === props.selectedRow}
           />

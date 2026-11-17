@@ -16,7 +16,7 @@ export function Detail(props: { view: DetailView }): ReactNode {
         textAlign='center'
         bg={theme.selection}
         width='80%'>
-        {props.view.path}
+        {props.view.repoPath}
       </text>
       <box
         flexGrow={1}

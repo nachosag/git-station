@@ -3,17 +3,15 @@ import path from 'path'
 import type { File, RepoStatus } from './status.ts'
 
 export type RowView = {
-  path: string
-  name: string
-  dirty: string
+  repoPath: string
+  repoName: string
   branch: string
-  ahead: string
-  behind: string
+  display: string
 }
 
 export type DetailView = {
   isClean: boolean
-  path: string
+  repoPath: string
   info: string[]
   staged: FileCell[]
   unstaged: FileCell[]
@@ -26,52 +24,51 @@ export type FileCell = {
 }
 
 const DASH = '—'
-const AHEAD_PAD = ' '.repeat(Math.floor('ahead'.length / 2))
-const BEHIND_PAD = ' '.repeat(Math.floor('behind'.length / 2))
 
 export function toRowViews(
   repos: string[],
   readable: Map<string, RepoStatus>,
   unreadable: Map<string, string>,
 ): RowView[] {
-  return repos.map((repo) => {
-    const status = readable.get(repo)
-    const name = path.basename(repo)
+  return repos.map((repoPath) => {
+    const status = readable.get(repoPath)
+    const repoName = path.basename(repoPath)
 
     if (!status) {
       return {
-        path: repo,
-        name,
-        dirty: '',
-        branch: `⚠ ${unreadable.get(repo) ?? 'unreadable'}`,
-        ahead: `${AHEAD_PAD}${DASH}`,
-        behind: `${BEHIND_PAD}${DASH}`,
+        repoPath,
+        repoName,
+        branch: `⚠ ${unreadable.get(repoPath) ?? 'unreadable'}`,
+        display: '',
       }
     }
 
+    const dirtySeg = status.dirty ? '✱' : '—'
+    const aheadSeg = status.ahead ? `↑ ${status.ahead}` : '—'
+    const behindSeg = status.behind ? `↓ ${status.behind}` : '—'
+    const isIdle = !status.dirty && !status.ahead && !status.behind
+
     return {
-      path: repo,
-      name,
-      dirty: status.dirty ? ' (*)' : '',
+      repoPath,
+      repoName,
       branch: status.branch,
-      ahead: status.ahead ? `↑ ${status.ahead}` : `${AHEAD_PAD}${DASH}`,
-      behind: status.behind ? `↓ ${status.behind}` : `${BEHIND_PAD}${DASH}`,
+      display: isIdle ? '' : `${dirtySeg} / ${aheadSeg} / ${behindSeg}`,
     }
   })
 }
 
 export function toDetailView(
-  repo: string,
+  repoPath: string,
   readable: Map<string, RepoStatus>,
   unreadable: Map<string, string>,
 ): DetailView {
-  const status = readable.get(repo)
+  const status = readable.get(repoPath)
 
   if (!status) {
     return {
       isClean: false,
-      path: repo,
-      info: [`⚠ ${unreadable.get(repo) ?? 'unreadable'}`],
+      repoPath: repoPath,
+      info: [`⚠ ${unreadable.get(repoPath) ?? 'unreadable'}`],
       staged: [],
       unstaged: [],
       untracked: [],
@@ -80,12 +77,11 @@ export function toDetailView(
 
   return {
     isClean: status.files.length === 0,
-    path: repo,
+    repoPath,
     info: [
-      `branch: ${status.branch}`,
-      `upstream: ${status.upstream ?? DASH}`,
-      `ahead: ↑ ${status.ahead ?? DASH}`,
-      `behind: ↓ ${status.behind ?? DASH}`,
+      `${status.branch} -> ${status.upstream ?? DASH}`,
+      repoPath,
+      `${status.ahead ? `↑ ${status.ahead}` : '—'} / ${status.behind ? `↓ ${status.behind}` : '—'}`,
     ],
     staged: fileLines(status, 'staged'),
     unstaged: fileLines(status, 'unstaged'),
@@ -106,6 +102,8 @@ function fileLines(status: RepoStatus, group: File['status']): FileCell[] {
 
 export function filterRows(query: string, rows: RowView[]): RowView[] {
   return query
-    ? rows.filter((row) => row.name.toLowerCase().includes(query.toLowerCase()))
+    ? rows.filter((row) =>
+        row.repoName.toLowerCase().includes(query.toLowerCase()),
+      )
     : rows
 }

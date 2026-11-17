@@ -12,90 +12,122 @@ import {
 const ERROR =
   'fatal: no es un repositorio git (ni ninguno de los directorios superiores): .git'
 
-describe('presenters', () => {
-  test('marks a broken repository with the git error', () => {
+describe('toRowViews', () => {
+  test('broken repository: shows the git error in branch and empty display', () => {
     const repos = ['/tmp']
     const readable = new Map<string, RepoStatus>()
     const unreadable = new Map<string, string>().set('/tmp', ERROR)
 
     expect(toRowViews(repos, readable, unreadable)).toStrictEqual([
       {
-        path: '/tmp',
-        name: 'tmp',
-        dirty: '',
+        repoPath: '/tmp',
+        repoName: 'tmp',
         branch: `⚠ ${ERROR}`,
-        ahead: '  —',
-        behind: '   —',
+        display: '',
       },
     ])
-
-    expect(toDetailView('/tmp', readable, unreadable)).toStrictEqual({
-      isClean: false,
-      path: '/tmp',
-      info: [`⚠ ${ERROR}`],
-      staged: [],
-      unstaged: [],
-      untracked: [],
-    })
   })
-
-  test('flattens a readable repository into info and three groups', () => {
+  test('readable repository: merges dirty, ahead and behind into one display string', () => {
     const status: RepoStatus = {
       branch: 'main',
       upstream: 'origin/main',
+      dirty: true,
+      files: [],
       ahead: 2,
       behind: null,
-      dirty: true,
-      files: [
-        { path: 'src/a.ts', status: 'staged' },
-        { path: 'src/b.ts', status: 'unstaged' },
-        { path: 'notes.md', status: 'untracked' },
-      ],
     }
     const repos = ['/home/me/git-station']
     const readable = new Map<string, RepoStatus>().set(
       '/home/me/git-station',
       status,
     )
+    const unreadable = new Map<string, string>()
 
-    expect(
-      toRowViews(repos, readable, new Map<string, string>()),
-    ).toStrictEqual([
+    expect(toRowViews(repos, readable, unreadable)).toStrictEqual([
       {
-        path: '/home/me/git-station',
-        name: 'git-station',
-        dirty: ' (*)',
+        repoPath: '/home/me/git-station',
+        repoName: 'git-station',
         branch: 'main',
-        ahead: '↑ 2',
-        behind: '   —',
+        display: '✱ / ↑ 2 / —',
       },
     ])
+  })
+  test('idle repository: leaves the display cell empty', () => {
+    const status: RepoStatus = {
+      branch: 'main',
+      upstream: 'origin/main',
+      dirty: false,
+      files: [],
+      ahead: 0,
+      behind: null,
+    }
+    const repos = ['/home/me/idle']
+    const readable = new Map<string, RepoStatus>().set('/home/me/idle', status)
+    const unreadable = new Map<string, string>()
+
+    expect(toRowViews(repos, readable, unreadable)).toStrictEqual([
+      {
+        repoPath: '/home/me/idle',
+        repoName: 'idle',
+        branch: 'main',
+        display: '',
+      },
+    ])
+  })
+})
+
+describe('toDetailView', () => {
+  test('broken repository: error message and no files', () => {
+    const readable = new Map<string, RepoStatus>()
+    const unreadable = new Map<string, string>().set('/tmp', ERROR)
+
+    expect(toDetailView('/tmp', readable, unreadable)).toStrictEqual({
+      isClean: false,
+      repoPath: '/tmp',
+      info: [`⚠ ${ERROR}`],
+      staged: [],
+      unstaged: [],
+      untracked: [],
+    })
+  })
+  test('readable repository: header has three values and three file groups', () => {
+    const status: RepoStatus = {
+      branch: 'main',
+      upstream: 'origin/main',
+      dirty: true,
+      files: [
+        { path: 'src/a.ts', status: 'staged' },
+        { path: 'src/b.ts', status: 'unstaged' },
+        { path: 'notes.md', status: 'untracked' },
+      ],
+      ahead: 2,
+      behind: null,
+    }
+    const readable = new Map<string, RepoStatus>().set(
+      '/home/me/git-station',
+      status,
+    )
+    const unreadable = new Map<string, string>()
 
     expect(
-      toDetailView('/home/me/git-station', readable, new Map<string, string>()),
+      toDetailView('/home/me/git-station', readable, unreadable),
     ).toStrictEqual({
       isClean: false,
-      path: '/home/me/git-station',
-      info: [
-        'branch: main',
-        'upstream: origin/main',
-        'ahead: ↑ 2',
-        'behind: ↓ —',
-      ],
+      repoPath: '/home/me/git-station',
+      info: ['main -> origin/main', '/home/me/git-station', '↑ 2 / —'],
       staged: [{ marker: 'M', name: 'src/a.ts' }],
       unstaged: [{ marker: 'M', name: 'src/b.ts' }],
       untracked: [{ marker: '?', name: 'notes.md' }],
     })
   })
-
-  test('shows a rename as old -> new', () => {
+  test('rename: displays old -> new', () => {
     const status: RepoStatus = {
       branch: 'main',
       upstream: null,
-      ahead: null,
-      behind: null,
       dirty: true,
       files: [{ path: 'nuevo.txt', status: 'staged', oldPath: 'viejo.txt' }],
+      ahead: null,
+      behind: null,
     }
     const readable = new Map<string, RepoStatus>().set('/home/me/demo', status)
 
@@ -103,8 +135,7 @@ describe('presenters', () => {
       toDetailView('/home/me/demo', readable, new Map<string, string>()).staged,
     ).toStrictEqual([{ marker: 'M', name: 'viejo.txt -> nuevo.txt' }])
   })
-
-  test('a clean repository reports no pending files', () => {
+  test('clean repository: no pending files', () => {
     const status: RepoStatus = {
       branch: 'main',
       upstream: 'origin/main',
@@ -114,17 +145,13 @@ describe('presenters', () => {
       behind: 0,
     }
     const readable = new Map<string, RepoStatus>().set('/home/me/demo', status)
+
     expect(
       toDetailView('/home/me/demo', readable, new Map<string, string>()),
     ).toStrictEqual({
-      info: [
-        'branch: main',
-        'upstream: origin/main',
-        'ahead: ↑ 0',
-        'behind: ↓ 0',
-      ],
       isClean: true,
-      path: '/home/me/demo',
+      repoPath: '/home/me/demo',
+      info: ['main -> origin/main', '/home/me/demo', '— / —'],
       staged: [],
       unstaged: [],
       untracked: [],
@@ -135,44 +162,17 @@ describe('presenters', () => {
 describe('filterRows', () => {
   test('ignores case and matches any part of the name', () => {
     const rows: RowView[] = [
-      {
-        ahead: '',
-        behind: '',
-        branch: '',
-        dirty: '',
-        name: 'college',
-        path: '',
-      },
-      {
-        ahead: '',
-        behind: '',
-        branch: '',
-        dirty: '',
-        name: 'something-else',
-        path: '',
-      },
+      { repoPath: '', repoName: 'college', branch: '', display: '' },
+      { repoPath: '', repoName: 'something-else', branch: '', display: '' },
     ]
 
     expect(filterRows('COLL', rows)).toStrictEqual(rows.slice(0, 1))
   })
-  test('returns every row then the query is empty', () => {
+
+  test('returns every row when the query is empty', () => {
     const rows: RowView[] = [
-      {
-        ahead: '',
-        behind: '',
-        branch: '',
-        dirty: '',
-        name: 'college',
-        path: '',
-      },
-      {
-        ahead: '',
-        behind: '',
-        branch: '',
-        dirty: '',
-        name: 'something-else',
-        path: '',
-      },
+      { repoPath: '', repoName: 'college', branch: '', display: '' },
+      { repoPath: '', repoName: 'something-else', branch: '', display: '' },
     ]
 
     expect(filterRows('', rows)).toStrictEqual(rows)
