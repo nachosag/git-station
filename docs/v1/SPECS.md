@@ -204,7 +204,7 @@ Arrow navigation wraps around everywhere — it is an app-wide standard, not a p
 
 ## Milestones
 
-Each milestone is independently verifiable against its done criteria. Progress is tracked in [BACKLOG.md](./BACKLOG.md); this file stays spec-only.
+Each milestone is independently verifiable against its done criteria. Progress is tracked in the [backlog directory](./backlog/README.md); this file stays spec-only.
 
 - **M1 Base TUI** — bootstrap/destroy on all exit paths; two placeholder views; `q` and Ctrl+C exit clean; resize-safe; `typecheck`, `lint`, `fmt:check` green; `bin` field in `package.json`.
 - **M2 Discovery** — pruned `$HOME` walk + config; bare found-count while scanning (no progress bar, 2026-11-17), list renders on completion; scanning and empty states.

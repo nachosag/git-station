@@ -1,6 +1,6 @@
 # AGENTS.md
 
-git-station: a keyboard-driven TUI (bun + TypeScript + @opentui/react) to discover, monitor, and manage every local git repository from one place. Binary name: `git-station`. v1 is specified in `docs/v1/SPECS.md`. Application code arrives story by story — the current state lives in the Status table of `docs/v1/BACKLOG.md`.
+git-station: a keyboard-driven TUI (bun + TypeScript + @opentui/react) to discover, monitor, and manage every local git repository from one place. Binary name: `git-station`. v1 is specified in `docs/v1/SPECS.md`. Application code arrives story by story — the current state lives in the Status table of `docs/v1/backlog/README.md` (the backlog is a directory: one file per story, `improvements.md` for IMPs, README as index).
 
 The working contract — how the agent behaves — is the generated pair-programming block below (workflow + voice), inlined from the pair-programming repo. Refresh it by re-running that repo's installer; everything after it is facts about this project.
 
@@ -187,7 +187,7 @@ How the agent talks to the human. This file is independent of the workflow: the 
 ## Project facts
 
 - Gate: `bun run check` (typecheck + lint + test in one command; see Commands).
-- Tracker: `docs/v1/BACKLOG.md`.
+- Tracker: `docs/v1/backlog/` (README.md is the index with the Status table).
 - Review trigger: "revisá mi código" is the formal review request.
 - User level: junior with TypeScript and this stack (bun, opentui, React); new to git internals beyond everyday usage.
 - Prototypes live in `docs/v1/prototipes/` (law since 2026-11-17): every HTML prototype of a page is saved there with the page's name (`Detail.html`, `Listing.html`), including the accepted version — never only in a temp directory.
@@ -196,7 +196,7 @@ How the agent talks to the human. This file is independent of the workflow: the 
 ## Source of truth
 
 - `docs/v1/SPECS.md` — v1 scope, behavior, external contracts (git commands, config format, keyboard map), and non-goals. Read it before proposing anything; do not expand scope beyond it.
-- `docs/v1/BACKLOG.md` — the single progress tracker: a Status table per story plus checkbox acceptance criteria, optional sub-steps, and `Verified by` lines. Tick a step only when it has been verified (run the app, run the tests, or check from another terminal), never when code is merely written. Move stories to In progress / Done accordingly. Accepted proposals live here as improvements: `IMP-001`, `IMP-002`… (in the Status table and in an `## Improvements` section at the end), with the same checkboxes, sub-steps and `Verified by` lines as stories. They go before the next story's first step, unless he says otherwise. `SPECS.md` stays spec-only.
+- `docs/v1/backlog/` — the single progress tracker: `README.md` (index with the Status table and tracking rules), one file per story (`US-001.md`…), and `improvements.md` for the IMPs, each with checkbox acceptance criteria, optional sub-steps, and `Verified by` lines. Tick a step only when it has been verified (run the app, run the tests, or check from another terminal), never when code is merely written. Move stories to In progress / Done accordingly (in the story's file and in the README table). Accepted proposals live as improvements: `IMP-001`, `IMP-002`… (a row in the README table and a section in `improvements.md`), with the same checkboxes, sub-steps and `Verified by` lines as stories. They go before the next story's first step, unless he says otherwise. `SPECS.md` stays spec-only.
 
 ## Commands
 
