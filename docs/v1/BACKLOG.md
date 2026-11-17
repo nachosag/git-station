@@ -554,9 +554,11 @@ The views have grown by accretion: `Listing` renders the search field, the no-ma
 - [x] Given the list table and the detail file groups, then both render through the same row primitive and the column sizes are declared once.
 
   Verified by: eye (written 2026-11-16 — `bun run dev`: la tabla y los grupos del detalle muestran lo mismo, con el marcador en columna fija y el nombre a lo ancho). Con la opción 2 los tests existentes de `presenters` se actualizaron a la nueva forma del dato (`FileCell`); no se agregaron tests nuevos. `Cols` es el único primitivo de fila: `Header`/`Row` en `Listing` y los tres grupos en `Detail`. Anchos: `WIDTHS` en `Listing`, `FILE_WIDTHS` en `Detail`, cada uno declarado una vez.
-- [ ] Given the search field, then it is one component that takes `query`, `searching` and the change handler; the clear hint stays in `Listing`, in the conditional `HintBar`.
+- [x] Given the search field, then it is one component that takes `query`, `searching` and the change handler; the clear hint stays in `Listing`, in the conditional `HintBar`.
 
-  Verified by: eye (planned)
+  Verified by: eye (written 2026-11-16 — `bun run dev`: `/` abre el campo, escribir filtra igual que antes, el hint condicional no cambió). `bun run check` verde (25 tests).
+
+  Decision (2026-11-16): the prop is `isSearching`, not `searching` — it keeps the name `Listing` already used, so no prop was renamed just to move.
 
   Decision (2026-11-16): approach B — the component is the field only, so the screen stays exactly as it is today. The original wording ("the search field and its clear hint are one component") was false under this approach, so it now says what is actually verified.
 - [ ] Given both views, then behavior is unchanged: list selection, filtering, no-matches state, detail header, groups and scroll, all checked by eye.

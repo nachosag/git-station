@@ -4,6 +4,7 @@ import type { RowView } from '../presenters.ts'
 
 import { Cols } from '../components/Cols.tsx'
 import { HintBar } from '../components/HintBar.tsx'
+import { SearchField } from '../components/SearchField.tsx'
 
 const WIDTHS = {
   repo: '35%',
@@ -35,10 +36,11 @@ export function Listing(props: {
 
   return (
     <box>
-      <input
-        value={props.query}
+      <SearchField
+        isSearching={props.isSearching}
         onInput={props.onInput}
-        focused={props.isSearching}></input>
+        query={props.query}
+      />
       {props.rows.length === 0 ? (
         <text>
           {props.query
