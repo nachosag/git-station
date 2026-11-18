@@ -1,9 +1,8 @@
+import { findRepos } from '@src/repo.ts'
 import { describe, expect, test } from 'bun:test'
 import fs from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-
-import { findRepos } from './repo'
 
 describe('findRepos', () => {
   test('reports the scanned directory itself when it contains .git', async () => {

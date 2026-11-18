@@ -1,6 +1,6 @@
-import path from 'path'
+import type { File, RepoStatus } from '@src/status'
 
-import type { File, RepoStatus } from './status.ts'
+import path from 'path'
 
 export type RowView = {
   id: string

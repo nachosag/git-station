@@ -186,7 +186,7 @@ How the agent talks to the human. This file is independent of the workflow: the 
 
 ## Working rules (user, 2026-11-17)
 
-- The user writes every line of application code in `src/`. The agent gives the goal in plain words, the API surface that already exists, and the decisions he has to make — never a ready snippet. Drop to concrete code only when he is blocked and asks for it.
+- The user writes every line of application code in `app/`. The agent gives the goal in plain words, the API surface that already exists, and the decisions he has to make — never a ready snippet. Drop to concrete code only when he is blocked and asks for it.
 - `docs/` is the agent's material; the user does not read it. Never cite a file under `docs/` (prototypes, SPECS) as if he had read it. Describe the result in terms of what the screen shows and of his own code.
 
 ## Project facts
@@ -207,9 +207,9 @@ How the agent talks to the human. This file is independent of the workflow: the 
 
 - bun 1.4.2 is the runtime, package manager, and test runner, pinned via `mise.toml`. This project deliberately uses bun — never pnpm, npm, or yarn.
 - `bun install` — dependencies
-- `bun run dev` — run the app (aliases to `bun run src/index.tsx`)
+- `bun run dev` — run the app (aliases to `bun run app/index.tsx`)
 - `bun run check` — typecheck + lint + test in one command. **This is the gate:** it must pass before a step is ticked. Do not run `fmt:check` (it adds nothing here).
-- `bun run typecheck` · `bun run lint` · `bun test` — the three parts of `check`, for when only one is needed. Single test file: `bun test src/repo.test.ts`; by name: `bun test -t "pattern"`. Per-test timeout defaults to 5s — a test that walks `$HOME` times out; walk a temp fixture instead (tests must be hermetic).
+- `bun run typecheck` · `bun run lint` · `bun test` — the three parts of `check`, for when only one is needed. Single test file: `bun test app/test/repo.test.ts`; by name: `bun test -t "pattern"`. Per-test timeout defaults to 5s — a test that walks `$HOME` times out; walk a temp fixture instead (tests must be hermetic).
 - No CI and no pre-commit hooks; `check` is the gate.
 
 ## Toolchain quirks
@@ -224,7 +224,7 @@ How the agent talks to the human. This file is independent of the workflow: the 
 
 ## Known traps
 
-- Binary name resolved: `git-station` (the `gs`/ghostscript collision is avoided). The `bin` entry in package.json already points at `src/index.tsx`. Still avoid global installs (`bun i -g`) that could shadow system binaries — use the repo-local script instead.
-- `README.md`'s run command (`bun run index.ts`) is stale; the real entry is `bun run dev` (which runs `src/index.tsx`).
-- The discovery prune list and config loading live in `src/config.ts` and must stay in sync with the default list in SPECS.md §Discovery.
-- `@total-typescript/ts-reset` is installed (`src/reset.d.ts`, side-effect import): `JSON.parse` returns `unknown` instead of `any`, and `Array.isArray` narrows to `unknown[]`. Any parsed JSON — the config file today — must be narrowed (`typeof` + `in` + `Array.isArray` + filter to string) before use.
+- Binary name resolved: `git-station` (the `gs`/ghostscript collision is avoided). The `bin` entry in package.json already points at `app/index.tsx`. Still avoid global installs (`bun i -g`) that could shadow system binaries — use the repo-local script instead.
+- `README.md`'s run command (`bun run index.ts`) is stale; the real entry is `bun run dev` (which runs `app/index.tsx`).
+- The discovery prune list and config loading live in `app/src/config.ts` and must stay in sync with the default list in SPECS.md §Discovery.
+- `@total-typescript/ts-reset` is installed (`app/reset.d.ts`, side-effect import): `JSON.parse` returns `unknown` instead of `any`, and `Array.isArray` narrows to `unknown[]`. Any parsed JSON — the config file today — must be narrowed (`typeof` + `in` + `Array.isArray` + filter to string) before use.

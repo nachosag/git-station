@@ -98,7 +98,7 @@ name                 branch           ●    ↑2 ↓0
 - `●`: dirty indicator — present when the index or working tree has changes, empty when clean.
 - `↑N ↓M`: ahead/behind vs upstream; `—` when there is no upstream.
 
-States: scanning (progress indicator while the walk runs; its look is designed in §Design, list page), empty (no repositories found, with a hint), filtered (`?` activates search mode on the band input; the active query stays visible in the band — a filtered list is never silent). While search mode is active the keyboard belongs to the input: no row movement, `Enter` confirms the filter and exits the mode keeping the query, `Esc` cancels — clears the query and exits the mode.
+States: scanning (the screen stays empty while the walk runs — nothing is drawn until the list is ready, see §Design, list page), empty (no repositories found, with a hint), filtered (`?` activates search mode on the band input; the active query stays visible in the band — a filtered list is never silent). While search mode is active the keyboard belongs to the input: no row movement, `Enter` confirms the filter and exits the mode keeping the query, `Esc` cancels — clears the query and exits the mode.
 
 ### Detail view
 
@@ -138,7 +138,7 @@ Chosen in dialogue and prototyped with live-server (2026-11-17, before prototype
 - **Rows**: faint horizontal separators only (never vertical), extra line spacing between rows, selection shown as a background; the list scrolls with mouse and keyboard and keeps the selection visible while scrolling; the arrows wrap around both ends (the app-wide standard).
 - **Hints**: one line spanning the panel width, `action: key` with the key in the attention color: `move: ↑↓`, `open: enter`, `search: ?`, `quit: q`. The clear hint is not here — while a query is active it lives on the band's right, and the band itself shows the query, so a filtered list is never silent.
 - **Empty state**: `No repository matches "q"` rendered above the list — the app-wide standard form is `No {type} matches "q"`; no repositories found keeps its dedicated hint.
-- **Loading state** (designed 2026-11-17, variant B of the prototype): a bare centered counter — `found: N`, the number in the attention color, three muted dots pulsing after it. No panel, no title band, no hints: the counter sits directly on the terminal background. When the list is complete, the counter swaps for the panel in one frame — the panel with its title band is drawn only then. The progress bar from the pre-redesign list is gone.
+- **Loading state** (revised 2026-11-18): the screen stays empty while the walk runs — no counter, no dots, no panel, no hints, nothing drawn on the terminal background. When the list is complete, the panel appears in one frame. The 2026-11-17 counter (`found: N` with three pulsing dots) and the progress bar before it are both gone.
 
 ### Detail page (2026-11-17)
 

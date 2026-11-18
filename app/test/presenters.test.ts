@@ -1,13 +1,12 @@
-import { describe, expect, test } from 'bun:test'
-
-import type { RepoStatus } from './status.ts'
+import type { RepoStatus } from '@src/status.ts'
 
 import {
   type RowView,
   filterRows,
   toDetailView,
   toRowViews,
-} from './presenters.ts'
+} from '@ui/presenters.ts'
+import { describe, expect, test } from 'bun:test'
 
 const ERROR =
   'fatal: no es un repositorio git (ni ninguno de los directorios superiores): .git'

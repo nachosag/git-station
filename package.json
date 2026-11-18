@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "bin": {
-    "git-station": "src/index.tsx"
+    "git-station": "app/index.tsx"
   },
   "type": "module",
   "scripts": {
@@ -12,8 +12,8 @@
     "fmt": "oxfmt --write",
     "fmt:check": "oxfmt --check",
     "test": "bun test --pass-with-no-tests",
-    "dev": "bun src/index.tsx",
-    "dev:watch": "bun --watch src/index.tsx",
+    "dev": "bun app/index.tsx",
+    "dev:watch": "bun --watch app/index.tsx",
     "check": "tsc --noEmit && oxlint && bun test --pass-with-no-tests"
   },
   "dependencies": {

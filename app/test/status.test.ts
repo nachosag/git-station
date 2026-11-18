@@ -1,9 +1,8 @@
+import { parseStatus, readStatus, scan } from '@src/status.ts'
 import { describe, expect, test } from 'bun:test'
 import fs from 'fs/promises'
 import { tmpdir } from 'os'
 import path from 'path'
-
-import { parseStatus, readStatus, scan } from './status.ts'
 
 describe('parseStatus', () => {
   test('reports the branch and ahead/behind from the status header', () => {

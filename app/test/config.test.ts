@@ -1,9 +1,8 @@
+import { loadConfig, pruneList } from '@src/config.ts'
 import { describe, expect, test } from 'bun:test'
 import fs from 'fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-
-import { loadConfig, pruneList } from './config'
 
 describe('loadConfig', () => {
   test('returns defaults when the config file is missing', async () => {

@@ -182,15 +182,15 @@ Expanded (2026-11-17): the pass defines the design in its totality, page by page
 
     Decision (2026-11-17): the progress bar is gone; the pulse rotates one undimmed dot among three `theme.muted` dots using `TextAttributes.DIM` on the other two, driven by the existing 500 ms tick. The counter shows from `found: 0` (no `length > 0` guard), and the centering props live on the `box` — on `text` they type-check but have no layout effect.
 
-    Rewrite (2026-11-18): the file is deleted with the rest of `src/pages/` and rebuilt in the clean-slate step; the design stays approved, only the code is new.
+    Rewrite (2026-11-18): the file is deleted with the rest of the old frontend and rebuilt in the clean-slate step; the design stays approved, only the code is new. Superseded the same day: the user replaced the counter with a completely empty screen (SPECS.md §Design, Loading state revised 2026-11-18), so nothing of it is rebuilt.
 
-  - [ ] Clean slate: `src/pages/` and `src/components/` are deleted and a new `App` boots the scan again, showing the approved loading counter (`found: N` with three pulsing dots); the counter stays on screen when the scan ends, until the list exists.
+  - [x] Clean slate: the whole old frontend is gone and a new `App` boots the scan again; the screen stays empty from launch until the list is ready — no counter, no dots, no panel — and it still quits cleanly from that state.
 
-    Verified by: eye (planned)
+    Verified by: eye (written 2026-11-18 — el usuario confirmó: la app abre en blanco, no crashea y `q` la cierra dejando la terminal usable). Gate green, 28 tests.
 
-    Decisions (2026-11-18, chosen by the user): delete-first over growing the new frontend beside the old one — the app shows no list between this step and the next, and that is accepted. The loading counter's design stays approved even though its file is new.
+    Decisions (2026-11-18, chosen by the user): delete-first over growing the new frontend beside the old one — the app shows no list between this step and the next, and that is accepted. The layout moves out of `src/` into `app/`: `app/index.tsx` is the entry, `app/src/` holds the logic (config, repo, status), `app/test/` the tests and `app/ui/` the screens, presenters and theme; `tsconfig.json` and `package.json` (`bin`, `dev`, `dev:watch`) follow the move, plus `paths` aliases (`@src/*`, `@ui/*`, `@components/*`, `@pages/*`). Only the scan wiring survives from the old `App`, and it lands in the next sub-step: without a list there is nothing to feed, so wiring it here would leave dead state. No keyboard work here — the map is already defined in SPECS.md. The loading counter is replaced by an empty screen (SPECS.md §Design, Loading state revised 2026-11-18).
 
-  - [ ] `Listing`, part one — the panel and the table: centered bordered panel on the surface background, the search band with its `search` placeholder, the `#` / `repo / branch` / `dirty / ahead / behind` header, one row per repository with bottom-only faint separators, and the hints line spanning the panel's width.
+  - [ ] `Listing`, part one — the panel and the table: centered bordered panel on the surface background, the search band with its `search` placeholder, the `#` / `repo / branch` / `dirty / ahead / behind` header, one row per repository with bottom-only faint separators, and the hints line spanning the panel's width. The scan runs on mount (`loadConfig` → `scan`) and the rows it returns are what the table shows: the screen stays empty until they exist.
 
     Verified by: eye (planned)
 

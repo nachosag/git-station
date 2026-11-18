@@ -2,22 +2,22 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     // Runtime and environment (Bun + OpenTUI)
-    "lib": [
-      "ESNext",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "target": "ESNext",
     "module": "Preserve",
     "moduleDetection": "force",
-    "types": [
-      "bun"
-    ],
+    "types": ["bun"],
     // Bun/OpenTUI JSX
     "jsx": "react-jsx",
     "jsxImportSource": "@opentui/react",
     // Bundler mode
     "moduleResolution": "bundler",
+    "paths": {
+      "@src/*": ["./app/src/*"],
+      "@ui/*": ["./app/ui/*"],
+      "@components/*": ["./app/ui/components/*"],
+      "@pages/*": ["./app/ui/pages/*"]
+    },
     "allowImportingTsExtensions": true,
     "noEmit": true,
     // Strictness (from templates/typescript/tsconfig.base.json)
@@ -39,7 +39,5 @@
     "noPropertyAccessFromIndexSignature": true,
     "erasableSyntaxOnly": true,
   },
-  "include": [
-    "src"
-  ]
+  "include": ["app"],
 }

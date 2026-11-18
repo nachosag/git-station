@@ -1,7 +1,6 @@
 import { createCliRenderer } from '@opentui/core'
 import { createRoot } from '@opentui/react'
-
-import { App } from './pages/App.tsx'
+import { App } from '@ui/App'
 
 const renderer = await createCliRenderer()
 createRoot(renderer).render(<App renderer={renderer} />)
