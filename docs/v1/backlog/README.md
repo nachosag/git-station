@@ -19,6 +19,7 @@ git-station (`gs`) is a keyboard-driven TUI to discover, monitor, and manage eve
 | IMP-008 | Declare the table columns once               | Done        | [improvements.md](./improvements.md)             |
 | IMP-009 | Confirm the search with Enter before moving  | Done        | [improvements.md](./improvements.md)             |
 | IMP-010 | Wire the full action catalog                 | Not started | [improvements.md](./improvements.md)             |
+| IMP-011 | Simplify the keyboard handling in App        | Not started | [improvements.md](./improvements.md)             |
 | US-003  | See the state of each repository at a glance | Done        | [US-003.md](./US-003.md)                         |
 | US-004  | Filter the list by name                      | Done        | [US-004.md](./US-004.md)                         |
 | US-005  | Inspect one repository in detail             | Done        | [US-005.md](./US-005.md)                         |

@@ -259,3 +259,15 @@ Accepted 2026-11-17 while designing the detail page (option A of two): the actio
 **Notes / open questions**
 
 - The design already describes the catalog (§Design, detail page); this improvement only wires it. Scope was chosen over leaving the panel half-empty at the rebuild — the alternative (no search bar in v1, catalog deferred to v2) was rejected the same day.
+
+## IMP-011: Simplify the keyboard handling in App
+
+**Priority:** polish (before US-006) · **Size:** S · **Depends on:** IMP-007
+
+**Description**
+
+Accepted 2026-11-17 while reviewing the frontend after the design phase of IMP-007. The `useKeyboard` handler in `App.tsx` is one flat list of ifs mixing both views, the search state and quit; its own comment says it is due. The upcoming stories pile keys on (stage, commit, fetch, pull, push, delete, the action panel), so the list only grows. Runs right after IMP-007's last sub-step (the keyboard map), when every key of the rebuild already exists and the behavior is stable — not before, or the work is done twice. The shared components (`Cols`, `HintBar`) and the presenters stay: each has two or more real users.
+
+**Acceptance criteria**
+
+- [ ] Given the rebuilt screens, then the keyboard handling is organized so adding a key for a new story touches one place, and the behavior is identical to SPECS.md §Keyboard map (verified key by key against it).
