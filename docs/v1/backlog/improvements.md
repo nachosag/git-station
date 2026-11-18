@@ -182,29 +182,41 @@ Expanded (2026-11-17): the pass defines the design in its totality, page by page
 
     Decision (2026-11-17): the progress bar is gone; the pulse rotates one undimmed dot among three `theme.muted` dots using `TextAttributes.DIM` on the other two, driven by the existing 500 ms tick. The counter shows from `found: 0` (no `length > 0` guard), and the centering props live on the `box` — on `text` they type-check but have no layout effect.
 
-  - [ ] `Listing` is rebuilt to SPECS.md §Design: centered bordered panel, search band with `?` and `cancel: esc`, `id` / `repo / branch` / merged-mark columns, faint separators, scrolling that keeps the selection visible, hints line, and the empty and no-matches states.
+    Rewrite (2026-11-18): the file is deleted with the rest of `src/pages/` and rebuilt in the clean-slate step; the design stays approved, only the code is new.
+
+  - [ ] Clean slate: `src/pages/` and `src/components/` are deleted and a new `App` boots the scan again, showing the approved loading counter (`found: N` with three pulsing dots); the counter stays on screen when the scan ends, until the list exists.
 
     Verified by: eye (planned)
 
-    Decisions (2026-11-17, chosen by the user): A — native `<scrollbox>` plus `scrollChildIntoView` on selection change; A — `id` becomes a field of `RowView`, filled from the index in `repos.map` (the React `key` stays `repoPath`, so the index is data, never a key); A — `Cols` accepts `text: ReactNode` so `name / branch` is one cell with two colors.
+    Decisions (2026-11-18, chosen by the user): delete-first over growing the new frontend beside the old one — the app shows no list between this step and the next, and that is accepted. The loading counter's design stays approved even though its file is new.
 
-    Progress (2026-11-17, in progress — pick up here): done by the user — `RowView.id`, the three columns (`#`, `repo / branch`, `dirty / ahead / behind`) built from one `COLUMNS` list with a `render` per column and `header` as the key, the theme palette from the design (hex values, `surface` / `border` / `separator` added), the centered bordered panel, the bottom-only row separators, the search band with the `cancel: esc` hint, and the hints line spread across the panel width. Left: the list scrolls through a `<scrollbox>` and keeps the selection visible via `scrollChildIntoView`; the list takes the free height so the hints sit on the panel's bottom edge; the empty / no-matches message renders above the list instead of replacing it; vertical breathing room between rows; the hints' top border in `theme.border` instead of `theme.separator`. `bun run check` green (28 tests) at this point. The `?` key already activates search in `App`.
-
-  - [ ] `Detail`'s page is rebuilt to SPECS.md §Design: one-row header, the three file groups with one circular cursor, adapted hints, the feedback line, and the clean and broken states.
+  - [ ] `Listing`, part one — the panel and the table: centered bordered panel on the surface background, the search band with its `search` placeholder, the `#` / `repo / branch` / `dirty / ahead / behind` header, one row per repository with bottom-only faint separators, and the hints line spanning the panel's width.
 
     Verified by: eye (planned)
 
-  - [ ] The action panel opens from `p` with the five scope sections, its inactive search bar, `+` descriptions, circular selection and the scrim over the page; it lists the full catalog and the five story actions are wired.
+  - [ ] `Listing`, part two — movement and states: the selection band, the list scrolling and keeping the selection visible, arrows wrapping around, `?` focusing the band with `enter` and `esc` behaving as specified, the empty and `No repository matches "q"` states, and the counter swapping for the panel in one frame.
 
     Verified by: eye (planned)
 
-  - [ ] The keyboard map across both views follows SPECS.md: `?` focuses search, arrows wrap around everywhere, `Esc` unwinds one layer, direct shortcuts work from the detail page and `q` quits.
+  - [ ] `Detail`, part one — the page and its header: one-row header (`branch -> upstream` left, the `~`-abbreviated path center, `↑N / ↓M` right), the three file groups with muted titles and counts, one circular cursor crossing the groups, and the hints line adapting to the selected group.
 
     Verified by: eye (planned)
+
+  - [ ] `Detail`, part two — the rest of the page: the feedback line between the files and the hints, the commit input hidden until `c`, the clean (`Repo is up to date`) and broken (`⚠ message`) states, and the status rendered immediately on open.
+
+    Verified by: eye (planned)
+
+  - [ ] The action panel opens from `p` with the five scope sections, its inactive search bar, `+` descriptions, circular selection and the scrim over the page; it lists the full catalog, and an action that does not exist yet does nothing when run (each story turns its own on).
+
+    Verified by: eye (planned)
+
+  - [ ] The keyboard map across both views follows SPECS.md: `?` focuses search, arrows wrap around everywhere, `Esc` unwinds one layer, the direct shortcuts work from the detail page and `q` quits; the handler is organized so a new key is added in one place — this absorbs and closes IMP-011 (2026-11-18).
+
+    Verified by: eye (planned, walked key by key against SPECS.md §Keyboard map)
 
 **Notes / open questions**
 
-- Decision (2026-11-18, after the Listing rebuild kept fighting opentui's layout details — selection band extent, wheel-scroll gaps, culling): the entire frontend (src/pages/, src/components/) is deleted and rewritten from zero aiming for maximum fidelity to the prototypes in `docs/v1/prototipes/`, which become the pixel-level source of truth for the rebuild. The logic layer survives untouched: presenters (+ their tests), status, repo, config, the index.tsx bootstrap. The rebuild sub-steps below are superseded by this decision; tomorrow's conversation plans the rewrite. Quirks learned the hard way, for the rebuild: scrollbox culls rows that don't fit whole (wheel scrolling scrolls fractionally → leaves blank gaps; fix was `viewportCulling={false}`); box padding is integer cells (no sub-line air); a box's backgroundColor paints all its cells including the border cell; percentage cell widths floor independently and can leave the box short of full width unless the box itself is `width='100%'`.
+- Decision (2026-11-18, after the Listing rebuild kept fighting opentui's layout details — selection band extent, wheel-scroll gaps, culling): the entire frontend (src/pages/, src/components/) is deleted and rewritten from zero aiming for maximum fidelity to the prototypes in `docs/v1/prototipes/`, which become the pixel-level source of truth for the rebuild. The logic layer survives untouched: presenters (+ their tests), status, repo, config, the index.tsx bootstrap. The rebuild sub-steps below are superseded by this decision; the plan written the next day replaces them (2026-11-18, chosen by the user: page by page — Listing, Detail, action panel, keyboard map — with the old frontend deleted first, and IMP-011 absorbed into the keyboard step). Quirks learned the hard way, for the rebuild: scrollbox culls rows that don't fit whole (wheel scrolling scrolls fractionally → leaves blank gaps; fix was `viewportCulling={false}`); box padding is integer cells (no sub-line air); a box's backgroundColor paints all its cells including the border cell; percentage cell widths floor independently and can leave the box short of full width unless the box itself is `width='100%'`.
 - Per-state colors (e.g. the behind count highlighted when it is above zero) would need the presenters to return structured cells instead of preformatted strings (`'↑ 2'`). The first pass colors whole lines and leaves that decision open.
 - Add tokens only when a component needs one; the set above is the floor, not the ceiling.
 - Design dialogue (2026-11-17): every page's discussion opens with one question — redesign from scratch or keep the structure — before any detail; the look is prototyped as HTML (kept in `prototipes/` since 2026-11-17) and reviewed live in the browser (live-server) before being written into SPECS.md.
@@ -270,12 +282,16 @@ Accepted 2026-11-17 while designing the detail page (option A of two): the actio
 
 ## IMP-011: Simplify the keyboard handling in App
 
-**Priority:** polish (before US-006) · **Size:** S · **Depends on:** IMP-007
+**Priority:** polish (before US-006) · **Size:** S · **Depends on:** IMP-007 · **Status:** absorbed into IMP-007 (2026-11-18)
 
 **Description**
 
 Accepted 2026-11-17 while reviewing the frontend after the design phase of IMP-007. The `useKeyboard` handler in `App.tsx` is one flat list of ifs mixing both views, the search state and quit; its own comment says it is due. The upcoming stories pile keys on (stage, commit, fetch, pull, push, delete, the action panel), so the list only grows. Runs right after IMP-007's last sub-step (the keyboard map), when every key of the rebuild already exists and the behavior is stable — not before, or the work is done twice. The shared components (`Cols`, `HintBar`) and the presenters stay: each has two or more real users.
 
+Absorbed (2026-11-18): the frontend is rewritten from zero, so `App.tsx` and its handler are deleted anyway. The criterion moved into IMP-007's last sub-step — the rebuilt keyboard map is written organized from the start — and this improvement closes with it. No separate step, no separate work.
+
 **Acceptance criteria**
 
 - [ ] Given the rebuilt screens, then the keyboard handling is organized so adding a key for a new story touches one place, and the behavior is identical to SPECS.md §Keyboard map (verified key by key against it).
+
+  Moved to IMP-007, last sub-step (2026-11-18).
