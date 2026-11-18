@@ -1,24 +1,36 @@
-import { type ReactNode } from 'react'
+import type { ScrollBoxRenderable } from '@opentui/core'
+
+import { type ReactNode, useEffect, useRef } from 'react'
 
 import type { RowView } from '../presenters.ts'
 
 import { Cols } from '../components/Cols.tsx'
 import { HintBar } from '../components/HintBar.tsx'
+import { Message } from '../components/Message.tsx'
 import { SearchField } from '../components/SearchField.tsx'
 import { theme } from '../theme.ts'
 
-const WIDTHS = {
-  repo: '35%',
-  dirty: '10%',
-  branch: '35%',
-  ahead: '10%',
-  behind: '10%',
-} as const
-
 const COLUMNS = [
-  { key: 'repo', field: 'repoName', width: WIDTHS.repo },
-  { key: 'branch', field: 'branch', width: WIDTHS.branch },
-  { key: 'display', field: 'display', width: WIDTHS.dirty },
+  {
+    header: '#',
+    width: '8%',
+    render: (view: RowView) => <span fg={theme.muted}>{view.id}</span>,
+  },
+  {
+    header: 'repo / branch',
+    width: '62%',
+    render: (view: RowView) => (
+      <>
+        {view.repoName}
+        <span fg={theme.muted}> / {view.branch}</span>
+      </>
+    ),
+  },
+  {
+    header: 'dirty / ahead / behind',
+    width: '30%',
+    render: (view: RowView) => view.display,
+  },
 ] as const
 
 export function Listing(props: {
@@ -29,45 +41,95 @@ export function Listing(props: {
   onInput: (value: string) => void
 }): ReactNode {
   const hints = [
-    { key: 'enter', action: 'Open' },
-    { key: 'q', action: 'Quit' },
+    { key: '↑↓', action: 'move' },
+    { key: 'enter', action: 'open' },
+    { key: '?', action: 'search' },
+    { key: 'q', action: 'quit' },
   ]
 
+  const message =
+    props.rows.length === 0
+      ? props.query
+        ? `no repositories matches "${props.query}"`
+        : 'no repositories were found - create one or check your config'
+      : null
+
   return (
-    <box>
-      <SearchField
-        isSearching={props.isSearching}
-        onInput={props.onInput}
-        query={props.query}
-      />
-      {props.rows.length === 0 ? (
-        <text>
-          {props.query
-            ? `No repositories match "${props.query}"`
-            : 'No repositories were found - create one or check your config'}
-        </text>
-      ) : (
+    <box
+      height='100%'
+      width='100%'
+      justifyContent='center'
+      alignItems='center'>
+      <box
+        paddingLeft={2}
+        paddingRight={2}
+        width={160}
+        maxWidth='92%'
+        height={40}
+        maxHeight='92%'
+        border
+        borderColor={theme.border}
+        backgroundColor={theme.surface}>
+        <box
+          flexDirection='row'
+          justifyContent='space-between'
+          height={2}
+          border={['bottom']}
+          borderColor={theme.border}
+          // paddingLeft={2}
+          // paddingRight={2}
+        >
+          <SearchField
+            isSearching={props.isSearching}
+            onInput={props.onInput}
+            query={props.query}
+          />
+          {(props.isSearching || props.query !== '') && (
+            <text>
+              cancel: <span fg={theme.attention}>esc</span>
+            </text>
+          )}
+        </box>
+
         <Table
+          message={message}
           rows={props.rows}
           selectedRow={props.selectedRow}
         />
-      )}
-      {props.query === '' ? (
-        <HintBar hints={[{ key: '/', action: 'Search' }, ...hints]} />
-      ) : (
-        <HintBar hints={[{ key: 'esc', action: 'Clear filter' }, ...hints]} />
-      )}
+        {<HintBar hints={[...hints]} />}
+      </box>
     </box>
   )
 }
 
-function Table(props: { rows: RowView[]; selectedRow: number }): ReactNode {
+const rowId = (view: RowView): string => `row-${view.id}`
+
+function Table(props: {
+  message: string | null
+  rows: RowView[]
+  selectedRow: number
+}): ReactNode {
+  const listRef = useRef<ScrollBoxRenderable>(null)
+
+  useEffect(() => {
+    const selected = props.rows[props.selectedRow]
+    if (selected) listRef.current?.scrollChildIntoView(rowId(selected))
+  }, [props.rows, props.selectedRow])
+
   return (
-    <box
-      width='100%'
-      alignItems='center'>
-      <box width='60%'>
-        <Header />
+    <box flexGrow={1}>
+      <Header />
+      <Message message={props.message} />
+      <scrollbox
+        viewportCulling={false}
+        scrollbarOptions={{
+          trackOptions: {
+            backgroundColor: theme.surface,
+            foregroundColor: theme.muted,
+          },
+        }}
+        ref={listRef}
+        flexGrow={1}>
         {props.rows.map((row, i) => (
           <Row
             key={row.repoPath}
@@ -75,7 +137,7 @@ function Table(props: { rows: RowView[]; selectedRow: number }): ReactNode {
             isSelected={i === props.selectedRow}
           />
         ))}
-      </box>
+      </scrollbox>
     </box>
   )
 }
@@ -85,8 +147,8 @@ function Header(): ReactNode {
     <Cols
       fg={theme.muted}
       cells={COLUMNS.map((column) => ({
-        key: column.key,
-        text: column.key,
+        key: column.header,
+        text: column.header,
         width: column.width,
       }))}
     />
@@ -95,11 +157,15 @@ function Header(): ReactNode {
 
 function Row(props: { view: RowView; isSelected: boolean }): ReactNode {
   return (
-    <box {...(props.isSelected ? { backgroundColor: theme.selection } : {})}>
+    <box
+      id={rowId(props.view)}
+      border={['bottom']}
+      borderColor={theme.separator}>
       <Cols
+        {...(props.isSelected ? { bg: theme.selection } : {})}
         cells={COLUMNS.map((column) => ({
-          key: column.key,
-          text: props.view[column.field],
+          key: column.header,
+          text: column.render(props.view),
           width: column.width,
         }))}
       />

@@ -3,6 +3,7 @@ import path from 'path'
 import type { File, RepoStatus } from './status.ts'
 
 export type RowView = {
+  id: string
   repoPath: string
   repoName: string
   branch: string
@@ -30,12 +31,14 @@ export function toRowViews(
   readable: Map<string, RepoStatus>,
   unreadable: Map<string, string>,
 ): RowView[] {
-  return repos.map((repoPath) => {
+  return repos.map((repoPath, i) => {
     const status = readable.get(repoPath)
     const repoName = path.basename(repoPath)
+    const id = String(i + 1).padStart(2, '0')
 
     if (!status) {
       return {
+        id,
         repoPath,
         repoName,
         branch: `⚠ ${unreadable.get(repoPath) ?? 'unreadable'}`,
@@ -49,6 +52,7 @@ export function toRowViews(
     const isIdle = !status.dirty && !status.ahead && !status.behind
 
     return {
+      id,
       repoPath,
       repoName,
       branch: status.branch,

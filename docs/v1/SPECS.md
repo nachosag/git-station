@@ -124,6 +124,7 @@ The design is defined in full, page by page (expanded 2026-11-17): which compone
 - Tokens are semantic: named for the role they play (`selection`, `muted`, `warning`), never for their color value. A token is added only when a component needs it.
 - One theme file (`theme.ts`) holds the tokens and nothing else. Every component reads its colors from it; no screen or component hardcodes a color.
 - Direct props always (`bg`, `fg`, …); the `style` prop only when no direct prop covers the need.
+- Palette (2026-11-17): the official Tokyo Night values, taken from the theme's own site. `surface` `#1a1b26` · `border` `#3b4261` · `separator` `#282c3f` · `selection` `#2f334d` · `muted` `#565f89` · `attention` `#ff9e64` (the official orange, chosen over the yellow `#e0af68` the same day) · `warning` `#f7768e`. `border`, `separator` and `selection` are not published by the theme; they stay as they were until a page needs a different one.
 
 ### List page (2026-11-17)
 

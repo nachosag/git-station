@@ -124,6 +124,8 @@ The views have grown by accretion: `Listing` renders the search field, the no-ma
 - Plan (2026-11-16): the layout is `src/pages/` (the three existing screens) plus `src/components/`. The criteria map to components: hints → `HintBar` taking `hints: {key, action}[]` (hints as data, so the new keys of US-006+ become entries, not code); row primitive → `Cols`, under `Table`'s Header/Row, with `Group` for the detail file blocks; search field → `SearchField` taking `query`, `searching` and the change handler. One-use visuals stay local to their page: `Info`, the centered detail header, the no-matches message. Colors move with the code unchanged; the new look is IMP-007's.
 - Open (decide when the row-primitive step is presented): the detail file line is a single string (`\t M name`); rendering it through `Cols` as marker + name columns changes the spacing slightly, while keeping it a string leaves the shared-primitive criterion half-met.
 
+- Decided (2026-11-17): semantic tokens, one theme file of tokens only, direct props first — recorded in SPECS.md §Design.
+
 ## IMP-007: Theme and component styling
 
 **Priority:** polish (after IMP-006, before US-006) · **Size:** L · **Depends on:** IMP-006
@@ -184,6 +186,10 @@ Expanded (2026-11-17): the pass defines the design in its totality, page by page
 
     Verified by: eye (planned)
 
+    Decisions (2026-11-17, chosen by the user): A — native `<scrollbox>` plus `scrollChildIntoView` on selection change; A — `id` becomes a field of `RowView`, filled from the index in `repos.map` (the React `key` stays `repoPath`, so the index is data, never a key); A — `Cols` accepts `text: ReactNode` so `name / branch` is one cell with two colors.
+
+    Progress (2026-11-17, in progress — pick up here): done by the user — `RowView.id`, the three columns (`#`, `repo / branch`, `dirty / ahead / behind`) built from one `COLUMNS` list with a `render` per column and `header` as the key, the theme palette from the design (hex values, `surface` / `border` / `separator` added), the centered bordered panel, the bottom-only row separators, the search band with the `cancel: esc` hint, and the hints line spread across the panel width. Left: the list scrolls through a `<scrollbox>` and keeps the selection visible via `scrollChildIntoView`; the list takes the free height so the hints sit on the panel's bottom edge; the empty / no-matches message renders above the list instead of replacing it; vertical breathing room between rows; the hints' top border in `theme.border` instead of `theme.separator`. `bun run check` green (28 tests) at this point. The `?` key already activates search in `App`.
+
   - [ ] `Detail`'s page is rebuilt to SPECS.md §Design: one-row header, the three file groups with one circular cursor, adapted hints, the feedback line, and the clean and broken states.
 
     Verified by: eye (planned)
@@ -198,7 +204,7 @@ Expanded (2026-11-17): the pass defines the design in its totality, page by page
 
 **Notes / open questions**
 
-- Decided (2026-11-17): semantic tokens, one theme file of tokens only, direct props first — recorded in SPECS.md §Design.
+- Decision (2026-11-18, after the Listing rebuild kept fighting opentui's layout details — selection band extent, wheel-scroll gaps, culling): the entire frontend (src/pages/, src/components/) is deleted and rewritten from zero aiming for maximum fidelity to the prototypes in `docs/v1/prototipes/`, which become the pixel-level source of truth for the rebuild. The logic layer survives untouched: presenters (+ their tests), status, repo, config, the index.tsx bootstrap. The rebuild sub-steps below are superseded by this decision; tomorrow's conversation plans the rewrite. Quirks learned the hard way, for the rebuild: scrollbox culls rows that don't fit whole (wheel scrolling scrolls fractionally → leaves blank gaps; fix was `viewportCulling={false}`); box padding is integer cells (no sub-line air); a box's backgroundColor paints all its cells including the border cell; percentage cell widths floor independently and can leave the box short of full width unless the box itself is `width='100%'`.
 - Per-state colors (e.g. the behind count highlighted when it is above zero) would need the presenters to return structured cells instead of preformatted strings (`'↑ 2'`). The first pass colors whole lines and leaves that decision open.
 - Add tokens only when a component needs one; the set above is the floor, not the ceiling.
 - Design dialogue (2026-11-17): every page's discussion opens with one question — redesign from scratch or keep the structure — before any detail; the look is prototyped as HTML (kept in `prototipes/` since 2026-11-17) and reviewed live in the browser (live-server) before being written into SPECS.md.

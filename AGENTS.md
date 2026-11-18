@@ -184,6 +184,11 @@ How the agent talks to the human. This file is independent of the workflow: the 
 
 <!-- pair-programming:end -->
 
+## Working rules (user, 2026-11-17)
+
+- The user writes every line of application code in `src/`. The agent gives the goal in plain words, the API surface that already exists, and the decisions he has to make — never a ready snippet. Drop to concrete code only when he is blocked and asks for it.
+- `docs/` is the agent's material; the user does not read it. Never cite a file under `docs/` (prototypes, SPECS) as if he had read it. Describe the result in terms of what the screen shows and of his own code.
+
 ## Project facts
 
 - Gate: `bun run check` (typecheck + lint + test in one command; see Commands).

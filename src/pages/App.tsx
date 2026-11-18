@@ -77,7 +77,7 @@ export function App(props: { renderer: CliRenderer }): ReactNode {
       return
     }
     if (key.name === 'q') props.renderer.destroy()
-    if (key.name === '/') setIsSearching(true)
+    if (key.name === '?') setIsSearching(true)
     if (key.name === 'return' && view === 'list' && visibleRows.length > 0)
       setView('detail')
     if (key.name === 'escape' && view === 'detail') setView('list')

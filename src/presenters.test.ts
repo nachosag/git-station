@@ -20,6 +20,7 @@ describe('toRowViews', () => {
 
     expect(toRowViews(repos, readable, unreadable)).toStrictEqual([
       {
+        id: '01',
         repoPath: '/tmp',
         repoName: 'tmp',
         branch: `⚠ ${ERROR}`,
@@ -45,6 +46,7 @@ describe('toRowViews', () => {
 
     expect(toRowViews(repos, readable, unreadable)).toStrictEqual([
       {
+        id: '01',
         repoPath: '/home/me/git-station',
         repoName: 'git-station',
         branch: 'main',
@@ -67,6 +69,7 @@ describe('toRowViews', () => {
 
     expect(toRowViews(repos, readable, unreadable)).toStrictEqual([
       {
+        id: '01',
         repoPath: '/home/me/idle',
         repoName: 'idle',
         branch: 'main',
@@ -162,8 +165,14 @@ describe('toDetailView', () => {
 describe('filterRows', () => {
   test('ignores case and matches any part of the name', () => {
     const rows: RowView[] = [
-      { repoPath: '', repoName: 'college', branch: '', display: '' },
-      { repoPath: '', repoName: 'something-else', branch: '', display: '' },
+      { id: '01', repoPath: '', repoName: 'college', branch: '', display: '' },
+      {
+        id: '01',
+        repoPath: '',
+        repoName: 'something-else',
+        branch: '',
+        display: '',
+      },
     ]
 
     expect(filterRows('COLL', rows)).toStrictEqual(rows.slice(0, 1))
@@ -171,8 +180,14 @@ describe('filterRows', () => {
 
   test('returns every row when the query is empty', () => {
     const rows: RowView[] = [
-      { repoPath: '', repoName: 'college', branch: '', display: '' },
-      { repoPath: '', repoName: 'something-else', branch: '', display: '' },
+      { id: '01', repoPath: '', repoName: 'college', branch: '', display: '' },
+      {
+        id: '01',
+        repoPath: '',
+        repoName: 'something-else',
+        branch: '',
+        display: '',
+      },
     ]
 
     expect(filterRows('', rows)).toStrictEqual(rows)

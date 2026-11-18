@@ -9,6 +9,8 @@ export function SearchField(props: {
 }): ReactNode {
   return (
     <input
+      placeholder='search'
+      width={30}
       value={props.query}
       onInput={props.onInput}
       focused={props.isSearching}
