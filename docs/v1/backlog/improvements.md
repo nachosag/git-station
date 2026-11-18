@@ -174,9 +174,11 @@ Expanded (2026-11-17): the pass defines the design in its totality, page by page
 
     Decision (2026-11-17): `RowView` is now `{ repoPath, repoName, branch, display }` and `DetailView.repoPath` replaces `path`; the names avoid colliding with a file's `path`. The header's branch/upstream separator is `->`, matching the rename display; SPECS.md §Design was updated to match.
 
-  - [ ] `Loading` is the bare centered `found: N` counter with three muted dots pulsing, directly on the terminal background — no panel, no title, no hints, no progress bar.
+  - [x] `Loading` is the bare centered `found: N` counter with three muted dots pulsing, directly on the terminal background — no panel, no title, no hints, no progress bar.
 
-    Verified by: eye (planned)
+    Verified by: eye (written 2026-11-17 — el usuario confirmó en `bun run dev`: contador centrado con los tres puntos latiendo, sin barra ni panel). `bun run check` green (28 tests).
+
+    Decision (2026-11-17): the progress bar is gone; the pulse rotates one undimmed dot among three `theme.muted` dots using `TextAttributes.DIM` on the other two, driven by the existing 500 ms tick. The counter shows from `found: 0` (no `length > 0` guard), and the centering props live on the `box` — on `text` they type-check but have no layout effect.
 
   - [ ] `Listing` is rebuilt to SPECS.md §Design: centered bordered panel, search band with `?` and `cancel: esc`, `id` / `repo / branch` / merged-mark columns, faint separators, scrolling that keeps the selection visible, hints line, and the empty and no-matches states.
 

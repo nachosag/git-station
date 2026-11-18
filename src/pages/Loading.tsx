@@ -1,3 +1,4 @@
+import { TextAttributes } from '@opentui/core'
 import { type ReactNode, useEffect, useState } from 'react'
 
 import { theme } from '../theme.ts'
@@ -8,24 +9,34 @@ export function Loading(props: { length: number }): ReactNode {
   useEffect(() => {
     const timer = setInterval(() => {
       setTick((t) => t + 1)
-    }, 100)
+    }, 500)
 
     return () => clearInterval(timer)
   }, [])
 
-  const width = 20
-  const position = tick % width
-  const bar = '·'.repeat(position) + '█' + '·'.repeat(width - position - 1)
-
   return (
-    <box>
-      {props.length > 0 && (
-        <text>
-          found: <span fg={theme.attention}>{props.length}</span>
-        </text>
-      )}
-
-      <text>{bar}</text>
+    <box
+      flexGrow={1}
+      justifyContent='center'
+      alignItems='center'>
+      <text>
+        found: <span fg={theme.attention}>{props.length}</span>{' '}
+        <span
+          fg={theme.muted}
+          {...(tick % 3 === 0 ? {} : { attributes: TextAttributes.DIM })}>
+          ·
+        </span>
+        <span
+          fg={theme.muted}
+          {...(tick % 3 === 1 ? {} : { attributes: TextAttributes.DIM })}>
+          ·
+        </span>
+        <span
+          fg={theme.muted}
+          {...(tick % 3 === 2 ? {} : { attributes: TextAttributes.DIM })}>
+          ·
+        </span>{' '}
+      </text>
     </box>
   )
 }
